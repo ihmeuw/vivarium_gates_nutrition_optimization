@@ -1,6 +1,11 @@
 BSD 3-Clause License
 
+<<<<<<< HEAD
 Copyright (c) 2023, Institute for Health Metrics and Evaluation
+=======
+Copyright 2022 Institute for Health Metrics and Evaluation
+All rights reserved
+>>>>>>> c64bc9d (Initial Setup)
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -25,4 +30,8 @@ DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
 SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+<<<<<<< HEAD
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+=======
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+>>>>>>> c64bc9d (Initial Setup)
