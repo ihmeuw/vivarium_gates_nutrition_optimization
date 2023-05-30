@@ -12,12 +12,19 @@ jobs:
       matrix:
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         python-version: ["3.8", "3.9", "3.10","3.11"]
 =======
         python-version: [3.7, 3.8]
 >>>>>>> Remove Python 3.6 from build
 =======
         python-version: [3.7, 3.8, 3.9, 3.10]
+>>>>>>> Add Python versions 3.9 and 3.10 to build
+=======
+        python-version: [3.7, 3.8, 3.9, 3.10]
+=======
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
+>>>>>>> 1afa352 (Add Python versions 3.9 and 3.10 to build)
 >>>>>>> Add Python versions 3.9 and 3.10 to build
     defaults:
       run:
