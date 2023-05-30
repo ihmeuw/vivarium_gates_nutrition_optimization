@@ -6,13 +6,12 @@ from typing import NamedTuple
 
 
 class InterventionScenario:
-
     def __init__(
-            self,
-            name: str,
-            # todo add additional interventions
-            # has_treatment_one: bool = False,
-            # has_treatment_two: bool = False,
+        self,
+        name: str,
+        # todo add additional interventions
+        # has_treatment_one: bool = False,
+        # has_treatment_two: bool = False,
     ):
         self.name = name
         # self.has_treatment_one = has_treatment_one
@@ -20,7 +19,7 @@ class InterventionScenario:
 
 
 class __InterventionScenarios(NamedTuple):
-    BASELINE: InterventionScenario = InterventionScenario('baseline')
+    BASELINE: InterventionScenario = InterventionScenario("baseline")
     # todo add additional intervention scenarios
 
     def __get_item__(self, item):
