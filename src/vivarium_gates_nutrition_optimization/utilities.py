@@ -50,14 +50,16 @@ def delete_if_exists(*paths: Union[Path, List[Path]], confirm=False):
             # Assumes all paths have the same root dir
             root = existing_paths[0].parent
             names = [p.name for p in existing_paths]
-            click.confirm(f"Existing files {names} found in directory {root}. Do you want to delete and replace?",
-                          abort=True)
+            click.confirm(
+                f"Existing files {names} found in directory {root}. Do you want to delete and replace?",
+                abort=True,
+            )
         for p in existing_paths:
-            logger.info(f'Deleting artifact at {str(p)}.')
+            logger.info(f"Deleting artifact at {str(p)}.")
             p.unlink()
 
 
-def read_data_by_draw(artifact_path: str, key : str, draw: int) -> pd.DataFrame:
+def read_data_by_draw(artifact_path: str, key: str, draw: int) -> pd.DataFrame:
     """Reads data from the artifact on a per-draw basis. This
     is necessary for Low Birthweight Short Gestation (LBWSG) data.
 
@@ -72,32 +74,34 @@ def read_data_by_draw(artifact_path: str, key : str, draw: int) -> pd.DataFrame:
 
     """
     key = key.replace(".", "/")
-    with pd.HDFStore(artifact_path, mode='r') as store:
-        index = store.get(f'{key}/index')
-        draw = store.get(f'{key}/draw_{draw}')
+    with pd.HDFStore(artifact_path, mode="r") as store:
+        index = store.get(f"{key}/index")
+        draw = store.get(f"{key}/draw_{draw}")
     draw = draw.rename("value")
     data = pd.concat([index, draw], axis=1)
-    data = data.drop(columns='location')
+    data = data.drop(columns="location")
     data = pivot_categorical(data)
-    data[project_globals.LBWSG_MISSING_CATEGORY.CAT] = project_globals.LBWSG_MISSING_CATEGORY.EXPOSURE
+    data[
+        project_globals.LBWSG_MISSING_CATEGORY.CAT
+    ] = project_globals.LBWSG_MISSING_CATEGORY.EXPOSURE
     return data
 
 
 def get_norm(
-        mean: float,
-        sd: float = None,
-        ninety_five_pct_confidence_interval: Tuple[float, float] = None
+    mean: float,
+    sd: float = None,
+    ninety_five_pct_confidence_interval: Tuple[float, float] = None,
 ) -> stats.norm:
     sd = _get_standard_deviation(mean, sd, ninety_five_pct_confidence_interval)
     return stats.norm(loc=mean, scale=sd)
 
 
 def get_truncnorm(
-        mean: float,
-        sd: float = None,
-        ninety_five_pct_confidence_interval: Tuple[float, float] = None,
-        lower_clip: float = 0.0,
-        upper_clip: float = 1.0
+    mean: float,
+    sd: float = None,
+    ninety_five_pct_confidence_interval: Tuple[float, float] = None,
+    lower_clip: float = 0.0,
+    upper_clip: float = 1.0,
 ) -> stats.norm:
     sd = _get_standard_deviation(mean, sd, ninety_five_pct_confidence_interval)
     a = (lower_clip - mean) / sd if sd else mean - 1e-03
@@ -106,12 +110,16 @@ def get_truncnorm(
 
 
 def _get_standard_deviation(
-        mean: float, sd: float, ninety_five_pct_confidence_interval: Tuple[float, float]
+    mean: float, sd: float, ninety_five_pct_confidence_interval: Tuple[float, float]
 ) -> float:
     if sd is None and ninety_five_pct_confidence_interval is None:
-        raise ValueError("Must provide either a standard deviation or a 95% confidence interval.")
+        raise ValueError(
+            "Must provide either a standard deviation or a 95% confidence interval."
+        )
     if sd is not None and ninety_five_pct_confidence_interval is not None:
-        raise ValueError("Cannot provide both a standard deviation and a 95% confidence interval.")
+        raise ValueError(
+            "Cannot provide both a standard deviation and a 95% confidence interval."
+        )
     if ninety_five_pct_confidence_interval is not None:
         lower = ninety_five_pct_confidence_interval[0]
         upper = ninety_five_pct_confidence_interval[1]
@@ -126,8 +134,9 @@ def _get_standard_deviation(
     return sd
 
 
-def get_lognorm_from_quantiles(median: float, lower: float, upper: float,
-                               quantiles: Tuple[float, float] = (0.025, 0.975)) -> stats.lognorm:
+def get_lognorm_from_quantiles(
+    median: float, lower: float, upper: float, quantiles: Tuple[float, float] = (0.025, 0.975)
+) -> stats.lognorm:
     """Returns a frozen lognormal distribution with the specified median, such that
     (lower, upper) are approximately equal to the quantiles with ranks
     (quantile_ranks[0], quantile_ranks[1]).
@@ -149,17 +158,21 @@ def get_lognorm_from_quantiles(median: float, lower: float, upper: float,
     norm_quantiles = np.log([lower, upper])
     # standard deviation of Y = log(X) computed from the above quantiles for Y
     # and the corresponding standard normal quantiles
-    sigma = (norm_quantiles[1] - norm_quantiles[0]) / (stdnorm_quantiles[1] - stdnorm_quantiles[0])
+    sigma = (norm_quantiles[1] - norm_quantiles[0]) / (
+        stdnorm_quantiles[1] - stdnorm_quantiles[0]
+    )
     # Frozen lognormal distribution for X = exp(Y)
     # (s=sigma is the shape parameter; the scale parameter is exp(mu), which equals the median)
     return stats.lognorm(s=sigma, scale=median)
 
 
-def get_random_variable_draws(number: int, seeded_distribution: SeededDistribution) -> np.array:
+def get_random_variable_draws(
+    number: int, seeded_distribution: SeededDistribution
+) -> np.array:
     return np.array([get_random_variable(x, seeded_distribution) for x in range(number)])
 
 
 def get_random_variable(draw: int, seeded_distribution: SeededDistribution) -> float:
     seed, distribution = seeded_distribution
-    np.random.seed(get_hash(f'{seed}_draw_{draw}'))
+    np.random.seed(get_hash(f"{seed}_draw_{draw}"))
     return distribution.rvs()
