@@ -79,6 +79,6 @@ jobs:
           pytest ./tests
       - name: Lint
         run: |
-          pip install black==22.1.0 isort
+          pip install black==22.3.0 isort
           black . --check -v
           isort . --check -v
