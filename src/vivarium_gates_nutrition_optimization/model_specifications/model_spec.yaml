@@ -4,7 +4,8 @@ components:
             - BasePopulation()
             - Mortality()
         metrics:
-            - DisabilityObserver()
+#            - DisabilityObserver()
+            - ResultsStratifier()
             - MortalityObserver()
 
     # Causes an error if left empty. Uncomment when you have components. 
@@ -13,6 +14,7 @@ components:
 configuration:
     input_data:
         input_draw_number: 0
+        artifact_path: '/home/pnast/viv_input/vivarium_gates_nutrition_optimization/ethiopia.hdf'
     interpolation:
         order: 0
         extrapolate: False
