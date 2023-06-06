@@ -40,7 +40,7 @@ configuration:
     metrics:
         default:
             - 'age'
-            - 'sex'
+#             - 'sex'
             - 'year'
         # disability:
         #     include:
