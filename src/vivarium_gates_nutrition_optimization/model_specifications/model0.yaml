@@ -17,7 +17,7 @@ configuration:
         artifact_path: '/home/pnast/viv_input/vivarium_gates_nutrition_optimization/ethiopia.hdf'
     interpolation:
         order: 0
-        extrapolate: False
+        extrapolate: True
     randomness:
         map_size: 1_000_000
         key_columns: ['entrance_time', 'age']
