@@ -8,7 +8,6 @@ from vivarium_gates_nutrition_optimization.constants import models
 # Results columns and variables #
 #################################
 
-TOTAL_POPULATION_COLUMN = "total_population"
 TOTAL_YLDS_COLUMN = "years_lived_with_disability"
 TOTAL_YLLS_COLUMN = "years_of_life_lost"
 
@@ -21,28 +20,19 @@ OUTPUT_RANDOM_SEED_COLUMN = "randomness.random_seed"
 OUTPUT_SCENARIO_COLUMN = "placeholder_branch_name.scenario"
 
 STANDARD_COLUMNS = {
-    "total_population": TOTAL_POPULATION_COLUMN,
     "total_ylls": TOTAL_YLLS_COLUMN,
     "total_ylds": TOTAL_YLDS_COLUMN,
 }
 
 THROWAWAY_COLUMNS = [f"{state}_event_count" for state in models.STATES]
 
-TOTAL_POPULATION_COLUMN_TEMPLATE = "total_population_{POP_STATE}"
-DEATH_COLUMN_TEMPLATE = "death_due_to_{CAUSE_OF_DEATH}_year_{YEAR}_sex_{SEX}_age_{AGE_GROUP}"
-YLLS_COLUMN_TEMPLATE = "ylls_due_to_{CAUSE_OF_DEATH}_year_{YEAR}_sex_{SEX}_age_{AGE_GROUP}"
-YLDS_COLUMN_TEMPLATE = (
-    "ylds_due_to_{CAUSE_OF_DISABILITY}_year_{YEAR}_sex_{SEX}_age_{AGE_GROUP}"
-)
-STATE_PERSON_TIME_COLUMN_TEMPLATE = (
-    "{STATE}_person_time_year_{YEAR}_sex_{SEX}_age_{AGE_GROUP}"
-)
-TRANSITION_COUNT_COLUMN_TEMPLATE = (
-    "{TRANSITION}_event_count_year_{YEAR}_sex_{SEX}_age_{AGE_GROUP}"
-)
+DEATH_COLUMN_TEMPLATE = "death_due_to_{CAUSE_OF_DEATH}_age_{AGE_GROUP}"
+YLLS_COLUMN_TEMPLATE = "ylls_due_to_{CAUSE_OF_DEATH}_age_{AGE_GROUP}"
+YLDS_COLUMN_TEMPLATE = "ylds_due_to_{CAUSE_OF_DISABILITY}_age_{AGE_GROUP}"
+STATE_PERSON_TIME_COLUMN_TEMPLATE = "{STATE}_person_time_age_{AGE_GROUP}"
+TRANSITION_COUNT_COLUMN_TEMPLATE = "{TRANSITION}_event_count_age_{AGE_GROUP}"
 
 COLUMN_TEMPLATES = {
-    "population": TOTAL_POPULATION_COLUMN_TEMPLATE,
     "deaths": DEATH_COLUMN_TEMPLATE,
     "ylls": YLLS_COLUMN_TEMPLATE,
     "ylds": YLDS_COLUMN_TEMPLATE,
@@ -52,12 +42,18 @@ COLUMN_TEMPLATES = {
 
 NON_COUNT_TEMPLATES = []
 
-POP_STATES = ("living", "dead", "tracked", "untracked")
-SEXES = ("male", "female")
-# TODO - add literals for years in the model
-YEARS = ()
-# TODO - add literals for ages in the model
-AGE_GROUPS = ()
+AGE_GROUPS = (
+    "10_to_14",
+    "15_to_19",
+    "20_to_24",
+    "25_to_29",
+    "30_to_34",
+    "35_to_39",
+    "40_to_44",
+    "45_to_49",
+    "50_to_54",
+    "55_to_59",
+)
 # TODO - add causes of death
 CAUSES_OF_DEATH = (
     "other_causes",
@@ -70,9 +66,6 @@ CAUSES_OF_DISABILITY = (
 )
 
 TEMPLATE_FIELD_MAP = {
-    "POP_STATE": POP_STATES,
-    "YEAR": YEARS,
-    "SEX": SEXES,
     "AGE_GROUP": AGE_GROUPS,
     "CAUSE_OF_DEATH": CAUSES_OF_DEATH,
     "CAUSE_OF_DISABILITY": CAUSES_OF_DISABILITY,
