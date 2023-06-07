@@ -6,6 +6,7 @@ components:
         metrics:
 #            - DisabilityObserver()
             - MortalityObserver()
+            - ResultsStratifier()
 
     # Causes an error if left empty. Uncomment when you have components. 
     # vivarium_gates_nutrition_optimization.components:
@@ -37,10 +38,9 @@ configuration:
         age_end: 54
         include_sex: "Female"
 
-    metrics:
+    observers:
         default:
             - 'age'
-            - 'year'
         # disability:
         #     include:
         #     exclude:
