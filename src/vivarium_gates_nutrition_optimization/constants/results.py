@@ -28,15 +28,9 @@ THROWAWAY_COLUMNS = [f"{state}_event_count" for state in models.STATES]
 
 DEATH_COLUMN_TEMPLATE = "death_due_to_{CAUSE_OF_DEATH}_age_{AGE_GROUP}"
 YLLS_COLUMN_TEMPLATE = "ylls_due_to_{CAUSE_OF_DEATH}_age_{AGE_GROUP}"
-YLDS_COLUMN_TEMPLATE = (
-    "ylds_due_to_{CAUSE_OF_DISABILITY}_age_{AGE_GROUP}"
-)
-STATE_PERSON_TIME_COLUMN_TEMPLATE = (
-    "{STATE}_person_time_age_{AGE_GROUP}"
-)
-TRANSITION_COUNT_COLUMN_TEMPLATE = (
-    "{TRANSITION}_event_count_age_{AGE_GROUP}"
-)
+YLDS_COLUMN_TEMPLATE = "ylds_due_to_{CAUSE_OF_DISABILITY}_age_{AGE_GROUP}"
+STATE_PERSON_TIME_COLUMN_TEMPLATE = "{STATE}_person_time_age_{AGE_GROUP}"
+TRANSITION_COUNT_COLUMN_TEMPLATE = "{TRANSITION}_event_count_age_{AGE_GROUP}"
 
 COLUMN_TEMPLATES = {
     "deaths": DEATH_COLUMN_TEMPLATE,
@@ -48,7 +42,8 @@ COLUMN_TEMPLATES = {
 
 NON_COUNT_TEMPLATES = []
 
-AGE_GROUPS = ("10_to_14",
+AGE_GROUPS = (
+    "10_to_14",
     "15_to_19",
     "20_to_24",
     "25_to_29",
@@ -57,7 +52,8 @@ AGE_GROUPS = ("10_to_14",
     "40_to_44",
     "45_to_49",
     "50_to_54",
-    "55_to_59",)
+    "55_to_59",
+)
 # TODO - add causes of death
 CAUSES_OF_DEATH = (
     "other_causes",
