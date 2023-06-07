@@ -11,8 +11,6 @@ SCENARIO_COLUMN = "scenario"
 GROUPBY_COLUMNS = [results.INPUT_DRAW_COLUMN, SCENARIO_COLUMN]
 OUTPUT_COLUMN_SORT_ORDER = [
     "age_group",
-    "sex",
-    "year",
     "risk",
     "cause",
     "measure",
@@ -26,25 +24,23 @@ RENAME_COLUMNS = {
 
 def make_measure_data(data):
     measure_data = MeasureData(
-        population=get_population_data(data),
         ylls=get_by_cause_measure_data(data, "ylls"),
-        ylds=get_by_cause_measure_data(data, "ylds"),
+        # ylds=get_by_cause_measure_data(data, "ylds"),
         deaths=get_by_cause_measure_data(data, "deaths"),
-        state_person_time=get_state_person_time_measure_data(
-            data, "disease_state_person_time"
-        ),
-        transition_count=get_transition_count_measure_data(data, "disease_transition_count"),
+        # state_person_time=get_state_person_time_measure_data(
+        #     data, "disease_state_person_time"
+        # ),
+        # transition_count=get_transition_count_measure_data(data, "disease_transition_count"),
     )
     return measure_data
 
 
 class MeasureData(NamedTuple):
-    population: pd.DataFrame
     ylls: pd.DataFrame
-    ylds: pd.DataFrame
+    # ylds: pd.DataFrame
     deaths: pd.DataFrame
-    state_person_time: pd.DataFrame
-    transition_count: pd.DataFrame
+    # state_person_time: pd.DataFrame
+    # transition_count: pd.DataFrame
 
     def dump(self, output_dir: Path):
         for key, df in self._asdict().items():
@@ -142,18 +138,6 @@ def apply_results_map(data: pd.DataFrame, kind: str) -> pd.DataFrame:
     data = data.rename(columns=RENAME_COLUMNS)
     logger.info(f"Mapping {kind} complete.")
     return data
-
-
-def get_population_data(data: pd.DataFrame) -> pd.DataFrame:
-    total_pop = pivot_data(
-        data[
-            [results.TOTAL_POPULATION_COLUMN]
-            + results.RESULT_COLUMNS("population")
-            + GROUPBY_COLUMNS
-        ]
-    )
-    total_pop = total_pop.rename(columns={"key": "measure"})
-    return sort_data(total_pop)
 
 
 def get_measure_data(data: pd.DataFrame, measure: str) -> pd.DataFrame:
