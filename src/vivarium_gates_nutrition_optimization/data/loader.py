@@ -24,8 +24,8 @@ from vivarium_inputs import utilities as vi_utils
 from vivarium_inputs import utility_data
 from vivarium_inputs.mapping_extension import alternative_risk_factors
 
-from vivarium_gates_nutrition_optimization.constants import data_keys
-
+from vivarium_gates_nutrition_optimization.constants import data_keys, metadata
+from vivarium_gates_nutrition_optimization.constants import extra_gbd, sampling
 
 def get_data(lookup_key: str, location: str) -> pd.DataFrame:
     """Retrieves data from an appropriate source.
@@ -50,14 +50,11 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
         data_keys.POPULATION.DEMOGRAPHY: load_demographic_dimensions,
         data_keys.POPULATION.TMRLE: load_theoretical_minimum_risk_life_expectancy,
         data_keys.POPULATION.ACMR: load_standard_data,
-        # TODO - add appropriate mappings
-        # data_keys.DIARRHEA.PREVALENCE: load_standard_data,
-        # data_keys.DIARRHEA.INCIDENCE_RATE: load_standard_data,
-        # data_keys.DIARRHEA.REMISSION_RATE: load_standard_data,
-        # data_keys.DIARRHEA.CSMR: load_standard_data,
-        # data_keys.DIARRHEA.EMR: load_standard_data,
-        # data_keys.DIARRHEA.DISABILITY_WEIGHT: load_standard_data,
-        # data_keys.DIARRHEA.RESTRICTIONS: load_metadata,
+        data_keys.PREGNANCY.ASFR: load_asfr,
+        data_keys.PREGNANCY.SBR: load_sbr,
+        data_keys.PREGNANCY.LIVE_BIRTHS_BY_SEX: load_standard_data,
+        data_keys.PREGNANCY.INCIDENCE_RATE_MISCARRIAGE: load_standard_data,
+        data_keys.PREGNANCY.INCIDENCE_RATE_ECTOPIC: load_standard_data,
     }
     return mapping[lookup_key](lookup_key, location)
 
@@ -145,7 +142,10 @@ def _load_em_from_meid(location, meid, measure):
     return vi_utils.sort_hierarchical_data(data).droplevel("location")
 
 
-# TODO - add project-specific data functions here
+##################
+# Pregnancy Data #
+##################
+
 def get_pregnancy_end_rate(location: str):
     asfr = get_data(data_keys.PREGNANCY.ASFR, location)
     sbr = get_data(data_keys.PREGNANCY.SBR, location)
@@ -154,6 +154,63 @@ def get_pregnancy_end_rate(location: str):
     pregnancy_end_rate = (asfr + asfr * sbr + incidence_c995 + incidence_c374)
     return pregnancy_end_rate.reorder_levels(asfr.index.names)
 
+
+def load_asfr(key: str, location: str):
+    asfr = load_standard_data(key, location)
+    asfr = asfr.reset_index()
+    asfr_pivot = asfr.pivot(
+        index=[col for col in metadata.ARTIFACT_INDEX_COLUMNS if col != "location"],
+        columns='parameter',
+        values='value'
+    )
+    seed = f'{key}_{location}'
+    asfr_draws = sampling.generate_vectorized_lognormal_draws(asfr_pivot, seed)
+    return asfr_draws
+
+
+def load_sbr(key: str, location: str):
+
+    births_per_location_year, sbr = [], []
+    for child_loc in get_child_locs(location):
+        child_pop = get_data(data_keys.POPULATION.STRUCTURE, child_loc)
+        child_asfr = get_data(data_keys.PREGNANCY.ASFR, child_loc)
+        child_asfr.index = child_pop.index  # Add location back
+        child_births = (child_asfr
+                        .multiply(child_pop.value, axis=0)
+                        .groupby(['location', 'year_start'])
+                        .sum())
+        births_per_location_year.append(child_births)
+
+        try:
+            child_sbr = get_child_sbr(child_loc)
+        except vi_globals.DataDoesNotExistError:
+            pass
+
+        child_sbr = (child_sbr
+                     .reset_index(level='year_end', drop=True)
+                     .reindex(child_births.index, level='year_start'))
+        sbr.append(child_sbr)
+
+    births_per_location_year = pd.concat(births_per_location_year)
+    sbr = pd.concat(sbr)
+
+    births_per_year = births_per_location_year.groupby('year_start').transform('sum')
+    sbr = (births_per_location_year
+           .multiply(sbr.value, axis=0)
+           .divide(births_per_year)
+           .groupby('year_start')
+           .sum()
+           .reset_index())
+    sbr['year_end'] = sbr['year_start'] + 1
+    sbr = sbr.set_index(['year_start', 'year_end'])
+    return sbr
+
+def get_child_sbr(location: str):
+    child_sbr = load_standard_data(data_keys.PREGNANCY.SBR, location)
+    child_sbr = (child_sbr
+                 .reorder_levels(['parameter', 'year_start', 'year_end'])
+                 .loc['mean_value'])
+    return child_sbr
 
 def get_entity(key: Union[str, EntityKey]):
     # Map of entity types to their gbd mappings.
@@ -165,3 +222,21 @@ def get_entity(key: Union[str, EntityKey]):
     }
     key = EntityKey(key)
     return type_map[key.type][key.name]
+
+
+###########
+# Helpers #
+###########
+
+def get_child_locs(location):
+    parent_id = utility_data.get_location_id(location)
+    hierarchy = extra_gbd.get_gbd_hierarchy()
+
+    is_child_loc = hierarchy.path_to_top_parent.str.contains(f',{parent_id},')
+    is_country = hierarchy.location_type == "admin0"
+    child_locs = hierarchy.loc[is_child_loc & is_country, 'location_name'].tolist()
+
+    # Return just location if location is admin 0 or more granular
+    if len(child_locs) == 0:
+        child_locs.append(location)
+    return child_locs
