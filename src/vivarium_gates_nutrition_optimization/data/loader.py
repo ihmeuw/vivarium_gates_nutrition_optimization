@@ -146,6 +146,13 @@ def _load_em_from_meid(location, meid, measure):
 
 
 # TODO - add project-specific data functions here
+def get_pregnancy_end_rate(location: str):
+    asfr = get_data(data_keys.PREGNANCY.ASFR, location)
+    sbr = get_data(data_keys.PREGNANCY.SBR, location)
+    incidence_c995 = get_data(data_keys.PREGNANCY.INCIDENCE_RATE_MISCARRIAGE, location)
+    incidence_c374 = get_data(data_keys.PREGNANCY.INCIDENCE_RATE_ECTOPIC, location)
+    pregnancy_end_rate = (asfr + asfr * sbr + incidence_c995 + incidence_c374)
+    return pregnancy_end_rate.reorder_levels(asfr.index.names)
 
 
 def get_entity(key: Union[str, EntityKey]):
