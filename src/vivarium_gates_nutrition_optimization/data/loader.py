@@ -71,7 +71,7 @@ def load_population_structure(key: str, location: str) -> pd.DataFrame:
 def load_pregnant_population_structure(key: str, location: str) -> pd.DataFrame:
     base_population_structure = interface.get_population_structure(location)
     pregnancy_end_rate = get_pregnancy_end_rate(location)
-    pregnant_population = base_population_structure ### Multiply in the pregnancies
+    pregnant_population = base_population_structure #TODO Multiply in the pregnancies
     return pregnant_population
 
 
