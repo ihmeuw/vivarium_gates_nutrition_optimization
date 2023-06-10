@@ -52,7 +52,6 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
         data_keys.POPULATION.ACMR: load_standard_data,
         data_keys.PREGNANCY.ASFR: load_asfr,
         data_keys.PREGNANCY.SBR: load_sbr,
-        data_keys.PREGNANCY.LIVE_BIRTHS_BY_SEX: load_standard_data,
         data_keys.PREGNANCY.INCIDENCE_RATE_MISCARRIAGE: load_standard_data,
         data_keys.PREGNANCY.INCIDENCE_RATE_ECTOPIC: load_standard_data,
     }
@@ -65,9 +64,15 @@ def load_population_location(key: str, location: str) -> str:
 
     return location
 
-
 def load_population_structure(key: str, location: str) -> pd.DataFrame:
     return interface.get_population_structure(location)
+
+
+def load_pregnant_population_structure(key: str, location: str) -> pd.DataFrame:
+    base_population_structure = interface.get_population_structure(location)
+    pregnancy_end_rate = get_pregnancy_end_rate(location)
+    pregnant_population = base_population_structure ### Multiply in the pregnancies
+    return pregnant_population
 
 
 def load_age_bins(key: str, location: str) -> pd.DataFrame:
