@@ -69,11 +69,12 @@ def load_population_location(key: str, location: str) -> str:
 def load_population_structure(key: str, location: str) -> pd.DataFrame:
     base_population_structure = interface.get_population_structure(location)
     pregnancy_end_rate_avg = get_pregnancy_end_rate(location)
-    pregnant_population_structure = (pregnancy_end_rate_avg
-                                     .multiply(base_population_structure['value'],axis=0))
-    pregnant_population_structure = (pregnant_population_structure
-                                     .assign(location="Ethiopia")
-                                     .set_index('location',append=True))
+    pregnant_population_structure = pregnancy_end_rate_avg.multiply(
+        base_population_structure["value"], axis=0
+    )
+    pregnant_population_structure = pregnant_population_structure.assign(
+        location="Ethiopia"
+    ).set_index("location", append=True)
     return vi_utils.sort_hierarchical_data(pregnant_population_structure)
 
 
@@ -153,15 +154,18 @@ def _load_em_from_meid(location, meid, measure):
 # Pregnancy Data #
 ##################
 
+
 def get_pregnancy_end_rate(location: str) -> pd.DataFrame:
     asfr = get_data(data_keys.PREGNANCY.ASFR, location)
     sbr = get_data(data_keys.PREGNANCY.SBR, location)
-    sbr = (sbr
-           .reset_index(level='year_end', drop=True)
-           .reindex(asfr.index, level='year_start', fill_value=0.))
+    sbr = sbr.reset_index(level="year_end", drop=True).reindex(
+        asfr.index, level="year_start", fill_value=0.0
+    )
     incidence_c995 = get_data(data_keys.PREGNANCY.INCIDENCE_RATE_MISCARRIAGE, location)
     incidence_c374 = get_data(data_keys.PREGNANCY.INCIDENCE_RATE_ECTOPIC, location)
-    pregnancy_end_rate = (asfr + asfr.multiply(sbr['value'],axis=0) + incidence_c995 + incidence_c374)
+    pregnancy_end_rate = (
+        asfr + asfr.multiply(sbr["value"], axis=0) + incidence_c995 + incidence_c374
+    )
     return pregnancy_end_rate.reorder_levels(asfr.index.names)
 
 
@@ -170,10 +174,10 @@ def load_asfr(key: str, location: str) -> pd.DataFrame:
     asfr = asfr.reset_index()
     asfr_pivot = asfr.pivot(
         index=[col for col in metadata.ARTIFACT_INDEX_COLUMNS if col != "location"],
-        columns='parameter',
-        values='value'
+        columns="parameter",
+        values="value",
     )
-    seed = f'{key}_{location}'
+    seed = f"{key}_{location}"
     # Keep lognormal draws from Gates IV Iron until @alibow says otherwise
     asfr_draws = sampling.generate_vectorized_lognormal_draws(asfr_pivot, seed)
     return asfr_draws
@@ -181,9 +185,7 @@ def load_asfr(key: str, location: str) -> pd.DataFrame:
 
 def load_sbr(key: str, location: str) -> pd.DataFrame:
     sbr = load_standard_data(key, location)
-    sbr = (sbr
-           .reorder_levels(['parameter', 'year_start', 'year_end'])
-           .loc['mean_value'])
+    sbr = sbr.reorder_levels(["parameter", "year_start", "year_end"]).loc["mean_value"]
     return sbr
 
 

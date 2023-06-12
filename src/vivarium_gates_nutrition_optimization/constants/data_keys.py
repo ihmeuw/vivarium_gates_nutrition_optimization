@@ -2,7 +2,6 @@ from typing import NamedTuple
 
 from vivarium_public_health.utilities import TargetString
 
-
 #############
 # Data Keys #
 #############
@@ -29,10 +28,13 @@ class __Population(NamedTuple):
 
 POPULATION = __Population()
 
+
 class __Pregnancy(NamedTuple):
     ASFR: str = "covariate.age_specific_fertility_rate.estimate"
     SBR: str = "covariate.stillbirth_to_live_birth_ratio.estimate"
-    INCIDENCE_RATE_MISCARRIAGE: str = "cause.maternal_abortion_and_miscarriage.raw_incidence_rate"
+    INCIDENCE_RATE_MISCARRIAGE: str = (
+        "cause.maternal_abortion_and_miscarriage.raw_incidence_rate"
+    )
     INCIDENCE_RATE_ECTOPIC: str = "cause.ectopic_pregnancy.raw_incidence_rate"
 
     @property
@@ -45,6 +47,7 @@ class __Pregnancy(NamedTuple):
 
 
 PREGNANCY = __Pregnancy()
+
 
 # TODO - sample key group used to identify keys in model
 # For more information see the tutorial:

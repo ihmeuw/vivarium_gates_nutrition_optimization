@@ -2,7 +2,6 @@ from typing import NamedTuple
 
 import pandas as pd
 
-
 ####################
 # Project metadata #
 ####################
@@ -16,9 +15,7 @@ MAKE_ARTIFACT_CPU = "1"
 MAKE_ARTIFACT_RUNTIME = "3:00:00"
 MAKE_ARTIFACT_SLEEP = 10
 
-LOCATIONS = [
-    "Ethiopia"
-]
+LOCATIONS = ["Ethiopia"]
 
 ARTIFACT_INDEX_COLUMNS = [
     "sex",
