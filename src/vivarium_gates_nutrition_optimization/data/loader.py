@@ -25,7 +25,7 @@ from vivarium_inputs import utility_data
 from vivarium_inputs.mapping_extension import alternative_risk_factors
 
 from vivarium_gates_nutrition_optimization.constants import data_keys, metadata
-from vivarium_gates_nutrition_optimization.data import extra_gbd, sampling
+from vivarium_gates_nutrition_optimization.data import sampling
 
 def get_data(lookup_key: str, location: str) -> pd.DataFrame:
     """Retrieves data from an appropriate source.
