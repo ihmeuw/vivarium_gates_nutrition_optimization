@@ -2,6 +2,7 @@ from typing import NamedTuple
 
 from vivarium_public_health.utilities import TargetString
 
+
 #############
 # Data Keys #
 #############

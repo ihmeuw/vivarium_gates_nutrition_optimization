@@ -3,6 +3,7 @@ import pandas as pd
 from scipy import stats
 from vivarium.framework.randomness import get_hash
 
+
 def generate_vectorized_lognormal_draws(df: pd.DataFrame, seed: str,) -> pd.DataFrame:
     mean = df['mean_value'].values
     lower = df['lower_value'].values
