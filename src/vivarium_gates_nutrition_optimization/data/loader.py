@@ -64,16 +64,10 @@ def load_population_location(key: str, location: str) -> str:
 
     return location
 
+
 def load_population_structure(key: str, location: str) -> pd.DataFrame:
     base_population_structure = interface.get_population_structure(location)
     pregnancy_end_rate_avg = get_pregnancy_end_rate(location)
-    # Pregnancy rates are associated with draws, but pop structure is just one value.
-    # I'm just averaging to flatten the draws. Do I need to do this, or can vivarium
-    # handle multi-draw populations?
-    # pregnancy_end_rate_avg['value'] = pregnancy_end_rate_avg.mean(axis=1)
-    # pregnancy_end_rate_avg = (pregnancy_end_rate_avg
-    #                                .drop(columns=pregnancy_end_rate_avg.columns[:1000]))
-    # pregnant_population_structure = base_population_structure * pregnancy_end_rate_avg
     pregnant_population_structure = (pregnancy_end_rate_avg
                                      .multiply(base_population_structure['value'],axis=0))
     pregnant_population_structure = (pregnant_population_structure
@@ -158,7 +152,7 @@ def _load_em_from_meid(location, meid, measure):
 # Pregnancy Data #
 ##################
 
-def get_pregnancy_end_rate(location: str):
+def get_pregnancy_end_rate(location: str) -> pd.DataFrame:
     asfr = get_data(data_keys.PREGNANCY.ASFR, location)
     sbr = get_data(data_keys.PREGNANCY.SBR, location)
     sbr = (sbr
@@ -170,7 +164,7 @@ def get_pregnancy_end_rate(location: str):
     return pregnancy_end_rate.reorder_levels(asfr.index.names)
 
 
-def load_asfr(key: str, location: str):
+def load_asfr(key: str, location: str) -> pd.DataFrame:
     asfr = load_standard_data(key, location)
     asfr = asfr.reset_index()
     asfr_pivot = asfr.pivot(
@@ -179,6 +173,7 @@ def load_asfr(key: str, location: str):
         values='value'
     )
     seed = f'{key}_{location}'
+    # Keep lognormal draws from Gates IV Iron until @alibow says otherwise
     asfr_draws = sampling.generate_vectorized_lognormal_draws(asfr_pivot, seed)
     return asfr_draws
 
