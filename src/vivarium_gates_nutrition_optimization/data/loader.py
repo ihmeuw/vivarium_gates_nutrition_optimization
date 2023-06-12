@@ -46,6 +46,8 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
     mapping = {
         data_keys.POPULATION.LOCATION: load_population_location,
         data_keys.POPULATION.STRUCTURE: load_population_structure,
+        # If we keep the multi-country location stuff, we need to 
+        # handle the fact that SBR takes in base population structure too 
         data_keys.POPULATION.AGE_BINS: load_age_bins,
         data_keys.POPULATION.DEMOGRAPHY: load_demographic_dimensions,
         data_keys.POPULATION.TMRLE: load_theoretical_minimum_risk_life_expectancy,
@@ -71,8 +73,12 @@ def load_population_structure(key: str, location: str) -> pd.DataFrame:
 def load_pregnant_population_structure(key: str, location: str) -> pd.DataFrame:
     base_population_structure = interface.get_population_structure(location)
     pregnancy_end_rate_averaged = get_pregnancy_end_rate(location)
+    # Pregnancy rates are associated with draws, but pop structure is just one value.
+    # I'm just averaging to flatten the draws. Do I need to do this, or can vivarium
+    # handle multi-draw populations?
     pregnancy_end_rate_averaged['value'] = pregnancy_end_rate_averaged.mean(axis=1)
-    pregnancy_end_rate_averaged = pregnancy_end_rate_averaged.drop(columns=pregnancy_end_rate_averaged.columns[:1000])
+    pregnancy_end_rate_averaged = (pregnancy_end_rate_averaged
+                                   .drop(columns=pregnancy_end_rate_averaged.columns[:1000]))
     pregnant_population_structure = base_population_structure * pregnancy_end_rate_averaged
     return pregnant_population_structure.reorder_levels(base_population_structure.index.names)
 
@@ -164,6 +170,7 @@ def get_pregnancy_end_rate(location: str):
 
 def load_asfr(key: str, location: str):
     asfr = load_standard_data(key, location)
+    # Lognormal Draws--is this needed?
     asfr = asfr.reset_index()
     asfr_pivot = asfr.pivot(
         index=[col for col in metadata.ARTIFACT_INDEX_COLUMNS if col != "location"],
@@ -176,7 +183,7 @@ def load_asfr(key: str, location: str):
 
 
 def load_sbr(key: str, location: str):
-
+    # Appears to be made to handle multi-country locations e.g. Sub-Saharan Africa--do we need this?
     births_per_location_year, sbr = [], []
     for child_loc in get_child_locs(location):
         child_pop = get_data(data_keys.POPULATION.STRUCTURE, child_loc)
@@ -236,6 +243,7 @@ def get_entity(key: Union[str, EntityKey]):
 ###########
 
 def get_child_locs(location):
+    # Appears to be needed for multi-country locations e.g. Sub Saharan Africa. Unnecessary?
     parent_id = utility_data.get_location_id(location)
     hierarchy = extra_gbd.get_gbd_hierarchy()
 

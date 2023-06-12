@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict, List, NamedTuple, Union, Tuple
+from typing import Dict, List, NamedTuple, Union
 
 import pandas as pd
 import yaml
@@ -48,7 +48,7 @@ class MeasureData(NamedTuple):
             df.to_csv(output_dir / f"{key}.csv")
 
 
-def read_data(path: Path, single_run: bool) -> Tuple(pd.DataFrame, List[str]):
+def read_data(path: Path, single_run: bool) -> (pd.DataFrame, List[str]):
     data = pd.read_hdf(path)
     # noinspection PyUnresolvedReferences
     data = (
