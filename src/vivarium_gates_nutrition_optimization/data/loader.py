@@ -46,14 +46,12 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
     mapping = {
         data_keys.POPULATION.LOCATION: load_population_location,
         data_keys.POPULATION.STRUCTURE: load_population_structure,
-        # If we keep the multi-country location stuff, we need to 
-        # handle the fact that SBR takes in base population structure too 
         data_keys.POPULATION.AGE_BINS: load_age_bins,
         data_keys.POPULATION.DEMOGRAPHY: load_demographic_dimensions,
         data_keys.POPULATION.TMRLE: load_theoretical_minimum_risk_life_expectancy,
         data_keys.POPULATION.ACMR: load_standard_data,
         data_keys.PREGNANCY.ASFR: load_asfr,
-        data_keys.PREGNANCY.SBR: load_sbr,
+        data_keys.PREGNANCY.SBR: load_standard_data,
         data_keys.PREGNANCY.INCIDENCE_RATE_MISCARRIAGE: load_standard_data,
         data_keys.PREGNANCY.INCIDENCE_RATE_ECTOPIC: load_standard_data,
     }
@@ -67,19 +65,15 @@ def load_population_location(key: str, location: str) -> str:
     return location
 
 def load_population_structure(key: str, location: str) -> pd.DataFrame:
-    return interface.get_population_structure(location)
-
-
-def load_pregnant_population_structure(key: str, location: str) -> pd.DataFrame:
     base_population_structure = interface.get_population_structure(location)
-    pregnancy_end_rate_averaged = get_pregnancy_end_rate(location)
+    pregnancy_end_rate_avg = get_pregnancy_end_rate(location)
     # Pregnancy rates are associated with draws, but pop structure is just one value.
     # I'm just averaging to flatten the draws. Do I need to do this, or can vivarium
     # handle multi-draw populations?
-    pregnancy_end_rate_averaged['value'] = pregnancy_end_rate_averaged.mean(axis=1)
-    pregnancy_end_rate_averaged = (pregnancy_end_rate_averaged
-                                   .drop(columns=pregnancy_end_rate_averaged.columns[:1000]))
-    pregnant_population_structure = base_population_structure * pregnancy_end_rate_averaged
+    pregnancy_end_rate_avg['value'] = pregnancy_end_rate_avg.mean(axis=1)
+    pregnancy_end_rate_avg = (pregnancy_end_rate_avg
+                                   .drop(columns=pregnancy_end_rate_avg.columns[:1000]))
+    pregnant_population_structure = base_population_structure * pregnancy_end_rate_avg
     return pregnant_population_structure.reorder_levels(base_population_structure.index.names)
 
 
@@ -170,7 +164,6 @@ def get_pregnancy_end_rate(location: str):
 
 def load_asfr(key: str, location: str):
     asfr = load_standard_data(key, location)
-    # Lognormal Draws--is this needed?
     asfr = asfr.reset_index()
     asfr_pivot = asfr.pivot(
         index=[col for col in metadata.ARTIFACT_INDEX_COLUMNS if col != "location"],
@@ -182,50 +175,6 @@ def load_asfr(key: str, location: str):
     return asfr_draws
 
 
-def load_sbr(key: str, location: str):
-    # Appears to be made to handle multi-country locations e.g. Sub-Saharan Africa--do we need this?
-    births_per_location_year, sbr = [], []
-    for child_loc in get_child_locs(location):
-        child_pop = get_data(data_keys.POPULATION.STRUCTURE, child_loc)
-        child_asfr = get_data(data_keys.PREGNANCY.ASFR, child_loc)
-        child_asfr.index = child_pop.index  # Add location back
-        child_births = (child_asfr
-                        .multiply(child_pop.value, axis=0)
-                        .groupby(['location', 'year_start'])
-                        .sum())
-        births_per_location_year.append(child_births)
-
-        try:
-            child_sbr = get_child_sbr(child_loc)
-        except vi_globals.DataDoesNotExistError:
-            pass
-
-        child_sbr = (child_sbr
-                     .reset_index(level='year_end', drop=True)
-                     .reindex(child_births.index, level='year_start'))
-        sbr.append(child_sbr)
-
-    births_per_location_year = pd.concat(births_per_location_year)
-    sbr = pd.concat(sbr)
-
-    births_per_year = births_per_location_year.groupby('year_start').transform('sum')
-    sbr = (births_per_location_year
-           .multiply(sbr.value, axis=0)
-           .divide(births_per_year)
-           .groupby('year_start')
-           .sum()
-           .reset_index())
-    sbr['year_end'] = sbr['year_start'] + 1
-    sbr = sbr.set_index(['year_start', 'year_end'])
-    return sbr
-
-def get_child_sbr(location: str):
-    child_sbr = load_standard_data(data_keys.PREGNANCY.SBR, location)
-    child_sbr = (child_sbr
-                 .reorder_levels(['parameter', 'year_start', 'year_end'])
-                 .loc['mean_value'])
-    return child_sbr
-
 def get_entity(key: Union[str, EntityKey]):
     # Map of entity types to their gbd mappings.
     type_map = {
@@ -236,22 +185,3 @@ def get_entity(key: Union[str, EntityKey]):
     }
     key = EntityKey(key)
     return type_map[key.type][key.name]
-
-
-###########
-# Helpers #
-###########
-
-def get_child_locs(location):
-    # Appears to be needed for multi-country locations e.g. Sub Saharan Africa. Unnecessary?
-    parent_id = utility_data.get_location_id(location)
-    hierarchy = extra_gbd.get_gbd_hierarchy()
-
-    is_child_loc = hierarchy.path_to_top_parent.str.contains(f',{parent_id},')
-    is_country = hierarchy.location_type == "admin0"
-    child_locs = hierarchy.loc[is_child_loc & is_country, 'location_name'].tolist()
-
-    # Return just location if location is admin 0 or more granular
-    if len(child_locs) == 0:
-        child_locs.append(location)
-    return child_locs
