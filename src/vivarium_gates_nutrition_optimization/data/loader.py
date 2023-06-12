@@ -73,7 +73,7 @@ def load_population_structure(key: str, location: str) -> pd.DataFrame:
         base_population_structure["value"], axis=0
     )
     pregnant_population_structure = pregnant_population_structure.assign(
-        location="Ethiopia"
+        location=location
     ).set_index("location", append=True)
     return vi_utils.sort_hierarchical_data(pregnant_population_structure)
 
