@@ -51,7 +51,7 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
         data_keys.POPULATION.TMRLE: load_theoretical_minimum_risk_life_expectancy,
         data_keys.POPULATION.ACMR: load_standard_data,
         data_keys.PREGNANCY.ASFR: load_asfr,
-        data_keys.PREGNANCY.SBR: load_standard_data,
+        data_keys.PREGNANCY.SBR: load_sbr,
         data_keys.PREGNANCY.INCIDENCE_RATE_MISCARRIAGE: load_standard_data,
         data_keys.PREGNANCY.INCIDENCE_RATE_ECTOPIC: load_standard_data,
     }
@@ -173,6 +173,11 @@ def load_asfr(key: str, location: str):
     seed = f'{key}_{location}'
     asfr_draws = sampling.generate_vectorized_lognormal_draws(asfr_pivot, seed)
     return asfr_draws
+
+
+def load_sbr(key: str, location: str) -> pd.DataFrame:
+    sbr = load_standard_data(key, location)
+    return sbr
 
 
 def get_entity(key: Union[str, EntityKey]):
