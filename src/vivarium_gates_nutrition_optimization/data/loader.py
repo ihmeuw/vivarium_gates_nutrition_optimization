@@ -70,9 +70,11 @@ def load_population_structure(key: str, location: str) -> pd.DataFrame:
 
 def load_pregnant_population_structure(key: str, location: str) -> pd.DataFrame:
     base_population_structure = interface.get_population_structure(location)
-    pregnancy_end_rate = get_pregnancy_end_rate(location)
-    pregnant_population = base_population_structure #TODO Multiply in the pregnancies
-    return pregnant_population
+    pregnancy_end_rate_averaged = get_pregnancy_end_rate(location)
+    pregnancy_end_rate_averaged['value'] = pregnancy_end_rate_averaged.mean(axis=1)
+    pregnancy_end_rate_averaged = pregnancy_end_rate_averaged.drop(columns=pregnancy_end_rate_averaged.columns[:1000])
+    pregnant_population_structure = base_population_structure * pregnancy_end_rate_averaged
+    return pregnant_population_structure.reorder_levels(base_population_structure.index.names)
 
 
 def load_age_bins(key: str, location: str) -> pd.DataFrame:
