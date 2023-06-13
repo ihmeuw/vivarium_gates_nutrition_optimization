@@ -55,8 +55,8 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
         data_keys.POPULATION.ACMR: load_standard_data,
         data_keys.PREGNANCY.ASFR: load_asfr,
         data_keys.PREGNANCY.SBR: load_sbr,
-        data_keys.PREGNANCY.INCIDENCE_RATE_MISCARRIAGE: load_standard_data,
-        data_keys.PREGNANCY.INCIDENCE_RATE_ECTOPIC: load_standard_data,
+        data_keys.PREGNANCY.INCIDENCE_RATE_MISCARRIAGE: load_raw_incidence_rate,
+        data_keys.PREGNANCY.INCIDENCE_RATE_ECTOPIC: load_raw_incidence_rate,
     }
     return mapping[lookup_key](lookup_key, location)
 
