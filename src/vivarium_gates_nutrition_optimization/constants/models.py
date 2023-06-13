@@ -14,8 +14,9 @@ class TransitionString(str):
 ###########################
 PREGNANCY_MODEL_NAME = data_keys.PREGNANCY.name
 # Only one state for now for person-time
-PREGNANT_STATE = "pregnant"
-PREGNANCY_MODEL_STATES = (PREGNANT_STATE,)
+PREGNANCY_STATE = "pregnant"
+PREGNANCY_SUSCEPTIBLE_STATE_NAME = "not_pregnant"
+PREGNANCY_MODEL_STATES = (PREGNANCY_STATE, PREGNANCY_SUSCEPTIBLE_STATE_NAME)
 PREGNANCY_MODEL_TRANSITIONS = ()
 
 
