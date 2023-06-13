@@ -32,10 +32,10 @@ POPULATION = __Population()
 class __Pregnancy(NamedTuple):
     ASFR: str = "covariate.age_specific_fertility_rate.estimate"
     SBR: str = "covariate.stillbirth_to_live_birth_ratio.estimate"
-    INCIDENCE_RATE_MISCARRIAGE: str = (
+    RAW_INCIDENCE_RATE_MISCARRIAGE: str = (
         "cause.maternal_abortion_and_miscarriage.raw_incidence_rate"
     )
-    INCIDENCE_RATE_ECTOPIC: str = "cause.ectopic_pregnancy.raw_incidence_rate"
+    RAW_INCIDENCE_RATE_ECTOPIC: str = "cause.ectopic_pregnancy.raw_incidence_rate"
 
     @property
     def name(self):
@@ -43,7 +43,7 @@ class __Pregnancy(NamedTuple):
 
     @property
     def log_name(self):
-        return "pregnancy"
+        return self.name.replace("_", " ")
 
 
 PREGNANCY = __Pregnancy()
@@ -76,7 +76,7 @@ class __SomeDisease(NamedTuple):
 
     @property
     def log_name(self):
-        return "some disease"
+        return self.name.replace("_", " ")
 
 
 SOME_DISEASE = __SomeDisease()
