@@ -15,15 +15,15 @@ for an example.
 from typing import Union
 
 import pandas as pd
+import vivarium_inputs.validation.sim as validation
 from gbd_mapping import causes, covariates, risk_factors
 from vivarium.framework.artifact import EntityKey
 from vivarium_gbd_access import gbd
-from vivarium_inputs import globals as vi_globals
 from vivarium_inputs import core as vi_core
+from vivarium_inputs import globals as vi_globals
 from vivarium_inputs import interface
 from vivarium_inputs import utilities as vi_utils
 from vivarium_inputs import utility_data
-import vivarium_inputs.validation.sim as validation
 from vivarium_inputs.mapping_extension import alternative_risk_factors
 
 from vivarium_gates_nutrition_optimization.constants import data_keys, metadata
@@ -97,10 +97,10 @@ def load_standard_data(key: str, location: str) -> pd.DataFrame:
     entity = get_entity(key)
     return interface.get_measure(entity, key.measure, location).droplevel("location")
 
-#TODO: Remove this if/ when Vivarium Inputs implements the change directly
+
+# TODO: Remove this if/ when Vivarium Inputs implements the change directly
 def load_raw_incidence_data(key: str, location: str) -> pd.DataFrame:
-    """Temporary function to short circuit around validation issues in Vivarium Inputs
-    """
+    """Temporary function to short circuit around validation issues in Vivarium Inputs"""
     key = EntityKey(key)
     entity = get_entity(key)
     data = vi_core.get_data(entity, key.measure, location)
@@ -173,9 +173,7 @@ def _load_em_from_meid(location, meid, measure):
 def get_pregnancy_end_rate(location: str) -> pd.DataFrame:
     asfr = get_data(data_keys.PREGNANCY.ASFR, location)
     sbr = get_data(data_keys.PREGNANCY.SBR, location)
-    sbr = sbr.reset_index(level="year_end", drop=True).reindex(
-        asfr.index, level="year_start"
-    )
+    sbr = sbr.reset_index(level="year_end", drop=True).reindex(asfr.index, level="year_start")
     incidence_c995 = get_data(data_keys.PREGNANCY.RAW_INCIDENCE_RATE_MISCARRIAGE, location)
     incidence_c374 = get_data(data_keys.PREGNANCY.RAW_INCIDENCE_RATE_ECTOPIC, location)
     pregnancy_end_rate = (
