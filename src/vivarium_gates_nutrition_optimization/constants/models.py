@@ -10,6 +10,16 @@ class TransitionString(str):
 
 
 ###########################
+# Pregnancy Model         #
+###########################
+PREGNANCY_MODEL_NAME = data_keys.PREGNANCY.name
+# Only one state for now for person-time
+PREGNANT_STATE = "pregnant"
+PREGNANCY_MODEL_STATES = (PREGNANT_STATE)
+PREGNANCY_MODEL_TRANSITIONS = ()
+
+
+###########################
 # Disease Model variables #
 ###########################
 
@@ -26,9 +36,9 @@ SOME_DISEASE_MODEL_TRANSITIONS = (
 )
 
 STATE_MACHINE_MAP = {
-    SOME_MODEL_NAME: {
-        "states": SOME_DISEASE_MODEL_STATES,
-        "transitions": SOME_DISEASE_MODEL_TRANSITIONS,
+    PREGNANCY_MODEL_NAME: {
+        "states": PREGNANCY_MODEL_STATES,
+        "transitions": PREGNANCY_MODEL_TRANSITIONS,
     },
 }
 
