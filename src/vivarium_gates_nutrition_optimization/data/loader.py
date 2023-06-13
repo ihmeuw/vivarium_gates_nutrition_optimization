@@ -19,9 +19,11 @@ from gbd_mapping import causes, covariates, risk_factors
 from vivarium.framework.artifact import EntityKey
 from vivarium_gbd_access import gbd
 from vivarium_inputs import globals as vi_globals
+from vivarium_inputs import core as vi_core
 from vivarium_inputs import interface
 from vivarium_inputs import utilities as vi_utils
 from vivarium_inputs import utility_data
+import vivarium_inputs.validation.sim as validation
 from vivarium_inputs.mapping_extension import alternative_risk_factors
 
 from vivarium_gates_nutrition_optimization.constants import data_keys, metadata
@@ -94,6 +96,19 @@ def load_standard_data(key: str, location: str) -> pd.DataFrame:
     key = EntityKey(key)
     entity = get_entity(key)
     return interface.get_measure(entity, key.measure, location).droplevel("location")
+
+#TODO: Remove this if/ when Vivarium Inputs implements the change directly
+def load_raw_incidence_data(key: str, location: str) -> pd.DataFrame:
+    """Temporary function to short circuit around validation issues in Vivarium Inputs
+    """
+    key = EntityKey(key)
+    entity = get_entity(key)
+    data = vi_core.get_data(entity, key.measure, location)
+    data = vi_utils.scrub_gbd_conventions(data, location)
+    validation.validate_for_simulation(data, entity, "incidence_rate", location)
+    data = vi_utils.split_interval(data, interval_column="age", split_column_prefix="age")
+    data = vi_utils.split_interval(data, interval_column="year", split_column_prefix="year")
+    return vi_utils.sort_hierarchical_data(data)
 
 
 def load_metadata(key: str, location: str):
