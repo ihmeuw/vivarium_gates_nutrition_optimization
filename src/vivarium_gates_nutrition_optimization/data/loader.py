@@ -108,7 +108,7 @@ def load_raw_incidence_data(key: str, location: str) -> pd.DataFrame:
     validation.validate_for_simulation(data, entity, "incidence_rate", location)
     data = vi_utils.split_interval(data, interval_column="age", split_column_prefix="age")
     data = vi_utils.split_interval(data, interval_column="year", split_column_prefix="year")
-    return vi_utils.sort_hierarchical_data(data)
+    return vi_utils.sort_hierarchical_data(data).droplevel("location")
 
 
 def load_metadata(key: str, location: str):
@@ -174,7 +174,7 @@ def get_pregnancy_end_rate(location: str) -> pd.DataFrame:
     asfr = get_data(data_keys.PREGNANCY.ASFR, location)
     sbr = get_data(data_keys.PREGNANCY.SBR, location)
     sbr = sbr.reset_index(level="year_end", drop=True).reindex(
-        asfr.index, level="year_start", fill_value=0.0
+        asfr.index, level="year_start"
     )
     incidence_c995 = get_data(data_keys.PREGNANCY.RAW_INCIDENCE_RATE_MISCARRIAGE, location)
     incidence_c374 = get_data(data_keys.PREGNANCY.RAW_INCIDENCE_RATE_ECTOPIC, location)
