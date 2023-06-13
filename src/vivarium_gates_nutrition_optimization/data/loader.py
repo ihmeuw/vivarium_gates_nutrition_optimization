@@ -55,8 +55,8 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
         data_keys.POPULATION.ACMR: load_standard_data,
         data_keys.PREGNANCY.ASFR: load_asfr,
         data_keys.PREGNANCY.SBR: load_sbr,
-        data_keys.PREGNANCY.RAW_INCIDENCE_RATE_MISCARRIAGE: load_raw_incidence_rate,
-        data_keys.PREGNANCY.RAW_INCIDENCE_RATE_ECTOPIC: load_raw_incidence_rate,
+        data_keys.PREGNANCY.RAW_INCIDENCE_RATE_MISCARRIAGE: load_raw_incidence_data,
+        data_keys.PREGNANCY.RAW_INCIDENCE_RATE_ECTOPIC: load_raw_incidence_data,
     }
     return mapping[lookup_key](lookup_key, location)
 
@@ -176,8 +176,8 @@ def get_pregnancy_end_rate(location: str) -> pd.DataFrame:
     sbr = sbr.reset_index(level="year_end", drop=True).reindex(
         asfr.index, level="year_start", fill_value=0.0
     )
-    incidence_c995 = get_data(data_keys.PREGNANCY.INCIDENCE_RATE_MISCARRIAGE, location)
-    incidence_c374 = get_data(data_keys.PREGNANCY.INCIDENCE_RATE_ECTOPIC, location)
+    incidence_c995 = get_data(data_keys.PREGNANCY.RAW_INCIDENCE_RATE_MISCARRIAGE, location)
+    incidence_c374 = get_data(data_keys.PREGNANCY.RAW_INCIDENCE_RATE_ECTOPIC, location)
     pregnancy_end_rate = (
         asfr + asfr.multiply(sbr["value"], axis=0) + incidence_c995 + incidence_c374
     )
@@ -193,7 +193,6 @@ def load_asfr(key: str, location: str) -> pd.DataFrame:
         values="value",
     )
     seed = f"{key}_{location}"
-    # Keep lognormal draws from Gates IV Iron until @alibow says otherwise
     asfr_draws = sampling.generate_vectorized_lognormal_draws(asfr_pivot, seed)
     return asfr_draws
 
