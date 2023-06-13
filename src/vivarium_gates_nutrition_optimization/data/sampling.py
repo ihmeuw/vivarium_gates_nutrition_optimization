@@ -13,6 +13,7 @@ def generate_vectorized_lognormal_draws(
     upper = df["upper_value"].values
     assert np.all((lower <= mean) & (mean <= upper))
     assert np.all((lower == mean) == (upper == mean))
+    assert np.all(mean >= 0)
 
     sample_mask = (mean > 0) & (lower < mean) & (mean < upper)
     stdnorm_quantiles = stats.norm.ppf((0.025, 0.975))
