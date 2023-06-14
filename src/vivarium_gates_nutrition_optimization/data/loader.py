@@ -70,7 +70,7 @@ def load_population_location(key: str, location: str) -> str:
 
 def load_population_structure(key: str, location: str) -> pd.DataFrame:
     base_population_structure = interface.get_population_structure(location)
-    pregnancy_end_rate_avg = get_pregnancy_end_rate(location)
+    pregnancy_end_rate_avg = get_pregnancy_end_incidence(location)
     pregnant_population_structure = pregnancy_end_rate_avg.multiply(
         base_population_structure["value"], axis=0
     )
@@ -170,7 +170,7 @@ def _load_em_from_meid(location, meid, measure):
 ##################
 
 
-def get_pregnancy_end_rate(location: str) -> pd.DataFrame:
+def get_pregnancy_end_incidence(location: str) -> pd.DataFrame:
     asfr = get_data(data_keys.PREGNANCY.ASFR, location)
     sbr = get_data(data_keys.PREGNANCY.SBR, location)
     sbr = sbr.reset_index(level="year_end", drop=True).reindex(asfr.index, level="year_start")
