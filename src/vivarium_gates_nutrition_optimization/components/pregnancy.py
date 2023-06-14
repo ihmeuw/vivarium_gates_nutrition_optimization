@@ -4,7 +4,7 @@ from vivarium_gates_nutrition_optimization.constants import data_keys, models
 
 
 def Pregnancy():
-    not_pregnant = SusceptibleState(models.PREGNANCY_SUSCEPTIBLE_STATE_NAME)
+    not_pregnant = SusceptibleState(models.PREGNANCY_STATE)
     pregnant = DiseaseState(
         models.PREGNANCY_STATE,
         get_data_functions={
