@@ -7,7 +7,7 @@ components:
 #            - DisabilityObserver()
             - MortalityObserver()
             - ResultsStratifier()
-            - DiseaseObserver()
+            - DiseaseObserver("pregnancy")
 
     # Causes an error if left empty. Uncomment when you have components. 
     # vivarium_gates_nutrition_optimization.components:
