@@ -29,6 +29,26 @@ class __Population(NamedTuple):
 POPULATION = __Population()
 
 
+class __Pregnancy(NamedTuple):
+    ASFR: str = "covariate.age_specific_fertility_rate.estimate"
+    SBR: str = "covariate.stillbirth_to_live_birth_ratio.estimate"
+    RAW_INCIDENCE_RATE_MISCARRIAGE: str = (
+        "cause.maternal_abortion_and_miscarriage.raw_incidence_rate"
+    )
+    RAW_INCIDENCE_RATE_ECTOPIC: str = "cause.ectopic_pregnancy.raw_incidence_rate"
+
+    @property
+    def name(self):
+        return "pregnancy"
+
+    @property
+    def log_name(self):
+        return self.name.replace("_", " ")
+
+
+PREGNANCY = __Pregnancy()
+
+
 # TODO - sample key group used to identify keys in model
 # For more information see the tutorial:
 # https://vivarium-inputs.readthedocs.io/en/latest/tutorials/pulling_data.html#entity-measure-data
@@ -56,13 +76,12 @@ class __SomeDisease(NamedTuple):
 
     @property
     def log_name(self):
-        return "some disease"
+        return self.name.replace("_", " ")
 
 
 SOME_DISEASE = __SomeDisease()
 
 MAKE_ARTIFACT_KEY_GROUPS = [
     POPULATION,
-    # TODO: list all key groups here
-    # SOME_DISEASE
+    PREGNANCY
 ]
