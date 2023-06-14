@@ -8,7 +8,6 @@ components:
             - MortalityObserver()
             - ResultsStratifier()
 
-    # Causes an error if left empty. Uncomment when you have components. 
     vivarium_gates_nutrition_optimization:
         components:
             - Pregnancy()
