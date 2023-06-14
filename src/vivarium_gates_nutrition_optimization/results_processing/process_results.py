@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict, List, NamedTuple, Union
+from typing import Dict, List, NamedTuple, Tuple, Union
 
 import pandas as pd
 import yaml
@@ -27,9 +27,9 @@ def make_measure_data(data):
         ylls=get_by_cause_measure_data(data, "ylls"),
         # ylds=get_by_cause_measure_data(data, "ylds"),
         deaths=get_by_cause_measure_data(data, "deaths"),
-        # state_person_time=get_state_person_time_measure_data(
-        #     data, "disease_state_person_time"
-        # ),
+        state_person_time=get_state_person_time_measure_data(
+            data, "state_person_time"
+        ),
         # transition_count=get_transition_count_measure_data(data, "disease_transition_count"),
     )
     return measure_data
@@ -39,7 +39,7 @@ class MeasureData(NamedTuple):
     ylls: pd.DataFrame
     # ylds: pd.DataFrame
     deaths: pd.DataFrame
-    # state_person_time: pd.DataFrame
+    state_person_time: pd.DataFrame
     # transition_count: pd.DataFrame
 
     def dump(self, output_dir: Path):
@@ -48,7 +48,7 @@ class MeasureData(NamedTuple):
             df.to_csv(output_dir / f"{key}.csv")
 
 
-def read_data(path: Path, single_run: bool) -> (pd.DataFrame, List[str]):
+def read_data(path: Path, single_run: bool) -> Tuple[pd.DataFrame, List[str]]:
     data = pd.read_hdf(path)
     # noinspection PyUnresolvedReferences
     data = (
