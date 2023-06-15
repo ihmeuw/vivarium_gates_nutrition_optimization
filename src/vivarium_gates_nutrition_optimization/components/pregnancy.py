@@ -1,9 +1,5 @@
 import pandas as pd
-from vivarium_public_health.disease import (
-    DiseaseModel,
-    DiseaseState,
-    SusceptibleState,
-)
+from vivarium_public_health.disease import DiseaseModel, DiseaseState, SusceptibleState
 
 from vivarium_gates_nutrition_optimization.constants import data_keys, models
 
@@ -27,14 +23,14 @@ def Pregnancy():
     postpartum = DiseaseState(
         models.POSTPARTUM_STATE_NAME,
         get_data_functions={
-            "prevalence": lambda *_: 1.0,
+            "prevalence": lambda *_: 0.0,
             "disability_weight": lambda *_: 0.0,
             "excess_mortality_rate": lambda *_: 0.0,
         },
     )
     pregnant.allow_self_transitions()
     pregnant.add_transition(postpartum)
-    
+
     postpartum.allow_self_transitions()
     return DiseaseModel(
         models.PREGNANCY_MODEL_NAME,
