@@ -1,7 +1,7 @@
 import pandas as pd
 from vivarium_public_health.disease import DiseaseModel, DiseaseState, SusceptibleState
 
-from vivarium_gates_nutrition_optimization.constants import data_keys, models
+from vivarium_gates_nutrition_optimization.constants import models
 
 
 class NotPregnantState(SusceptibleState):
