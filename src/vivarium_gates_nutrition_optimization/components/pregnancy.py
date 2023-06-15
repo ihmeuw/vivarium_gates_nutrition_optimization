@@ -2,9 +2,11 @@ from vivarium_public_health.disease import DiseaseModel, DiseaseState, Susceptib
 
 from vivarium_gates_nutrition_optimization.constants import data_keys, models
 
+
 class NotPregnantState(SusceptibleState):
     def __init__(self, cause, *args, **kwargs):
         super(SusceptibleState, self).__init__(cause, *args, name_prefix="not_", **kwargs)
+
 
 def Pregnancy():
     not_pregnant = NotPregnantState(models.PREGNANCY_STATE)
