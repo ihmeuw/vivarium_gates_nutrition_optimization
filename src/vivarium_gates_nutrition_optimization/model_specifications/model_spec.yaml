@@ -16,7 +16,7 @@ components:
 configuration:
     input_data:
         input_draw_number: 0
-        artifact_path: '/mnt/team/simulation_science/costeffectiveness/artifacts/vivarium_gates_nutrition_optimization/ethiopia.hdf'
+        artifact_path: '/mnt/team/simulation_science/costeffectiveness/artifacts/vivarium_gates_nutrition_optimization/model0.1/ethiopia.hdf'
     interpolation:
         order: 0
         extrapolate: True
@@ -35,7 +35,7 @@ configuration:
             day: 3
         step_size: 7 # Days
     population:
-        population_size: 100_000
+        population_size: 10_000
         age_start: 10
         age_end: 54
         include_sex: "Female"
