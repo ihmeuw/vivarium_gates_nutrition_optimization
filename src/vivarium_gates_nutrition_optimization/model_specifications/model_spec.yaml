@@ -7,11 +7,11 @@ components:
 #            - DisabilityObserver()
             - MortalityObserver()
             - ResultsStratifier()
-            - DiseaseObserver("pregnancy")
 
     vivarium_gates_nutrition_optimization:
         components:
             - Pregnancy()
+            - PregnancyObserver()
 
 configuration:
     input_data:
