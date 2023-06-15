@@ -2,7 +2,6 @@ import pandas as pd
 from vivarium_public_health.disease import (
     DiseaseModel,
     DiseaseState,
-    RecoveredState,
     SusceptibleState,
 )
 
@@ -35,6 +34,7 @@ def Pregnancy():
     )
     pregnant.allow_self_transitions()
     pregnant.add_transition(postpartum)
+    
     postpartum.allow_self_transitions()
     return DiseaseModel(
         models.PREGNANCY_MODEL_NAME,
