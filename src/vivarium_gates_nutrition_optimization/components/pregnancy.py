@@ -1,17 +1,16 @@
 import pandas as pd
+from vivarium.framework.population import SimulantData
 from vivarium_public_health.disease import DiseaseModel, DiseaseState, SusceptibleState
 
 from vivarium_gates_nutrition_optimization.constants import models
-
-from vivarium.framework.population import SimulantData
 
 
 class NotPregnantState(SusceptibleState):
     def __init__(self, cause, *args, **kwargs):
         super(SusceptibleState, self).__init__(cause, *args, name_prefix="not_", **kwargs)
 
-class PregnantState(DiseaseState):
 
+class PregnantState(DiseaseState):
     def get_initial_event_times(self, pop_data: SimulantData) -> pd.DataFrame:
         pop_update = super().get_initial_event_times(pop_data)
 
@@ -19,7 +18,9 @@ class PregnantState(DiseaseState):
             pop_data.index, query=f'{self._model}=="{self.state_id}"'
         )
         if not simulants_with_condition.empty:
-            pop_update.loc[simulants_with_condition.index, self.event_time_column] = self.clock()
+            pop_update.loc[
+                simulants_with_condition.index, self.event_time_column
+            ] = self.clock()
 
         return pop_update
 
