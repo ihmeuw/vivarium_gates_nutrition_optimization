@@ -8,10 +8,6 @@ class NotPregnantState(SusceptibleState):
     def __init__(self, cause, *args, **kwargs):
         super(SusceptibleState, self).__init__(cause, *args, name_prefix="not_", **kwargs)
 
-class PostpartumState(RecoveredState):
-    def __init__(self, cause, *args, **kwargs):
-        super(RecoveredState, self).__init__(cause, *args, name_prefix="post_", **kwargs)
-
 def Pregnancy():
     not_pregnant = NotPregnantState(models.PREGNANCY_STATE)
     pregnant = DiseaseState(
@@ -23,7 +19,13 @@ def Pregnancy():
             "dwell_time": lambda *_: pd.Timedelta(days=40*7)
         },
     )
-    postpartum = PostpartumState(models.PREGNANCY_STATE)
+    postpartum = DiseaseState(models.POSTPARTUM_STATE_NAME,
+                                      get_data_functions={
+            "prevalence": lambda *_: 1.0,
+            "disability_weight": lambda *_: 0.0,
+            "excess_mortality_rate": lambda *_: 0.0, 
+        },
+                              )
     pregnant.allow_self_transitions()
     pregnant.add_transition(postpartum)
     postpartum.allow_self_transitions()
