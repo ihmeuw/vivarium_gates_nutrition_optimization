@@ -12,17 +12,10 @@ class NotPregnantState(SusceptibleState):
 
 class PregnantState(DiseaseState):
     def get_initial_event_times(self, pop_data: SimulantData) -> pd.DataFrame:
-        pop_update = super().get_initial_event_times(pop_data)
-
-        simulants_with_condition = self.population_view.subview([self._model]).get(
-            pop_data.index, query=f'{self._model}=="{self.state_id}"'
+        return pd.DataFrame(
+            {self.event_time_column: self.clock(), self.event_count_column: 1},
+            index=pop_data.index,
         )
-        if not simulants_with_condition.empty:
-            pop_update.loc[
-                simulants_with_condition.index, self.event_time_column
-            ] = self.clock()
-
-        return pop_update
 
 
 def Pregnancy():
