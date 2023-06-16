@@ -15,9 +15,13 @@ class PregnantState(DiseaseState):
     def setup(self, builder: Builder):
         super().setup(builder)
         self.time_step = builder.time.step_size()
+
     def get_initial_event_times(self, pop_data: SimulantData) -> pd.DataFrame:
         return pd.DataFrame(
-            {self.event_time_column: self.clock() + self.time_step(), self.event_count_column: 1},
+            {
+                self.event_time_column: self.clock() + self.time_step(),
+                self.event_count_column: 1,
+            },
             index=pop_data.index,
         )
 
@@ -47,7 +51,7 @@ def Pregnancy():
 
     postpartum.allow_self_transitions()
     postpartum.add_transition(not_pregnant)
-    
+
     return DiseaseModel(
         models.PREGNANCY_MODEL_NAME,
         states=[not_pregnant, pregnant, postpartum],
