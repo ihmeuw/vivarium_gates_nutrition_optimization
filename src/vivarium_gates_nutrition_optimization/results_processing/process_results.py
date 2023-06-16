@@ -30,7 +30,7 @@ def make_measure_data(data):
         pregnancy_state_person_time=get_state_person_time_measure_data(
             data, "pregnancy_state_person_time"
         ),
-        # transition_count=get_transition_count_measure_data(data, "disease_transition_count"),
+        pregnancy_transition_count=get_transition_count_measure_data(data, "pregnancy_transition_count"),
     )
     return measure_data
 
@@ -40,7 +40,7 @@ class MeasureData(NamedTuple):
     # ylds: pd.DataFrame
     deaths: pd.DataFrame
     pregnancy_state_person_time: pd.DataFrame
-    # transition_count: pd.DataFrame
+    pregnancy_transition_count: pd.DataFrame
 
     def dump(self, output_dir: Path):
         for key, df in self._asdict().items():
