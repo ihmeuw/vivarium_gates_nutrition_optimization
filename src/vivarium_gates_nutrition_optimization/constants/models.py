@@ -13,33 +13,16 @@ class TransitionString(str):
 # Pregnancy Model         #
 ###########################
 PREGNANCY_MODEL_NAME = data_keys.PREGNANCY.name
-# Only one state for now for person-time
-PREGNANCY_STATE = "pregnant"
+PREGNANT_STATE_NAME = "pregnant"
 PREGNANCY_SUSCEPTIBLE_STATE_NAME = "not_pregnant"
 POSTPARTUM_STATE_NAME = "postpartum"
 PREGNANCY_MODEL_STATES = (
     PREGNANCY_SUSCEPTIBLE_STATE_NAME,
-    PREGNANCY_STATE,
+    PREGNANT_STATE_NAME,
     POSTPARTUM_STATE_NAME,
 )
-PREGNANCY_MODEL_TRANSITIONS = ()
+PREGNANCY_MODEL_TRANSITIONS = (TransitionString(f"{PREGNANT_STATE_NAME}_TO_{POSTPARTUM_STATE_NAME}"),)
 
-
-###########################
-# Disease Model variables #
-###########################
-
-# TODO input details of model states and transitions
-SOME_MODEL_NAME = data_keys.SOME_DISEASE.name
-SUSCEPTIBLE_STATE_NAME = f"susceptible_to_{SOME_MODEL_NAME}"
-FIRST_STATE_NAME = "first_state"
-SECOND_STATE_NAME = "second_state"
-SOME_DISEASE_MODEL_STATES = (SUSCEPTIBLE_STATE_NAME, FIRST_STATE_NAME, SECOND_STATE_NAME)
-SOME_DISEASE_MODEL_TRANSITIONS = (
-    TransitionString(f"{SUSCEPTIBLE_STATE_NAME}_TO_{FIRST_STATE_NAME}"),
-    TransitionString(f"{FIRST_STATE_NAME}_TO_{SECOND_STATE_NAME}"),
-    TransitionString(f"{SECOND_STATE_NAME}_TO_{FIRST_STATE_NAME}"),
-)
 
 STATE_MACHINE_MAP = {
     PREGNANCY_MODEL_NAME: {

@@ -26,9 +26,9 @@ class PregnantState(DiseaseState):
 
 
 def Pregnancy():
-    not_pregnant = NotPregnantState(models.PREGNANCY_STATE)
+    not_pregnant = NotPregnantState(models.PREGNANT_STATE_NAME)
     pregnant = PregnantState(
-        models.PREGNANCY_STATE,
+        models.PREGNANT_STATE_NAME,
         get_data_functions={
             "prevalence": lambda *_: 1.0,
             "disability_weight": lambda *_: 0.0,
