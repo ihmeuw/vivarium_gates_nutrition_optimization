@@ -39,12 +39,15 @@ def Pregnancy():
             "prevalence": lambda *_: 0.0,
             "disability_weight": lambda *_: 0.0,
             "excess_mortality_rate": lambda *_: 0.0,
+            "dwell_time": lambda *_: pd.Timedelta(days=6 * 7),
         },
     )
     pregnant.allow_self_transitions()
     pregnant.add_transition(postpartum)
 
     postpartum.allow_self_transitions()
+    postpartum.add_transition(not_pregnant)
+    
     return DiseaseModel(
         models.PREGNANCY_MODEL_NAME,
         states=[not_pregnant, pregnant, postpartum],
