@@ -12,17 +12,19 @@ class TransitionString(str):
 ###########################
 # Pregnancy Model         #
 ###########################
+
 PREGNANCY_MODEL_NAME = data_keys.PREGNANCY.name
 PREGNANT_STATE_NAME = "pregnant"
-PREGNANCY_SUSCEPTIBLE_STATE_NAME = "not_pregnant"
+NOT_PREGNANT_STATE_NAME = "not_pregnant"
 POSTPARTUM_STATE_NAME = "postpartum"
 PREGNANCY_MODEL_STATES = (
-    PREGNANCY_SUSCEPTIBLE_STATE_NAME,
+    NOT_PREGNANT_STATE_NAME,
     PREGNANT_STATE_NAME,
     POSTPARTUM_STATE_NAME,
 )
 PREGNANCY_MODEL_TRANSITIONS = (
     TransitionString(f"{PREGNANT_STATE_NAME}_TO_{POSTPARTUM_STATE_NAME}"),
+    TransitionString(f"{POSTPARTUM_STATE_NAME}_TO_{NOT_PREGNANT_STATE_NAME}"),
 )
 
 
@@ -34,7 +36,13 @@ STATE_MACHINE_MAP = {
 }
 
 
-STATES = tuple(state for model in STATE_MACHINE_MAP.values() for state in model["states"])
+STATES = tuple(
+    f"{model}_{state}"
+    for model, state in STATE_MACHINE_MAP.items()
+    for state in STATE_MACHINE_MAP[model]["states"]
+)
 TRANSITIONS = tuple(
-    state for model in STATE_MACHINE_MAP.values() for state in model["transitions"]
+    f"{model}_{transition}"
+    for model, transition in STATE_MACHINE_MAP.items()
+    for transition in STATE_MACHINE_MAP[model]["transitions"]
 )
