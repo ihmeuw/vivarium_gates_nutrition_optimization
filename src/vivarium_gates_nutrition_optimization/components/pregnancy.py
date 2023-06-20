@@ -4,6 +4,9 @@ from vivarium.framework.population import SimulantData
 from vivarium_public_health.disease import DiseaseModel, DiseaseState, SusceptibleState
 
 from vivarium_gates_nutrition_optimization.constants import models
+from vivarium_gates_nutrition_optimization.constants.data_values import (
+    POSTPARTUM_DURATION,
+)
 
 
 class NotPregnantState(SusceptibleState):
@@ -43,7 +46,7 @@ def Pregnancy():
             "prevalence": lambda *_: 0.0,
             "disability_weight": lambda *_: 0.0,
             "excess_mortality_rate": lambda *_: 0.0,
-            "dwell_time": lambda *_: pd.Timedelta(days=6 * 7),
+            "dwell_time": lambda *_: pd.Timedelta(days=POSTPARTUM_DURATION),
         },
     )
     pregnant.allow_self_transitions()
