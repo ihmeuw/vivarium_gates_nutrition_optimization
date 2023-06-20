@@ -31,7 +31,15 @@ class PregnantState(DiseaseState):
     def setup(self, builder: Builder):
         super().setup(builder)
         self.time_step = builder.time.step_size()
-        self.partial_term_outcomes = get_partial_term_probabilities(builder)
+        self.randomness = builder.randomness.get_stream(self.name)
+        self.partial_term_probs = builder.value.register_value_producer(
+            "partial_term_probabilities",
+            source=builder.lookup.build_table(
+                get_partial_term_probabilities(builder),
+                key_columns=['sex'],
+                parameter_columns=['age', 'year'],
+            )
+        )
 
     def on_initialize_simulants(self, pop_data: SimulantData) -> None:
         pop_events = self.get_initial_event_times(pop_data)
@@ -40,10 +48,15 @@ class PregnantState(DiseaseState):
         self.population_view.update(pop_update)
 
     def sample_pregnancy_terms(self, pop_data: SimulantData) -> pd.DataFrame:
-        p_term_outcome = self.partial_term_outcomes
+        p_term_outcome = self.partial_term_probs(pop_data.index)
+        p_term_outcome = pd.DataFrame({models.PARTIAL_TERM_OUTCOME:p_term_outcome, models.FULL_TERM_OUTCOME: 1 - p_term_outcome})
         term_outcome = self.randomness.choice(
             pop_data.index,
+            choices=p_term_outcome.columns.to_list(),
+            p=p_term_outcome,
+            additional_key='term_outcome'
         )
+        return term_outcome
 
     def get_initial_event_times(self, pop_data: SimulantData) -> pd.DataFrame:
         return pd.DataFrame(
