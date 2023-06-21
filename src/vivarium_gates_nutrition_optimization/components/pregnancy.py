@@ -35,13 +35,17 @@ class PregnantState(DiseaseState):
         self.partial_term_probs = builder.value.register_value_producer(
             "partial_term_probabilities",
             source=builder.lookup.build_table(
-                get_partial_term_probabilities(builder),
-                key_columns=['sex'],
-                parameter_columns=['age', 'year'],
-            )
+                get_partial_term_probability_data(builder),
+                key_columns=["sex"],
+                parameter_columns=["age", "year"],
+            ),
         )
 
     def on_initialize_simulants(self, pop_data: SimulantData) -> None:
+        for transition in self.transition_set:
+            if transition.start_active:
+                transition.set_active(pop_data.index)
+
         pop_events = self.get_initial_event_times(pop_data)
         pregnancy_term_outcomes = self.sample_pregnancy_terms(pop_data)
         pop_update = pd.concat([pop_events, pregnancy_term_outcomes], axis=1)
@@ -49,13 +53,22 @@ class PregnantState(DiseaseState):
 
     def sample_pregnancy_terms(self, pop_data: SimulantData) -> pd.DataFrame:
         term_outcome_probabilities = self.partial_term_probs(pop_data.index)
-        term_outcome_probabilities = pd.DataFrame({models.PARTIAL_TERM_OUTCOME:term_outcome_probabilities, models.FULL_TERM_OUTCOME: 1 - term_outcome_probabilities})
-        pregnancy_term_outcomes = pd.DataFrame({'pregnancy_term_outcome':self.randomness.choice(
-            pop_data.index,
-            choices=term_outcome_probabilities.columns.to_list(),
-            p=term_outcome_probabilities,
-            additional_key='pregnancy_term_outcome')
-        })
+        term_outcome_probabilities = pd.DataFrame(
+            {
+                models.PARTIAL_TERM_OUTCOME: term_outcome_probabilities,
+                models.FULL_TERM_OUTCOME: 1 - term_outcome_probabilities,
+            }
+        )
+        pregnancy_term_outcomes = pd.DataFrame(
+            {
+                "pregnancy_term_outcome": self.randomness.choice(
+                    pop_data.index,
+                    choices=term_outcome_probabilities.columns.to_list(),
+                    p=term_outcome_probabilities,
+                    additional_key="pregnancy_term_outcome",
+                )
+            }
+        )
         return pregnancy_term_outcomes
 
     def get_initial_event_times(self, pop_data: SimulantData) -> pd.DataFrame:
@@ -101,7 +114,7 @@ def Pregnancy():
     )
 
 
-def get_partial_term_probabilities(builder: Builder) -> pd.DataFrame:
+def get_partial_term_probability_data(builder: Builder) -> pd.DataFrame:
     asfr = builder.data.load(data_keys.PREGNANCY.ASFR).set_index(ARTIFACT_INDEX_COLUMNS)
     sbr = (
         builder.data.load(data_keys.PREGNANCY.SBR)
