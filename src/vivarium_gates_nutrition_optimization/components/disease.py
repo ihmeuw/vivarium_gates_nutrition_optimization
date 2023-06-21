@@ -1,4 +1,4 @@
-from typing import Callable, Dict, Tuple
+from typing import Callable, Dict, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -16,7 +16,7 @@ from vivarium_public_health.utilities import is_non_zero
 class DiseaseState(BaseDiseaseState):
     """State representing a disease in a state machine model."""
 
-    def __init__(self, cause, get_data_functions=None, cleanup_function=None, **kwargs):
+    def __init__(self, cause: str, get_data_functions: Dict[str, Callable] =None, cleanup_function: Callable =None, **kwargs):
         """
         Parameters
         ----------
@@ -70,13 +70,13 @@ class DiseaseState(BaseDiseaseState):
         """
         super().setup(builder)
 
-        self.prevalence = self.get_prevalence_source(builder)
+        self.prevalence = self.get_prevalence_table(builder)
 
-        self.birth_prevalence = self.get_birth_prevalence_source(builder)
+        self.birth_prevalence = self.get_birth_prevalence_table(builder)
 
         self.dwell_time = self.get_dwell_time_pipeline(builder)
 
-        self.has_disability, self.base_disability_weight = self.get_disability_weight_source(
+        self.has_disability, self.base_disability_weight = self.get_disability_weight_table(
             builder
         )
 
@@ -86,7 +86,7 @@ class DiseaseState(BaseDiseaseState):
         (
             self.has_excess_mortality,
             self.base_excess_mortality_rate,
-        ) = self.get_excess_mortality_rate_source(builder)
+        ) = self.get_excess_mortality_rate_table(builder)
         self.excess_mortality_rate = self.get_excess_mortality_rate_pipeline(builder)
 
         self.joint_paf = self.get_joint_paf_pipeline(builder)
@@ -95,29 +95,26 @@ class DiseaseState(BaseDiseaseState):
 
         self.randomness_prevalence = self.get_prevalence_random_stream(builder)
 
-    def get_prevalence_source(self, builder: Builder) -> LookupTable:
+    def get_prevalence_random_stream(self, builder: Builder) -> RandomnessStream:
+        return builder.randomness.get_stream(f"{self.state_id}_prevalent_cases")
+    
+    ##################################
+    # Lookup Tables                  #
+    ##################################
+
+    def get_prevalence_table(self, builder: Builder) -> LookupTable:
         prevalence_data = self.load_prevalence_data(builder)
         return builder.lookup.build_table(
             prevalence_data, key_columns=["sex"], parameter_columns=["age", "year"]
         )
 
-    def get_birth_prevalence_source(self, builder: Builder) -> LookupTable:
+    def get_birth_prevalence_table(self, builder: Builder) -> LookupTable:
         birth_prevalence_data = self.load_birth_prevalence_data(builder)
         return builder.lookup.build_table(
             birth_prevalence_data, key_columns=["sex"], parameter_columns=["year"]
         )
-
-    def get_dwell_time_pipeline(self, builder: Builder) -> Pipeline:
-        dwell_time_data = self.load_dwell_time_data(builder)
-        return builder.value.register_value_producer(
-            f"{self.state_id}.dwell_time",
-            source=builder.lookup.build_table(
-                dwell_time_data, key_columns=["sex"], parameter_columns=["age", "year"]
-            ),
-            requires_columns=["age", "sex"],
-        )
     
-    def get_disability_weight_source(self, builder: Builder) -> Tuple[bool, LookupTable]:
+    def get_disability_weight_table(self, builder: Builder) -> Tuple[bool, LookupTable]:
         disability_weight_data = self.load_disability_weight_data(builder)
         has_disability = is_non_zero(disability_weight_data)
         base_disability_weight = builder.lookup.build_table(
@@ -126,6 +123,77 @@ class DiseaseState(BaseDiseaseState):
 
         return has_disability, base_disability_weight
     
+    def get_excess_mortality_rate_table(self, builder: Builder) -> Tuple[bool, LookupTable]:
+        excess_mortality_data = self.load_excess_mortality_rate_data(builder)
+        has_excess_mortality = is_non_zero(excess_mortality_data)
+        base_excess_mortality_rate = builder.lookup.build_table(
+            excess_mortality_data, key_columns=["sex"], parameter_columns=["age", "year"]
+        )
+        return has_excess_mortality, base_excess_mortality_rate
+    
+    ##################################
+    # Pipeline Sources               #
+    ##################################
+
+    def get_dwell_time_source(self, builder: Builder) -> LookupTable:
+        dwell_time_data = self.load_dwell_time_data(builder)
+        return builder.lookup.build_table(
+                dwell_time_data, key_columns=["sex"], parameter_columns=["age", "year"])
+
+    def compute_disability_weight(self, index: pd.Index) -> pd.Series:
+        """Gets the disability weight associated with this state.
+
+        Parameters
+        ----------
+        index
+            An iterable of integer labels for the simulants.
+
+        Returns
+        -------
+        `pandas.Series`
+            An iterable of disability weights indexed by the provided `index`.
+        """
+        disability_weight = pd.Series(0, index=index)
+        with_condition = self.with_condition(index)
+        disability_weight.loc[with_condition] = self.base_disability_weight(with_condition)
+        return disability_weight
+   
+    def compute_excess_mortality_rate(self, index: pd.Index) -> pd.Series:
+        excess_mortality_rate = pd.Series(0, index=index)
+        with_condition = self.with_condition(index)
+        base_excess_mort = self.base_excess_mortality_rate(with_condition)
+        joint_mediated_paf = self.joint_paf(with_condition)
+        excess_mortality_rate.loc[with_condition] = base_excess_mort * (
+            1 - joint_mediated_paf.values
+        )
+        return excess_mortality_rate
+
+    def adjust_mortality_rate(self, index: pd.Index, rates_df: pd.DataFrame) -> pd.DataFrame:
+        """Modifies the baseline mortality rate for a simulant if they are in this state.
+
+        Parameters
+        ----------
+        index
+            An iterable of integer labels for the simulants.
+        rates_df : `pandas.DataFrame`
+
+        """
+        rate = self.excess_mortality_rate(index, skip_post_processor=True)
+        rates_df[self.state_id] = rate
+        return rates_df
+
+    ##################################
+    # Pipelines                      #
+    ##################################
+
+    def get_dwell_time_pipeline(self, builder: Builder) -> Pipeline:
+        return builder.value.register_value_producer(
+            f"{self.state_id}.dwell_time",
+            source=self.get_dwell_time_source(builder),
+            requires_columns=["age", "sex"],
+        )
+    
+    
     def get_disability_weight_pipeline(self, builder: Builder) -> Pipeline:
         return builder.value.register_value_producer(
             f"{self.state_id}.disability_weight",
@@ -133,32 +201,12 @@ class DiseaseState(BaseDiseaseState):
             requires_columns=["age", "sex", "alive", self._model],
         )
 
-    def register_disability_weight_modifier(self, builder: Builder) -> None:
-        builder.value.register_value_modifier(
-            "disability_weight", modifier=self.disability_weight
-        )
-
-    def get_excess_mortality_rate_source(self, builder: Builder) -> Tuple[bool, LookupTable]:
-        excess_mortality_data = self.load_excess_mortality_rate_data(builder)
-        has_excess_mortality = is_non_zero(excess_mortality_data)
-        base_excess_mortality_rate = builder.lookup.build_table(
-            excess_mortality_data, key_columns=["sex"], parameter_columns=["age", "year"]
-        )
-        return has_excess_mortality, base_excess_mortality_rate
-
     def get_excess_mortality_rate_pipeline(self, builder: Builder) -> Pipeline:
         return builder.value.register_rate_producer(
             self.excess_mortality_rate_pipeline_name,
             source=self.compute_excess_mortality_rate,
             requires_columns=["age", "sex", "alive", self._model],
             requires_values=[self.excess_mortality_rate_paf_pipeline_name],
-        )
-
-    def register_mortality_rate_modifier(self, builder: Builder) -> None:
-        builder.value.register_value_modifier(
-            "mortality_rate",
-            modifier=self.adjust_mortality_rate,
-            requires_values=[self.excess_mortality_rate_pipeline_name],
         )
 
     def get_joint_paf_pipeline(self, builder: Builder) -> Pipeline:
@@ -169,15 +217,81 @@ class DiseaseState(BaseDiseaseState):
             preferred_combiner=list_combiner,
             preferred_post_processor=union_post_processor,
         )
+    
+    ##################################
+    # Pipeline Modifiers             #
+    ##################################
+    
+    def register_disability_weight_modifier(self, builder: Builder) -> None:
+        builder.value.register_value_modifier(
+            "disability_weight", modifier=self.disability_weight
+        )
 
-    def get_prevalence_random_stream(self, builder: Builder) -> RandomnessStream:
-        return builder.randomness.get_stream(f"{self.state_id}_prevalent_cases")
+    def register_mortality_rate_modifier(self, builder: Builder) -> None:
+        builder.value.register_value_modifier(
+            "mortality_rate",
+            modifier=self.adjust_mortality_rate,
+            requires_values=[self.excess_mortality_rate_pipeline_name],
+        )
 
+    
+    ##################################
+    # Data Loading Methods           # 
+    ##################################
 
+    def load_prevalence_data(self, builder: Builder) -> Union[Callable, pd.DataFrame]:
+        if "prevalence" in self._get_data_functions:
+            return self._get_data_functions["prevalence"](builder, self.cause)
+        else:
+            return builder.data.load(f"{self.cause_type}.{self.cause}.prevalence")
 
+    def load_birth_prevalence_data(self, builder: Builder) -> Union[Callable, int]:
+        if "birth_prevalence" in self._get_data_functions:
+            return self._get_data_functions["birth_prevalence"](builder, self.cause)
+        else:
+            return 0
 
+    def load_dwell_time_data(self, builder: Builder):
+        if "dwell_time" in self._get_data_functions:
+            dwell_time = self._get_data_functions["dwell_time"](builder, self.cause)
+        else:
+            dwell_time = 0
 
+        if isinstance(dwell_time, pd.Timedelta):
+            dwell_time = dwell_time.total_seconds() / (60 * 60 * 24)
+        if (
+            isinstance(dwell_time, pd.DataFrame) and np.any(dwell_time.value != 0)
+        ) or dwell_time > 0:
+            self.transition_set.allow_null_transition = True
 
+        return dwell_time
+
+    def load_disability_weight_data(self, builder: Builder) -> Union[Callable, pd.DataFrame]:
+        if "disability_weight" in self._get_data_functions:
+            disability_weight = self._get_data_functions["disability_weight"](
+                builder, self.cause
+            )
+        else:
+            disability_weight = builder.data.load(
+                f"{self.cause_type}.{self.cause}.disability_weight"
+            )
+
+        if isinstance(disability_weight, pd.DataFrame) and len(disability_weight) == 1:
+            disability_weight = disability_weight.value[0]  # sequela only have single value
+
+        return disability_weight
+
+    def load_excess_mortality_rate_data(self, builder: Builder) -> Union[Callable, int, pd.DataFrame]:
+        
+        if "excess_mortality_rate" in self._get_data_functions:
+            return self._get_data_functions["excess_mortality_rate"](builder, self.cause)
+        
+        only_morbid = builder.data.load(f"cause.{self._model}.restrictions")["yld_only"]
+        if only_morbid:
+            return 0
+        else:
+            return builder.data.load(f"{self.cause_type}.{self.cause}.excess_mortality_rate")
+      
     ########################
     # Event-driven methods #
     ########################
@@ -199,59 +313,10 @@ class DiseaseState(BaseDiseaseState):
 
         return pop_update
 
-    def compute_disability_weight(self, index):
-        """Gets the disability weight associated with this state.
-
-        Parameters
-        ----------
-        index
-            An iterable of integer labels for the simulants.
-
-        Returns
-        -------
-        `pandas.Series`
-            An iterable of disability weights indexed by the provided `index`.
-        """
-        disability_weight = pd.Series(0, index=index)
-        with_condition = self.with_condition(index)
-        disability_weight.loc[with_condition] = self.base_disability_weight(with_condition)
-        return disability_weight
-
-    def compute_excess_mortality_rate(self, index):
-        excess_mortality_rate = pd.Series(0, index=index)
-        with_condition = self.with_condition(index)
-        base_excess_mort = self.base_excess_mortality_rate(with_condition)
-        joint_mediated_paf = self.joint_paf(with_condition)
-        excess_mortality_rate.loc[with_condition] = base_excess_mort * (
-            1 - joint_mediated_paf.values
-        )
-        return excess_mortality_rate
-
-    def adjust_mortality_rate(self, index, rates_df):
-        """Modifies the baseline mortality rate for a simulant if they are in this state.
-
-        Parameters
-        ----------
-        index
-            An iterable of integer labels for the simulants.
-        rates_df : `pandas.DataFrame`
-
-        """
-        rate = self.excess_mortality_rate(index, skip_post_processor=True)
-        rates_df[self.state_id] = rate
-        return rates_df
-
-    def with_condition(self, index):
-        pop = self.population_view.subview(["alive", self._model]).get(index)
-        with_condition = pop.loc[
-            (pop[self._model] == self.state_id) & (pop["alive"] == "alive")
-        ].index
-        return with_condition
-
     @staticmethod
     def _assign_event_time_for_prevalent_cases(
-        infected, current_time, randomness_func, dwell_time_func
-    ):
+        infected: pd.Index, current_time: pd.Timestamp, randomness_func: Callable, dwell_time_func: Callable
+    ) -> pd.Timestamp:
         dwell_time = dwell_time_func(infected.index)
         infected_at = dwell_time * randomness_func(infected.index)
         infected_at = current_time - pd.to_timedelta(infected_at, unit="D")
@@ -285,7 +350,7 @@ class DiseaseState(BaseDiseaseState):
 
     def next_state(
         self, index: pd.Index, event_time: pd.Timestamp, population_view: PopulationView
-    ):
+    ) -> None:
         """Moves a population among different disease states.
 
         Parameters
@@ -300,7 +365,14 @@ class DiseaseState(BaseDiseaseState):
         eligible_index = self._filter_for_transition_eligibility(index, event_time)
         return super().next_state(eligible_index, event_time, population_view)
 
-    def _filter_for_transition_eligibility(self, index, event_time):
+    def with_condition(self, index: pd.Index) -> pd.Index:
+        pop = self.population_view.subview(["alive", self._model]).get(index)
+        with_condition = pop.loc[
+            (pop[self._model] == self.state_id) & (pop["alive"] == "alive")
+        ].index
+        return with_condition
+
+    def _filter_for_transition_eligibility(self, index: pd.Index, event_time: pd.Timestamp) -> pd.Index:
         """Filter out all simulants who haven't been in the state for the prescribed dwell time.
 
         Parameters
@@ -322,64 +394,10 @@ class DiseaseState(BaseDiseaseState):
         else:
             return index
 
-    def _cleanup_effect(self, index, event_time):
+    def _cleanup_effect(self, index: pd.Index, event_time: pd.Timestamp) -> None:
         if self.cleanup_function is not None:
             self.cleanup_function(index, event_time)
 
-    def load_prevalence_data(self, builder):
-        if "prevalence" in self._get_data_functions:
-            return self._get_data_functions["prevalence"](builder, self.cause)
-        else:
-            return builder.data.load(f"{self.cause_type}.{self.cause}.prevalence")
-
-    def load_birth_prevalence_data(self, builder):
-        if "birth_prevalence" in self._get_data_functions:
-            return self._get_data_functions["birth_prevalence"](builder, self.cause)
-        else:
-            return 0
-
-    def load_dwell_time_data(self, builder):
-        if "dwell_time" in self._get_data_functions:
-            dwell_time = self._get_data_functions["dwell_time"](builder, self.cause)
-        else:
-            dwell_time = 0
-
-        if isinstance(dwell_time, pd.Timedelta):
-            dwell_time = dwell_time.total_seconds() / (60 * 60 * 24)
-        if (
-            isinstance(dwell_time, pd.DataFrame) and np.any(dwell_time.value != 0)
-        ) or dwell_time > 0:
-            self.transition_set.allow_null_transition = True
-
-        return dwell_time
-
-    def load_disability_weight_data(self, builder):
-        if "disability_weight" in self._get_data_functions:
-            disability_weight = self._get_data_functions["disability_weight"](
-                builder, self.cause
-            )
-        else:
-            disability_weight = builder.data.load(
-                f"{self.cause_type}.{self.cause}.disability_weight"
-            )
-
-        if isinstance(disability_weight, pd.DataFrame) and len(disability_weight) == 1:
-            disability_weight = disability_weight.value[0]  # sequela only have single value
-
-        return disability_weight
-
-    def load_excess_mortality_rate_data(self, builder):
-        
-        if "excess_mortality_rate" in self._get_data_functions:
-            return self._get_data_functions["excess_mortality_rate"](builder, self.cause)
-        
-        only_morbid = builder.data.load(f"cause.{self._model}.restrictions")["yld_only"]
-        if only_morbid:
-            return 0
-        else:
-            return builder.data.load(f"{self.cause_type}.{self.cause}.excess_mortality_rate")
-        
-
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "DiseaseState({})".format(self.state_id)
 
