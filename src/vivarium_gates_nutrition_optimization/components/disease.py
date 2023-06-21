@@ -243,13 +243,13 @@ class DiseaseState(BaseDiseaseState):
     # Data Loading Methods           #
     ##################################
 
-    def load_prevalence_data(self, builder: Builder) -> Union[Callable, pd.DataFrame]:
+    def load_prevalence_data(self, builder: Builder):
         if "prevalence" in self._get_data_functions:
             return self._get_data_functions["prevalence"](builder, self.cause)
         else:
             return builder.data.load(f"{self.cause_type}.{self.cause}.prevalence")
 
-    def load_birth_prevalence_data(self, builder: Builder) -> Union[Callable, int]:
+    def load_birth_prevalence_data(self, builder: Builder):
         if "birth_prevalence" in self._get_data_functions:
             return self._get_data_functions["birth_prevalence"](builder, self.cause)
         else:
@@ -270,7 +270,7 @@ class DiseaseState(BaseDiseaseState):
 
         return dwell_time
 
-    def load_disability_weight_data(self, builder: Builder) -> Union[Callable, pd.DataFrame]:
+    def load_disability_weight_data(self, builder: Builder):
         if "disability_weight" in self._get_data_functions:
             disability_weight = self._get_data_functions["disability_weight"](
                 builder, self.cause
@@ -287,7 +287,7 @@ class DiseaseState(BaseDiseaseState):
 
     def load_excess_mortality_rate_data(
         self, builder: Builder
-    ) -> Union[Callable, int, pd.DataFrame]:
+    ):
         if "excess_mortality_rate" in self._get_data_functions:
             return self._get_data_functions["excess_mortality_rate"](builder, self.cause)
 
