@@ -23,9 +23,9 @@ class PregnantState(DiseaseState):
         return [
             self.event_time_column,
             self.event_count_column,
-            "pregnancy_term_length",
+            "pregnancy_term_outcome",
             "pregnancy_duration",
-            "pregnancy_outcome",
+            "pregnancy_birth_outcome",
         ]
 
     def setup(self, builder: Builder):
@@ -43,20 +43,20 @@ class PregnantState(DiseaseState):
 
     def on_initialize_simulants(self, pop_data: SimulantData) -> None:
         pop_events = self.get_initial_event_times(pop_data)
-        pregnancy_term_outcome = self.sample_pregnancy_terms(pop_data)
-        pop_update = pd.concat([pop_events, pregnancy_term_outcome], axis=1)
+        pregnancy_term_outcomes = self.sample_pregnancy_terms(pop_data)
+        pop_update = pd.concat([pop_events, pregnancy_term_outcomes], axis=1)
         self.population_view.update(pop_update)
 
     def sample_pregnancy_terms(self, pop_data: SimulantData) -> pd.DataFrame:
-        p_term_outcome = self.partial_term_probs(pop_data.index)
-        p_term_outcome = pd.DataFrame({models.PARTIAL_TERM_OUTCOME:p_term_outcome, models.FULL_TERM_OUTCOME: 1 - p_term_outcome})
-        term_outcome = self.randomness.choice(
+        term_outcome_probabilities = self.partial_term_probs(pop_data.index)
+        term_outcome_probabilities = pd.DataFrame({models.PARTIAL_TERM_OUTCOME:term_outcome_probabilities, models.FULL_TERM_OUTCOME: 1 - term_outcome_probabilities})
+        pregnancy_term_outcomes = pd.DataFrame({'pregnancy_term_outcome':self.randomness.choice(
             pop_data.index,
-            choices=p_term_outcome.columns.to_list(),
-            p=p_term_outcome,
-            additional_key='term_outcome'
-        )
-        return term_outcome
+            choices=term_outcome_probabilities.columns.to_list(),
+            p=term_outcome_probabilities,
+            additional_key='pregnancy_term_outcome')
+        })
+        return pregnancy_term_outcomes
 
     def get_initial_event_times(self, pop_data: SimulantData) -> pd.DataFrame:
         return pd.DataFrame(
