@@ -3,20 +3,25 @@ from typing import Callable, Dict, Tuple, Union
 import numpy as np
 import pandas as pd
 from vivarium.framework.engine import Builder
-from vivarium.framework.population import PopulationView, SimulantData
-from vivarium.framework.state_machine import State, Transition
-from vivarium.framework.values import list_combiner, union_post_processor, Pipeline
 from vivarium.framework.lookup import LookupTable
+from vivarium.framework.population import PopulationView, SimulantData
 from vivarium.framework.randomness import RandomnessStream
+from vivarium.framework.state_machine import State, Transition
+from vivarium.framework.values import Pipeline, list_combiner, union_post_processor
 from vivarium_public_health.disease import BaseDiseaseState
-
 from vivarium_public_health.utilities import is_non_zero
 
 
 class DiseaseState(BaseDiseaseState):
     """State representing a disease in a state machine model."""
 
-    def __init__(self, cause: str, get_data_functions: Dict[str, Callable] =None, cleanup_function: Callable =None, **kwargs):
+    def __init__(
+        self,
+        cause: str,
+        get_data_functions: Dict[str, Callable] = None,
+        cleanup_function: Callable = None,
+        **kwargs,
+    ):
         """
         Parameters
         ----------
@@ -97,7 +102,7 @@ class DiseaseState(BaseDiseaseState):
 
     def get_prevalence_random_stream(self, builder: Builder) -> RandomnessStream:
         return builder.randomness.get_stream(f"{self.state_id}_prevalent_cases")
-    
+
     ##################################
     # Lookup Tables                  #
     ##################################
@@ -113,7 +118,7 @@ class DiseaseState(BaseDiseaseState):
         return builder.lookup.build_table(
             birth_prevalence_data, key_columns=["sex"], parameter_columns=["year"]
         )
-    
+
     def get_disability_weight_table(self, builder: Builder) -> Tuple[bool, LookupTable]:
         disability_weight_data = self.load_disability_weight_data(builder)
         has_disability = is_non_zero(disability_weight_data)
@@ -122,7 +127,7 @@ class DiseaseState(BaseDiseaseState):
         )
 
         return has_disability, base_disability_weight
-    
+
     def get_excess_mortality_rate_table(self, builder: Builder) -> Tuple[bool, LookupTable]:
         excess_mortality_data = self.load_excess_mortality_rate_data(builder)
         has_excess_mortality = is_non_zero(excess_mortality_data)
@@ -130,7 +135,7 @@ class DiseaseState(BaseDiseaseState):
             excess_mortality_data, key_columns=["sex"], parameter_columns=["age", "year"]
         )
         return has_excess_mortality, base_excess_mortality_rate
-    
+
     ##################################
     # Pipeline Sources               #
     ##################################
@@ -138,7 +143,8 @@ class DiseaseState(BaseDiseaseState):
     def get_dwell_time_source(self, builder: Builder) -> LookupTable:
         dwell_time_data = self.load_dwell_time_data(builder)
         return builder.lookup.build_table(
-                dwell_time_data, key_columns=["sex"], parameter_columns=["age", "year"])
+            dwell_time_data, key_columns=["sex"], parameter_columns=["age", "year"]
+        )
 
     def compute_disability_weight(self, index: pd.Index) -> pd.Series:
         """Gets the disability weight associated with this state.
@@ -157,7 +163,7 @@ class DiseaseState(BaseDiseaseState):
         with_condition = self.with_condition(index)
         disability_weight.loc[with_condition] = self.base_disability_weight(with_condition)
         return disability_weight
-   
+
     def compute_excess_mortality_rate(self, index: pd.Index) -> pd.Series:
         excess_mortality_rate = pd.Series(0, index=index)
         with_condition = self.with_condition(index)
@@ -192,8 +198,7 @@ class DiseaseState(BaseDiseaseState):
             source=self.get_dwell_time_source(builder),
             requires_columns=["age", "sex"],
         )
-    
-    
+
     def get_disability_weight_pipeline(self, builder: Builder) -> Pipeline:
         return builder.value.register_value_producer(
             f"{self.state_id}.disability_weight",
@@ -217,11 +222,11 @@ class DiseaseState(BaseDiseaseState):
             preferred_combiner=list_combiner,
             preferred_post_processor=union_post_processor,
         )
-    
+
     ##################################
     # Pipeline Modifiers             #
     ##################################
-    
+
     def register_disability_weight_modifier(self, builder: Builder) -> None:
         builder.value.register_value_modifier(
             "disability_weight", modifier=self.disability_weight
@@ -234,9 +239,8 @@ class DiseaseState(BaseDiseaseState):
             requires_values=[self.excess_mortality_rate_pipeline_name],
         )
 
-    
     ##################################
-    # Data Loading Methods           # 
+    # Data Loading Methods           #
     ##################################
 
     def load_prevalence_data(self, builder: Builder) -> Union[Callable, pd.DataFrame]:
@@ -281,17 +285,18 @@ class DiseaseState(BaseDiseaseState):
 
         return disability_weight
 
-    def load_excess_mortality_rate_data(self, builder: Builder) -> Union[Callable, int, pd.DataFrame]:
-        
+    def load_excess_mortality_rate_data(
+        self, builder: Builder
+    ) -> Union[Callable, int, pd.DataFrame]:
         if "excess_mortality_rate" in self._get_data_functions:
             return self._get_data_functions["excess_mortality_rate"](builder, self.cause)
-        
+
         only_morbid = builder.data.load(f"cause.{self._model}.restrictions")["yld_only"]
         if only_morbid:
             return 0
         else:
             return builder.data.load(f"{self.cause_type}.{self.cause}.excess_mortality_rate")
-      
+
     ########################
     # Event-driven methods #
     ########################
@@ -315,7 +320,10 @@ class DiseaseState(BaseDiseaseState):
 
     @staticmethod
     def _assign_event_time_for_prevalent_cases(
-        infected: pd.Index, current_time: pd.Timestamp, randomness_func: Callable, dwell_time_func: Callable
+        infected: pd.Index,
+        current_time: pd.Timestamp,
+        randomness_func: Callable,
+        dwell_time_func: Callable,
     ) -> pd.Timestamp:
         dwell_time = dwell_time_func(infected.index)
         infected_at = dwell_time * randomness_func(infected.index)
@@ -372,7 +380,9 @@ class DiseaseState(BaseDiseaseState):
         ].index
         return with_condition
 
-    def _filter_for_transition_eligibility(self, index: pd.Index, event_time: pd.Timestamp) -> pd.Index:
+    def _filter_for_transition_eligibility(
+        self, index: pd.Index, event_time: pd.Timestamp
+    ) -> pd.Index:
         """Filter out all simulants who haven't been in the state for the prescribed dwell time.
 
         Parameters
@@ -400,4 +410,3 @@ class DiseaseState(BaseDiseaseState):
 
     def __repr__(self) -> str:
         return "DiseaseState({})".format(self.state_id)
-
