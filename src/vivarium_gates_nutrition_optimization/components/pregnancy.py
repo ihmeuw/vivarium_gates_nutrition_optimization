@@ -1,7 +1,9 @@
 import pandas as pd
 from vivarium.framework.engine import Builder
 from vivarium.framework.population import SimulantData
-from vivarium_public_health.disease import DiseaseModel, DiseaseState, SusceptibleState
+from vivarium_public_health.disease import DiseaseModel, SusceptibleState
+
+from vivarium_gates_nutrition_optimization.components.disease import DiseaseState
 
 from vivarium_gates_nutrition_optimization.constants import data_keys, models
 from vivarium_gates_nutrition_optimization.constants.data_values import (
