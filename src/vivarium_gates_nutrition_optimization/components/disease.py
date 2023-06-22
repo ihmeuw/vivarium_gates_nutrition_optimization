@@ -74,30 +74,21 @@ class DiseaseState(BaseDiseaseState):
             Interface to several simulation tools.
         """
         super().setup(builder)
-
         self.prevalence = self.get_prevalence_table(builder)
-
         self.birth_prevalence = self.get_birth_prevalence_table(builder)
-
         self.dwell_time = self.get_dwell_time_pipeline(builder)
-
         self.has_disability, self.base_disability_weight = self.get_disability_weight_table(
             builder
         )
-
         self.disability_weight = self.get_disability_weight_pipeline(builder)
         self.register_disability_weight_modifier(builder)
-
         (
             self.has_excess_mortality,
             self.base_excess_mortality_rate,
         ) = self.get_excess_mortality_rate_table(builder)
         self.excess_mortality_rate = self.get_excess_mortality_rate_pipeline(builder)
-
         self.joint_paf = self.get_joint_paf_pipeline(builder)
-
         self.register_mortality_rate_modifier(builder)
-
         self.randomness_prevalence = self.get_prevalence_random_stream(builder)
 
     def get_prevalence_random_stream(self, builder: Builder) -> RandomnessStream:
@@ -285,9 +276,7 @@ class DiseaseState(BaseDiseaseState):
 
         return disability_weight
 
-    def load_excess_mortality_rate_data(
-        self, builder: Builder
-    ):
+    def load_excess_mortality_rate_data(self, builder: Builder):
         if "excess_mortality_rate" in self._get_data_functions:
             return self._get_data_functions["excess_mortality_rate"](builder, self.cause)
 
