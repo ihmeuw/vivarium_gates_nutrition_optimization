@@ -179,8 +179,9 @@ class DiseaseState(BaseDiseaseState):
 
     def get_dwell_time_pipeline(self, builder: Builder) -> Pipeline:
         dwell_time_data = self.load_dwell_time_data(builder)
-        dwell_time_source =  builder.lookup.build_table(
-            dwell_time_data, key_columns=["sex"], parameter_columns=["age", "year"])
+        dwell_time_source = builder.lookup.build_table(
+            dwell_time_data, key_columns=["sex"], parameter_columns=["age", "year"]
+        )
         return builder.value.register_value_producer(
             f"{self.state_id}.dwell_time",
             source=dwell_time_source,

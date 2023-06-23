@@ -1,14 +1,12 @@
 import pandas as pd
 from vivarium.framework.engine import Builder
 from vivarium.framework.population import SimulantData
+from vivarium.framework.values import Pipeline
 from vivarium_public_health.disease import DiseaseModel, SusceptibleState
 
 from vivarium_gates_nutrition_optimization.components.disease import DiseaseState
-
 from vivarium_gates_nutrition_optimization.constants import data_keys, models
-from vivarium_gates_nutrition_optimization.constants.data_values import (
-    POSTPARTUM_DURATION,
-)
+from vivarium_gates_nutrition_optimization.constants.data_values import DURATIONS
 from vivarium_gates_nutrition_optimization.constants.metadata import (
     ARTIFACT_INDEX_COLUMNS,
 )
@@ -27,7 +25,7 @@ class PregnantState(DiseaseState):
             self.event_count_column,
             "pregnancy_term_outcome",
             "pregnancy_duration",
-            "pregnancy_birth_outcome",
+            # "pregnancy_birth_outcome",
         ]
 
     def setup(self, builder: Builder):
@@ -49,11 +47,13 @@ class PregnantState(DiseaseState):
                 transition.set_active(pop_data.index)
 
         pop_events = self.get_initial_event_times(pop_data)
-        pregnancy_term_outcomes = self.sample_pregnancy_terms(pop_data)
-        pop_update = pd.concat([pop_events, pregnancy_term_outcomes], axis=1)
+        pregnancy_term_outcomes_and_durations = self.sample_pregnancy_terms_and_durations(
+            pop_data
+        )
+        pop_update = pd.concat([pop_events, pregnancy_term_outcomes_and_durations], axis=1)
         self.population_view.update(pop_update)
 
-    def sample_pregnancy_terms(self, pop_data: SimulantData) -> pd.DataFrame:
+    def sample_pregnancy_terms_and_durations(self, pop_data: SimulantData) -> pd.DataFrame:
         term_outcome_probabilities = self.partial_term_probs(pop_data.index)
         term_outcome_probabilities = pd.DataFrame(
             {
@@ -71,7 +71,35 @@ class PregnantState(DiseaseState):
                 )
             }
         )
+
+        term_duration_map = {
+            models.FULL_TERM_OUTCOME: lambda *_: pd.to_timedelta(
+                DURATIONS.FULL_TERM, unit="days"
+            ),
+            models.PARTIAL_TERM_OUTCOME: self.sample_partial_term_durations,
+        }
+
+        for term_length, sampling_func in term_duration_map.items():
+            term_pop = pregnancy_term_outcomes[
+                pregnancy_term_outcomes["pregnancy_term_outcome"] == term_length
+            ].index
+            pregnancy_term_outcomes.loc[term_pop, "pregnancy_duration"] = sampling_func(
+                term_pop
+            )
+
         return pregnancy_term_outcomes
+
+    def sample_partial_term_durations(self, partial_term_pop: pd.DataFrame) -> pd.Series:
+        low, high = DURATIONS.DETECTION, DURATIONS.PARTIAL_TERM
+        draw = self.randomness.get_draw(partial_term_pop, additional_key="pregnancy_duration")
+        return pd.to_timedelta((low + (high - low) * draw), unit="days")
+
+    def get_dwell_time_pipeline(self, builder: Builder) -> Pipeline:
+        return builder.value.register_value_producer(
+            f"{self.state_id}.dwell_time",
+            source=lambda index: self.population_view.get(index)["pregnancy_duration"],
+            requires_columns=["age", "sex", "pregnancy_term_outcome"],
+        )
 
     def get_initial_event_times(self, pop_data: SimulantData) -> pd.DataFrame:
         return pd.DataFrame(
@@ -91,7 +119,6 @@ def Pregnancy():
             "prevalence": lambda *_: 1.0,
             "disability_weight": lambda *_: 0.0,
             "excess_mortality_rate": lambda *_: 0.0,
-            "dwell_time": lambda *_: pd.Timedelta(days=40 * 7),
         },
     )
     postpartum = DiseaseState(
@@ -100,7 +127,7 @@ def Pregnancy():
             "prevalence": lambda *_: 0.0,
             "disability_weight": lambda *_: 0.0,
             "excess_mortality_rate": lambda *_: 0.0,
-            "dwell_time": lambda *_: pd.Timedelta(days=POSTPARTUM_DURATION),
+            "dwell_time": lambda *_: pd.Timedelta(days=DURATIONS.POSTPARTUM_DURATION),
         },
     )
     pregnant.allow_self_transitions()
