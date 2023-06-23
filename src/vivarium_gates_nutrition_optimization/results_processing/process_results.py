@@ -29,6 +29,9 @@ def make_measure_data(data):
         deaths=get_by_cause_measure_data(data, "deaths"),
         state_person_time=get_state_person_time_measure_data(data, "state_person_time"),
         transition_count=get_transition_count_measure_data(data, "transition_count"),
+        term_outcome_counts=get_measure_data(
+            data, "pregnancy_term_outcome_count",
+        ),
     )
     return measure_data
 
