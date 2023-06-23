@@ -38,7 +38,12 @@ class PregnancyObserver(DiseaseObserver):
 
             for outcome in models.PREGNANCY_TERM_OUTCOMES:
                 key = f"outcome_{outcome}_count_{label}"
-                sub_group = pop[group_mask].query(f'pregnancy_term_outcome == "{outcome}" ')
-                new_observations[key] = len(sub_group)
+                term_mask = (
+                    group_mask
+                    & (pop["pregnancy_term_outcome"] == outcome)
+                    & (pop[self.previous_state_column_name] == transition.from_state)
+                    & (pop[self.current_state_column_name] == transition.to_state)
+                )
+                new_observations[key] = term_mask.sum()
 
         self.counts.update(new_observations)
