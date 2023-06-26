@@ -1,8 +1,9 @@
-from vivarium_public_health.metrics.disease import DiseaseObserver
 from vivarium.framework.engine import Builder
 from vivarium.framework.event import Event
 from vivarium.framework.population import PopulationView
+from vivarium_public_health.metrics.disease import DiseaseObserver
 from vivarium_public_health.utilities import to_years
+
 from vivarium_gates_nutrition_optimization.constants import models
 
 
