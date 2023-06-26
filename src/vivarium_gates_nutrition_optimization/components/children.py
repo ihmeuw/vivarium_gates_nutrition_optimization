@@ -1,19 +1,14 @@
 from pathlib import Path
-# from typing import Tuple
 
-# import numpy as np
 import pandas as pd
 from vivarium.framework.engine import Builder
 from vivarium.framework.event import Event
 from vivarium_cluster_tools.utilities import mkdir
 
-from vivarium_gates_nutrition_optimization.constants import (
-    # data_keys,
-    models,
-)
+from vivarium_gates_nutrition_optimization.constants import models
+
 
 class BirthRecorder:
-
     @property
     def name(self):
         return "birth_recorder"
@@ -30,12 +25,11 @@ class BirthRecorder:
         self.births = []
 
         required_columns = [
-
-            'pregnant_event_time',
-            'pregnancy_term_outcome',
-            'pregnancy_duration',
-            'pregnancy',
-            'previous_pregnancy'
+            "pregnant_event_time",
+            "pregnancy_term_outcome",
+            "pregnancy_duration",
+            "pregnancy",
+            "previous_pregnancy",
         ]
         self.population_view = builder.population.get_view(required_columns)
 
@@ -45,23 +39,20 @@ class BirthRecorder:
     def on_collect_metrics(self, event: Event):
         pop = self.population_view.get(event.index)
         new_birth_mask = (
-            (pop['pregnancy_term_outcome'] == models.FULL_TERM_OUTCOME)
-            & (pop['previous_pregnancy'] == models.PREGNANT_STATE_NAME)
-            & (pop['pregnancy'] == models.POSTPARTUM_STATE_NAME)
-            )
-        
-        pop['birth_date'] = pop['pregnant_event_time'] + pop['pregnancy_duration']
-        new_births = (
-            pop.loc[new_birth_mask, ['birth_date']]
+            (pop["pregnancy_term_outcome"] == models.FULL_TERM_OUTCOME)
+            & (pop["previous_pregnancy"] == models.PREGNANT_STATE_NAME)
+            & (pop["pregnancy"] == models.POSTPARTUM_STATE_NAME)
         )
 
+        pop["birth_date"] = pop["pregnant_event_time"] + pop["pregnancy_duration"]
+        new_births = pop.loc[new_birth_mask, ["birth_date"]]
 
         self.births.append(new_births)
 
     # noinspection PyUnusedLocal
     def write_output(self, event: Event) -> None:
         births_data = pd.concat(self.births)
-        births_data.to_hdf(self.output_path, key='data')
+        births_data.to_hdf(self.output_path, key="data")
 
     ###########
     # Helpers #
@@ -70,12 +61,12 @@ class BirthRecorder:
     @staticmethod
     def _build_output_path(builder: Builder) -> Path:
         results_root = builder.configuration.output_data.results_directory
-        output_root = Path(results_root) / 'child_data'
+        output_root = Path(results_root) / "child_data"
 
         mkdir(output_root, exists_ok=True)
 
         input_draw = builder.configuration.input_data.input_draw_number
         seed = builder.configuration.randomness.random_seed
-        output_path = output_root / f'draw_{input_draw}_seed_{seed}.hdf'
+        output_path = output_root / f"draw_{input_draw}_seed_{seed}.hdf"
 
         return output_path
