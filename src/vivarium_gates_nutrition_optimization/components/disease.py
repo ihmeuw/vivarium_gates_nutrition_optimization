@@ -131,12 +131,6 @@ class DiseaseState(BaseDiseaseState):
     # Pipeline Sources               #
     ##################################
 
-    def get_dwell_time_source(self, builder: Builder) -> LookupTable:
-        dwell_time_data = self.load_dwell_time_data(builder)
-        return builder.lookup.build_table(
-            dwell_time_data, key_columns=["sex"], parameter_columns=["age", "year"]
-        )
-
     def compute_disability_weight(self, index: pd.Index) -> pd.Series:
         """Gets the disability weight associated with this state.
 
@@ -184,9 +178,13 @@ class DiseaseState(BaseDiseaseState):
     ##################################
 
     def get_dwell_time_pipeline(self, builder: Builder) -> Pipeline:
+        dwell_time_data = self.load_dwell_time_data(builder)
+        dwell_time_source = builder.lookup.build_table(
+            dwell_time_data, key_columns=["sex"], parameter_columns=["age", "year"]
+        )
         return builder.value.register_value_producer(
             f"{self.state_id}.dwell_time",
-            source=self.get_dwell_time_source(builder),
+            source=dwell_time_source,
             requires_columns=["age", "sex"],
         )
 
