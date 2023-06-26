@@ -25,7 +25,6 @@ class BirthRecorder:
         self.births = []
 
         required_columns = [
-            "pregnant_event_time",
             "pregnancy_term_outcome",
             "pregnancy_duration",
             "pregnancy",
@@ -44,8 +43,7 @@ class BirthRecorder:
             & (pop["pregnancy"] == models.POSTPARTUM_STATE_NAME)
         )
 
-        pop["birth_date"] = pop["pregnant_event_time"] + pop["pregnancy_duration"]
-        new_births = pop.loc[new_birth_mask, ["birth_date"]]
+        new_births = pop.loc[new_birth_mask, ["pregnancy_duration"]]
 
         self.births.append(new_births)
 
