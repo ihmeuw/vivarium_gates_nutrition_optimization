@@ -12,6 +12,7 @@ components:
         components:
             - Pregnancy()
             - PregnancyObserver()
+            - BirthRecorder()
 
 configuration:
     input_data:

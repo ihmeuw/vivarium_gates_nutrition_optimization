@@ -31,9 +31,11 @@ class BirthRecorder:
 
         required_columns = [
 
-            'pregnancy_event_time',
+            'pregnant_event_time',
             'pregnancy_term_outcome',
             'pregnancy_duration',
+            'pregnancy',
+            'previous_pregnancy'
         ]
         self.population_view = builder.population.get_view(required_columns)
 
@@ -48,7 +50,7 @@ class BirthRecorder:
             & (pop['pregnancy'] == models.POSTPARTUM_STATE_NAME)
             )
         
-        new_births['birth_date'] = new_births['pregnant_event_time'] + new_births['pregnancy_duration']
+        pop['birth_date'] = pop['pregnant_event_time'] + pop['pregnancy_duration']
         new_births = (
             pop.loc[new_birth_mask, ['birth_date']]
         )
@@ -74,7 +76,6 @@ class BirthRecorder:
 
         input_draw = builder.configuration.input_data.input_draw_number
         seed = builder.configuration.randomness.random_seed
-        scenario = builder.configuration.intervention.scenario
-        output_path = output_root / f'scenario_{scenario}_draw_{input_draw}_seed_{seed}.hdf'
+        output_path = output_root / f'draw_{input_draw}_seed_{seed}.hdf'
 
         return output_path
