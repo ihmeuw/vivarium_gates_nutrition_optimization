@@ -79,11 +79,11 @@ class PregnantState(DiseaseState):
             models.PARTIAL_TERM_OUTCOME: self.sample_partial_term_durations,
         }
 
-        for term_length, sampling_func in term_duration_map.items():
+        for term_length, sampling_function in term_duration_map.items():
             term_pop = pregnancy_term_outcomes[
                 pregnancy_term_outcomes["pregnancy_term_outcome"] == term_length
             ].index
-            pregnancy_term_outcomes.loc[term_pop, "pregnancy_duration"] = sampling_func(
+            pregnancy_term_outcomes.loc[term_pop, "pregnancy_duration"] = sampling_function(
                 term_pop
             )
 
@@ -91,7 +91,9 @@ class PregnantState(DiseaseState):
 
     def sample_partial_term_durations(self, partial_term_pop: pd.DataFrame) -> pd.Series:
         low, high = DURATIONS.DETECTION, DURATIONS.PARTIAL_TERM
-        draw = self.randomness.get_draw(partial_term_pop, additional_key="pregnancy_duration")
+        draw = self.randomness.get_draw(
+            partial_term_pop, additional_key="partial_term_pregnancy_duration"
+        )
         return pd.to_timedelta((low + (high - low) * draw), unit="days")
 
     def get_dwell_time_pipeline(self, builder: Builder) -> Pipeline:
@@ -127,7 +129,7 @@ def Pregnancy():
             "prevalence": lambda *_: 0.0,
             "disability_weight": lambda *_: 0.0,
             "excess_mortality_rate": lambda *_: 0.0,
-            "dwell_time": lambda *_: pd.Timedelta(days=DURATIONS.POSTPARTUM_DURATION),
+            "dwell_time": lambda *_: pd.Timedelta(days=DURATIONS.POSTPARTUM),
         },
     )
     pregnant.allow_self_transitions()
