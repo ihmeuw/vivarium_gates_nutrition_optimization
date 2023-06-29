@@ -38,7 +38,11 @@ class BirthRecorder:
     def on_collect_metrics(self, event: Event):
         pop = self.population_view.get(event.index)
         new_birth_mask = (
-            (pop["pregnancy_term_outcome"] == models.FULL_TERM_OUTCOME)
+            (
+                pop["pregnancy_term_outcome"].isin(
+                    [models.LIVE_BIRTH_OUTCOME, models.STILLBIRTH_OUTCOME]
+                )
+            )
             & (pop["previous_pregnancy"] == models.PREGNANT_STATE_NAME)
             & (pop["pregnancy"] == models.POSTPARTUM_STATE_NAME)
         )
