@@ -37,7 +37,7 @@ class PregnancyObserver(DiseaseObserver):
                 )
                 new_observations[key] = transition_mask.sum()
 
-            for outcome in models.PREGNANCY_TERM_OUTCOMES:
+            for outcome in models.PREGNANCY_OUTCOMES:
                 key = f"outcome_{outcome}_count_{label}"
                 term_mask = (
                     group_mask
