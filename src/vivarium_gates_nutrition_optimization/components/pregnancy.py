@@ -32,10 +32,16 @@ class PregnantState(DiseaseState):
         super().setup(builder)
         self.time_step = builder.time.step_size()
         self.randomness = builder.randomness.get_stream(self.name)
-        self.partial_term_probs = builder.value.register_value_producer(
-            "partial_term_probabilities",
+        self.partial_term_probs = builder.lookup.build_table(
+            get_partial_term_probability_data(builder),
+            key_columns=["sex"],
+            parameter_columns=["age", "year"],
+        )
+
+        self.birth_outcome_probs = builder.value.register_value_producer(
+            "birth_outcome_probabilities",
             source=builder.lookup.build_table(
-                get_partial_term_probability_data(builder),
+                get_birth_outcome_probabilities(builder),
                 key_columns=["sex"],
                 parameter_columns=["age", "year"],
             ),
@@ -53,14 +59,22 @@ class PregnantState(DiseaseState):
         pop_update = pd.concat([pop_events, pregnancy_term_outcomes_and_durations], axis=1)
         self.population_view.update(pop_update)
 
-    def sample_pregnancy_terms_and_durations(self, pop_data: SimulantData) -> pd.DataFrame:
-        term_outcome_probabilities = self.partial_term_probs(pop_data.index)
-        term_outcome_probabilities = pd.DataFrame(
+    def sample_pregnancy_outcomes_and_durations(self, pop_data: SimulantData) -> pd.Dataframe:
+        outcome_probabilities = self.birth_outcome_probs(pop_data.index)
+        pregnancy_outcomes = pd.DataFrame(
             {
-                models.PARTIAL_TERM_OUTCOME: term_outcome_probabilities,
-                models.FULL_TERM_OUTCOME: 1 - term_outcome_probabilities,
+                "pregnancy_outcome": self.randomness.choice(
+                    pop_data.index,
+                    choices=outcome_probabilities.columns.to_list(),
+                    p=outcome_probabilities,
+                    additional_key="pregnancy_outcome",
+                )
             }
         )
+
+    def sample_pregnancy_terms_and_durations(self, pop_data: SimulantData) -> pd.DataFrame:
+        term_outcome_probabilities = self.partial_term_probs(pop_data.index)
+
         pregnancy_term_outcomes = pd.DataFrame(
             {
                 "pregnancy_term_outcome": self.randomness.choice(
@@ -169,3 +183,37 @@ def get_partial_term_probability_data(builder: Builder) -> pd.DataFrame:
             + raw_incidence_ectopic
         )
     ).reset_index()
+
+
+def get_birth_outcome_probabilities(builder: Builder) -> pd.DataFrame:
+    asfr = builder.data.load(data_keys.PREGNANCY.ASFR).set_index(ARTIFACT_INDEX_COLUMNS)
+    sbr = (
+        builder.data.load(data_keys.PREGNANCY.SBR)
+        .set_index("year_start")
+        .drop(columns=["year_end"])
+        .reindex(asfr.index, level="year_start")
+    )
+
+    raw_incidence_miscarriage = builder.data.load(
+        data_keys.PREGNANCY.RAW_INCIDENCE_RATE_MISCARRIAGE
+    ).set_index(ARTIFACT_INDEX_COLUMNS)
+    raw_incidence_ectopic = builder.data.load(
+        data_keys.PREGNANCY.RAW_INCIDENCE_RATE_ECTOPIC
+    ).set_index(ARTIFACT_INDEX_COLUMNS)
+
+    partial_term_incidence = raw_incidence_ectopic + raw_incidence_miscarriage
+    full_term_incidence = asfr + asfr.multiply(sbr["value"], axis=0)
+    total_incidence = partial_term_incidence + full_term_incidence
+
+
+    partial_term = (partial_term_incidence / total_incidence).reset_index()
+    partial_term['pregnancy_outcome'] = models.PARTIAL_TERM_OUTCOME
+    live_births = (asfr / full_term_incidence).reset_index()
+    live_births['pregnancy_outome'] = models.LIVE_BIRTH_OUTCOME
+    stillbirths = (asfr.multiply(sbr["value"], axis=0) / full_term_incidence).reset_index()
+    stillbirths['pregnancy_outcome'] = models.STILLBIRTH_OUTCOME
+
+    return pd.concat([partial_term,live_births,stillbirths]).set_index('pregnancy_outcome')
+
+
+    return None
