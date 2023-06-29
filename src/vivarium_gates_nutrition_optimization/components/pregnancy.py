@@ -158,9 +158,14 @@ def get_birth_outcome_probabilities(builder: Builder) -> pd.DataFrame:
         data_keys.PREGNANCY.RAW_INCIDENCE_RATE_ECTOPIC
     ).set_index(ARTIFACT_INDEX_COLUMNS)
 
-    total_incidence = asfr + asfr.multiply(sbr["value"], axis=0) + raw_incidence_ectopic + raw_incidence_miscarriage
+    total_incidence = (
+        asfr
+        + asfr.multiply(sbr["value"], axis=0)
+        + raw_incidence_ectopic
+        + raw_incidence_miscarriage
+    )
 
-    partial_term = raw_incidence_ectopic + raw_incidence_miscarriage / total_incidence
+    partial_term = (raw_incidence_ectopic + raw_incidence_miscarriage) / total_incidence
     partial_term["pregnancy_outcome"] = models.PARTIAL_TERM_OUTCOME
     live_births = asfr / total_incidence
     live_births["pregnancy_outcome"] = models.LIVE_BIRTH_OUTCOME
