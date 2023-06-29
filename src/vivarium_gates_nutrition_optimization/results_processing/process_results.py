@@ -31,7 +31,7 @@ def make_measure_data(data):
         transition_count=get_transition_count_measure_data(data, "transition_count"),
         term_outcome_counts=get_measure_data(
             data,
-            "pregnancy_term_outcome_count",
+            "pregnancy_outcome_count",
         ),
     )
     return measure_data

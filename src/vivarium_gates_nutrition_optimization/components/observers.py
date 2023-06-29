@@ -17,7 +17,7 @@ class PregnancyObserver(DiseaseObserver):
         columns_required = [
             self.current_state_column_name,
             self.previous_state_column_name,
-            "pregnancy_term_outcome",
+            "pregnancy_outcome",
         ]
         return builder.population.get_view(columns_required)
 
@@ -41,7 +41,7 @@ class PregnancyObserver(DiseaseObserver):
                 key = f"outcome_{outcome}_count_{label}"
                 term_mask = (
                     group_mask
-                    & (pop["pregnancy_term_outcome"] == outcome)
+                    & (pop["pregnancy_outcome"] == outcome)
                     & (pop[self.previous_state_column_name] == transition.from_state)
                     & (pop[self.current_state_column_name] == transition.to_state)
                 )

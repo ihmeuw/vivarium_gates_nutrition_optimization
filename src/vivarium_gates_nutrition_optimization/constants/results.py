@@ -39,7 +39,7 @@ COLUMN_TEMPLATES = {
     "ylds": YLDS_COLUMN_TEMPLATE,
     "state_person_time": STATE_PERSON_TIME_COLUMN_TEMPLATE,
     "transition_count": TRANSITION_COUNT_COLUMN_TEMPLATE,
-    "pregnancy_term_outcome_count": PREGNANCY_TERM_OUTPUT_COUNT_COLUMN_TEMPLATE,
+    "pregnancy_outcome_count": PREGNANCY_TERM_OUTPUT_COUNT_COLUMN_TEMPLATE,
 }
 
 NON_COUNT_TEMPLATES = []
