@@ -25,7 +25,7 @@ class BirthRecorder:
         self.births = []
 
         required_columns = [
-            "pregnancy_term_outcome",
+            "pregnancy_outcome",
             "pregnancy_duration",
             "pregnancy",
             "previous_pregnancy",
@@ -39,7 +39,7 @@ class BirthRecorder:
         pop = self.population_view.get(event.index)
         new_birth_mask = (
             (
-                pop["pregnancy_term_outcome"].isin(
+                pop["pregnancy_outcome"].isin(
                     [models.LIVE_BIRTH_OUTCOME, models.STILLBIRTH_OUTCOME]
                 )
             )
