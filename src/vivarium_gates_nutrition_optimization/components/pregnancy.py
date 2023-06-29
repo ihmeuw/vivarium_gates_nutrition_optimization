@@ -83,7 +83,7 @@ class PregnantState(DiseaseState):
             pregnancy_outcomes.loc[term_pop, "pregnancy_duration"] = sampling_function(
                 term_pop
             )
-        
+
         return pregnancy_outcomes
 
     def sample_partial_term_durations(self, partial_term_pop: pd.DataFrame) -> pd.Series:
@@ -162,13 +162,15 @@ def get_birth_outcome_probabilities(builder: Builder) -> pd.DataFrame:
     full_term_incidence = asfr + asfr.multiply(sbr["value"], axis=0)
     total_incidence = partial_term_incidence + full_term_incidence
 
-    partial_term = (partial_term_incidence / total_incidence)
+    partial_term = partial_term_incidence / total_incidence
     partial_term["pregnancy_outcome"] = models.PARTIAL_TERM_OUTCOME
-    live_births = (asfr / full_term_incidence)
+    live_births = asfr / full_term_incidence
     live_births["pregnancy_outcome"] = models.LIVE_BIRTH_OUTCOME
-    stillbirths = (asfr.multiply(sbr["value"], axis=0) / full_term_incidence)
+    stillbirths = asfr.multiply(sbr["value"], axis=0) / full_term_incidence
     stillbirths["pregnancy_outcome"] = models.STILLBIRTH_OUTCOME
     probabilities = pd.concat([partial_term, live_births, stillbirths]).fillna(0)
-    probabilities = probabilities.pivot(columns="pregnancy_outcome", values='value').reset_index()
+    probabilities = probabilities.pivot(
+        columns="pregnancy_outcome", values="value"
+    ).reset_index()
 
     return probabilities
