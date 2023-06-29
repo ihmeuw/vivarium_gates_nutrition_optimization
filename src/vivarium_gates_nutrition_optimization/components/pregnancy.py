@@ -32,7 +32,7 @@ class PregnantState(DiseaseState):
         self.time_step = builder.time.step_size()
         self.randomness = builder.randomness.get_stream(self.name)
 
-        self.birth_outcome_probs = builder.value.register_value_producer(
+        self.birth_outcome_probabilities = builder.value.register_value_producer(
             "birth_outcome_probabilities",
             source=builder.lookup.build_table(
                 get_birth_outcome_probabilities(builder),
@@ -47,14 +47,14 @@ class PregnantState(DiseaseState):
                 transition.set_active(pop_data.index)
 
         pop_events = self.get_initial_event_times(pop_data)
-        pregnancy_term_outcomes_and_durations = self.sample_pregnancy_outcomes_and_durations(
+        pregnancy_outcomes_and_durations = self.sample_pregnancy_outcomes_and_durations(
             pop_data
         )
-        pop_update = pd.concat([pop_events, pregnancy_term_outcomes_and_durations], axis=1)
+        pop_update = pd.concat([pop_events, pregnancy_outcomes_and_durations], axis=1)
         self.population_view.update(pop_update)
 
     def sample_pregnancy_outcomes_and_durations(self, pop_data: SimulantData) -> pd.DataFrame:
-        outcome_probabilities = self.birth_outcome_probs(pop_data.index)
+        outcome_probabilities = self.birth_outcome_probabilities(pop_data.index)
         pregnancy_outcomes = pd.DataFrame(
             {
                 "pregnancy_outcome": self.randomness.choice(
@@ -83,6 +83,8 @@ class PregnantState(DiseaseState):
             pregnancy_outcomes.loc[term_pop, "pregnancy_duration"] = sampling_function(
                 term_pop
             )
+        
+        return pregnancy_outcomes
 
     def sample_partial_term_durations(self, partial_term_pop: pd.DataFrame) -> pd.Series:
         low, high = DURATIONS.DETECTION, DURATIONS.PARTIAL_TERM
@@ -160,20 +162,13 @@ def get_birth_outcome_probabilities(builder: Builder) -> pd.DataFrame:
     full_term_incidence = asfr + asfr.multiply(sbr["value"], axis=0)
     total_incidence = partial_term_incidence + full_term_incidence
 
-    # partial_term = (partial_term_incidence / total_incidence)
-    # partial_term["pregnancy_outcome"] = models.PARTIAL_TERM_OUTCOME
-    # live_births = (asfr / full_term_incidence)
-    # live_births["pregnancy_outcome"] = models.LIVE_BIRTH_OUTCOME
-    # stillbirths = (asfr.multiply(sbr["value"], axis=0) / full_term_incidence).reorder_levels(asfr.index.names)
-    # stillbirths["pregnancy_outcome"] = models.STILLBIRTH_OUTCOME
-    # data = pd.concat([partial_term, live_births, stillbirths]).fillna(0)
-    # idx_cols = data.columns.difference(['value', "pregnancy_outcome"])
-    # data = data.pivot(index=data.index, columns="pregnancy_outcome", values='value')
-
-    probabilities = pd.DataFrame({
-        "partial_term":partial_term_incidence / total_incidence,
-        "stillbirth":asfr.multiply(sbr["value"], axis=0) / full_term_incidence,
-        "live_birth": asfr / full_term_incidence,
-    }, index=asfr.index)
+    partial_term = (partial_term_incidence / total_incidence)
+    partial_term["pregnancy_outcome"] = models.PARTIAL_TERM_OUTCOME
+    live_births = (asfr / full_term_incidence)
+    live_births["pregnancy_outcome"] = models.LIVE_BIRTH_OUTCOME
+    stillbirths = (asfr.multiply(sbr["value"], axis=0) / full_term_incidence)
+    stillbirths["pregnancy_outcome"] = models.STILLBIRTH_OUTCOME
+    probabilities = pd.concat([partial_term, live_births, stillbirths]).fillna(0)
+    probabilities = probabilities.pivot(columns="pregnancy_outcome", values='value').reset_index()
 
     return probabilities
