@@ -171,7 +171,7 @@ def get_birth_outcome_probabilities(builder: Builder) -> pd.DataFrame:
     live_births["pregnancy_outcome"] = models.LIVE_BIRTH_OUTCOME
     stillbirths = asfr.multiply(sbr["value"], axis=0) / total_incidence
     stillbirths["pregnancy_outcome"] = models.STILLBIRTH_OUTCOME
-    probabilities = pd.concat([partial_term, live_births, stillbirths]).fillna(0)
+    probabilities = pd.concat([partial_term, live_births, stillbirths])
     probabilities = probabilities.pivot(
         columns="pregnancy_outcome", values="value"
     ).reset_index()
