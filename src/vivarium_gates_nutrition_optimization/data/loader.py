@@ -18,7 +18,9 @@ import pandas as pd
 import vivarium_inputs.validation.sim as validation
 from gbd_mapping import causes, covariates, risk_factors
 from vivarium.framework.artifact import EntityKey
+from vivarium_gbd_access import constants as gbd_constants
 from vivarium_gbd_access import gbd
+from vivarium_gbd_access import utilities as vga_utils
 from vivarium_inputs import core as vi_core
 from vivarium_inputs import globals as vi_globals
 from vivarium_inputs import interface
@@ -57,6 +59,9 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
         data_keys.PREGNANCY.SBR: load_sbr,
         data_keys.PREGNANCY.RAW_INCIDENCE_RATE_MISCARRIAGE: load_raw_incidence_data,
         data_keys.PREGNANCY.RAW_INCIDENCE_RATE_ECTOPIC: load_raw_incidence_data,
+        data_keys.LBWSG.DISTRIBUTION: load_metadata,
+        data_keys.LBWSG.CATEGORIES: load_metadata,
+        data_keys.LBWSG.EXPOSURE: load_lbwsg_exposure,
     }
     return mapping[lookup_key](lookup_key, location)
 
@@ -200,6 +205,43 @@ def load_sbr(key: str, location: str) -> pd.DataFrame:
     return sbr
 
 
+##############
+# LBWSG Data #
+##############
+
+
+def load_lbwsg_exposure(key: str, location: str) -> pd.DataFrame:
+    entity = get_entity(data_keys.LBWSG.EXPOSURE)
+    location_id = utility_data.get_location_id(location)
+    data = vga_utils.get_draws(
+        gbd_id_type="rei_id",
+        gbd_id=entity.gbd_id,
+        source=gbd_constants.SOURCES.EXPOSURE,
+        location_id=location_id,
+        sex_id=gbd_constants.SEX.MALE + gbd_constants.SEX.FEMALE,
+        age_group_id=164,  # Birth prevalence
+        gbd_round_id=gbd_constants.ROUND_IDS.GBD_2019,
+        decomp_step=gbd_constants.DECOMP_STEP.STEP_4,
+    )
+    # This data set is big, so let's reduce it by a factor of ~40
+    data = data[data["year_id"] == 2019].drop(columns="year_id")
+    # This category was a mistake in GBD 2019, so drop.
+    extra_residual_category = vi_globals.EXTRA_RESIDUAL_CATEGORY[entity.name]
+    data = data.loc[data["parameter"] != extra_residual_category]
+    idx_cols = ["location_id", "sex_id", "parameter"]
+    data = data.set_index(idx_cols)[vi_globals.DRAW_COLUMNS]
+
+    # Sometimes there are data values on the order of 10e-300 that cause
+    # floating point headaches, so clip everything to reasonable values
+    data = data.clip(lower=vi_globals.MINIMUM_EXPOSURE_VALUE)
+
+    # normalize so all categories sum to 1
+    total_exposure = data.groupby(["location_id", "sex_id"]).transform("sum")
+    data = (data / total_exposure).reset_index()
+    data = reshape_to_vivarium_format(data, location)
+    return data
+
+
 def get_entity(key: Union[str, EntityKey]):
     # Map of entity types to their gbd mappings.
     type_map = {
@@ -210,3 +252,13 @@ def get_entity(key: Union[str, EntityKey]):
     }
     key = EntityKey(key)
     return type_map[key.type][key.name]
+
+
+def reshape_to_vivarium_format(df, location):
+    df = vi_utils.reshape(df, value_cols=vi_globals.DRAW_COLUMNS)
+    df = vi_utils.scrub_gbd_conventions(df, location)
+    df = vi_utils.split_interval(df, interval_column="age", split_column_prefix="age")
+    df = vi_utils.split_interval(df, interval_column="year", split_column_prefix="year")
+    df = vi_utils.sort_hierarchical_data(df)
+    df.index = df.index.droplevel("location")
+    return df
