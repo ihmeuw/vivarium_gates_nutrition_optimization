@@ -78,6 +78,7 @@ class __SomeDisease(NamedTuple):
     def log_name(self):
         return self.name.replace("_", " ")
 
+
 class __LowBirthWeightShortGestation(NamedTuple):
     # Keys that will be loaded into the artifact. must have a colon type declaration
     EXPOSURE: str = "risk_factor.low_birth_weight_and_short_gestation.exposure"
