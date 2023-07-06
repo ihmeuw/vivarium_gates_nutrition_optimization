@@ -4,6 +4,7 @@ from vivarium.framework.population import SimulantData
 from vivarium.framework.values import Pipeline
 from vivarium_public_health.disease import DiseaseModel, SusceptibleState
 
+from vivarium_gates_nutrition_optimization.children import NewChildren
 from vivarium_gates_nutrition_optimization.components.disease import DiseaseState
 from vivarium_gates_nutrition_optimization.constants import data_keys, models
 from vivarium_gates_nutrition_optimization.constants.data_values import DURATIONS
@@ -18,6 +19,9 @@ class NotPregnantState(SusceptibleState):
 
 
 class PregnantState(DiseaseState):
+    def __init__(self):
+        super().__init__()
+        self.new_children = NewChildren
     @property
     def columns_created(self):
         return [
@@ -25,6 +29,7 @@ class PregnantState(DiseaseState):
             self.event_count_column,
             "pregnancy_outcome",
             "pregnancy_duration",
+            + self.new_children.columns_created
         ]
 
     def setup(self, builder: Builder):
