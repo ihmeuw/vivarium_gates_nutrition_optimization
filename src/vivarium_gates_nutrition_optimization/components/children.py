@@ -1,5 +1,5 @@
-from typing import Tuple
 from pathlib import Path
+from typing import Tuple
 
 import numpy as np
 import pandas as pd
@@ -7,16 +7,20 @@ from vivarium.framework.engine import Builder
 from vivarium.framework.event import Event
 from vivarium_cluster_tools.utilities import mkdir
 
-from vivarium_gates_nutrition_optimization.constants import models, data_keys
+from vivarium_gates_nutrition_optimization.constants import (
+    data_keys,
+    data_values,
+    models,
+)
+
 
 class NewChildren:
-
     def __init__(self):
         self.lbwsg = LBWSGDistribution()
 
     @property
     def name(self):
-        return 'child_status'
+        return "child_status"
 
     @property
     def sub_components(self):
@@ -24,41 +28,56 @@ class NewChildren:
 
     @property
     def columns_created(self):
-        return ['sex_of_child', 'birth_weight', 'gestational_age']
+        return ["sex_of_child", "birth_weight", "gestational_age"]
 
     def setup(self, builder: Builder):
         self.randomness = builder.randomness.get_stream(self.name)
+        self.male_sex_percentage = data_values.INFANT_MALE_PERCENTAGES[
+            builder.data.load(data_keys.POPULATION.LOCATION)
+        ]
 
     def empty(self, index: pd.Index) -> pd.DataFrame:
-        return pd.DataFrame({
-            'sex_of_child': models.INVALID_OUTCOME,
-            'birth_weight': np.nan,
-            'gestational_age': np.nan,
-        }, index=index)
+        return pd.DataFrame(
+            {
+                "sex_of_child": models.INVALID_OUTCOME,
+                "birth_weight": np.nan,
+                "gestational_age": np.nan,
+            },
+            index=index,
+        )
 
     def __call__(self, index: pd.Index):
+        sex_probabilities = pd.DataFrame(
+            {
+                "Male": self.male_sex_percentage,
+                "Female": 1 - self.male_sex_percentage,
+            }
+        )
         sex_of_child = self.randomness.choice(
             index,
-            choices=['Male', 'Female'],
-            additional_key='sex_of_child',
+            choices=["Male", "Female"],
+            p=sex_probabilities,
+            additional_key="sex_of_child",
         )
         lbwsg = self.lbwsg(sex_of_child)
-        return pd.DataFrame({
-            'sex_of_child': sex_of_child,
-            'birth_weight': lbwsg['birth_weight'],
-            'gestational_age': lbwsg['gestational_age'],
-        }, index=index)
+        return pd.DataFrame(
+            {
+                "sex_of_child": sex_of_child,
+                "birth_weight": lbwsg["birth_weight"],
+                "gestational_age": lbwsg["gestational_age"],
+            },
+            index=index,
+        )
 
 
 class LBWSGDistribution:
-
     @property
     def name(self):
-        return 'lbwsg_distribution'
+        return "lbwsg_distribution"
 
     def setup(self, builder: Builder):
         self.randomness = builder.randomness.get_stream(self.name)
-        self.exposure = builder.data.load(data_keys.LBWSG.EXPOSURE).set_index('sex')
+        self.exposure = builder.data.load(data_keys.LBWSG.EXPOSURE).set_index("sex")
         self.category_intervals = self._get_category_intervals(builder)
 
     def __call__(self, newborn_sex: pd.Series):
@@ -75,12 +94,14 @@ class LBWSGDistribution:
         for sex in newborn_sex.unique():
             group_data = newborn_sex[newborn_sex == sex]
             sex_exposure = self.exposure.loc[sex]
-            categorical_exposures.append(self.randomness.choice(
-                group_data.index,
-                choices=sex_exposure.parameter.tolist(),
-                p=sex_exposure.value.tolist(),
-                additional_key='categorical_exposure',
-            ))
+            categorical_exposures.append(
+                self.randomness.choice(
+                    group_data.index,
+                    choices=sex_exposure.parameter.tolist(),
+                    p=sex_exposure.value.tolist(),
+                    additional_key="categorical_exposure",
+                )
+            )
         categorical_exposures = pd.concat(categorical_exposures).sort_index()
         return categorical_exposures
 
@@ -88,9 +109,9 @@ class LBWSGDistribution:
         intervals = self.category_intervals.loc[categorical_exposure]
         intervals.index = categorical_exposure.index
         exposures = []
-        for axis in ['birth_weight', 'gestational_age']:
+        for axis in ["birth_weight", "gestational_age"]:
             draw = self.randomness.get_draw(categorical_exposure.index, additional_key=axis)
-            lower, upper = intervals[f'{axis}_lower'], intervals[f'{axis}_upper']
+            lower, upper = intervals[f"{axis}_lower"], intervals[f"{axis}_upper"]
             exposures.append((lower + (upper - lower) * draw).rename(axis))
         return pd.concat(exposures, axis=1)
 
@@ -101,12 +122,18 @@ class LBWSGDistribution:
     def _get_category_intervals(self, builder: Builder):
         categories = builder.data.load(data_keys.LBWSG.CATEGORIES)
         category_intervals = pd.DataFrame(
-            data=[(category, *self._parse_description(description))
-                  for category, description in categories.items()],
-            columns=['category',
-                     'birth_weight_lower', 'birth_weight_upper',
-                     'gestational_age_lower', 'gestational_age_upper'],
-        ).set_index('category')
+            data=[
+                (category, *self._parse_description(description))
+                for category, description in categories.items()
+            ],
+            columns=[
+                "category",
+                "birth_weight_lower",
+                "birth_weight_upper",
+                "gestational_age_lower",
+                "gestational_age_upper",
+            ],
+        ).set_index("category")
         return category_intervals
 
     @staticmethod
@@ -118,7 +145,8 @@ class LBWSGDistribution:
             float(val) for val in description.split("- [")[1].split(")")[0].split(", ")
         ]
         return *birth_weight, *gestational_age
-    
+
+
 class BirthRecorder:
     @property
     def name(self):
