@@ -29,6 +29,7 @@ PREGNANCY_MODEL_TRANSITIONS = (
 PARTIAL_TERM_OUTCOME = "partial_term"
 LIVE_BIRTH_OUTCOME = "live_birth"
 STILLBIRTH_OUTCOME = "stillbirth"
+INVALID_OUTCOME = "invalid" ## For sex of partial births
 
 PREGNANCY_OUTCOMES = (
     PARTIAL_TERM_OUTCOME,
