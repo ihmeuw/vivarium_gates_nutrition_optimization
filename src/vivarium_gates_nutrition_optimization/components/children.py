@@ -47,16 +47,10 @@ class NewChildren:
         )
 
     def __call__(self, index: pd.Index):
-        sex_probabilities = pd.DataFrame(
-            {
-                "Male": self.male_sex_percentage,
-                "Female": 1 - self.male_sex_percentage,
-            }
-        )
         sex_of_child = self.randomness.choice(
             index,
             choices=["Male", "Female"],
-            p=sex_probabilities,
+            p=[self.male_sex_percentage, 1-self.male_sex_percentage],
             additional_key="sex_of_child",
         )
         lbwsg = self.lbwsg(sex_of_child)
