@@ -22,11 +22,8 @@ class PregnantState(DiseaseState):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.new_children = NewChildren()
-
-    @property
-    def sub_components(self):
-        return [self.new_children]
-
+        self._sub_components += [self.new_children]
+        
     @property
     def columns_created(self):
         return [
