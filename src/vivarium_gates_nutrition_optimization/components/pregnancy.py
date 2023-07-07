@@ -100,11 +100,11 @@ class PregnantState(DiseaseState):
         return child_status
 
     def sample_full_term_durations(self, full_term_pop: pd.Index) -> pd.DataFrame:
-        child_status = self.new_children(full_term_pop)
+        child_status = self.new_children.generate_children(full_term_pop)
         child_status["pregnancy_duration"] = pd.to_timedelta(
             7 * child_status["gestational_age"], unit="days"
         )
-        return child_status
+        return child_status.drop(columns=["gestational_age"])
 
     def get_dwell_time_pipeline(self, builder: Builder) -> Pipeline:
         return builder.value.register_value_producer(

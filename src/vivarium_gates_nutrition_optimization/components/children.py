@@ -28,7 +28,7 @@ class NewChildren:
 
     @property
     def columns_created(self):
-        return ["sex_of_child", "birth_weight", "gestational_age"]
+        return ["sex_of_child", "birth_weight"]
 
     def setup(self, builder: Builder):
         self.randomness = builder.randomness.get_stream(self.name)
@@ -41,12 +41,11 @@ class NewChildren:
             {
                 "sex_of_child": models.INVALID_OUTCOME,
                 "birth_weight": np.nan,
-                "gestational_age": np.nan,
             },
             index=index,
         )
 
-    def __call__(self, index: pd.Index):
+    def generate_children(self, index: pd.Index):
         sex_of_child = self.randomness.choice(
             index,
             choices=["Male", "Female"],
