@@ -29,10 +29,6 @@ def make_measure_data(data):
         deaths=get_by_cause_measure_data(data, "deaths"),
         state_person_time=get_state_person_time_measure_data(data, "state_person_time"),
         transition_count=get_transition_count_measure_data(data, "transition_count"),
-        pregnancy_outcome_counts=get_measure_data(
-            data,
-            "pregnancy_outcome_count",
-        ),
     )
     return measure_data
 
@@ -43,7 +39,6 @@ class MeasureData(NamedTuple):
     deaths: pd.DataFrame
     state_person_time: pd.DataFrame
     transition_count: pd.DataFrame
-    pregnancy_outcome_counts: pd.DataFrame
 
     def dump(self, output_dir: Path):
         for key, df in self._asdict().items():
