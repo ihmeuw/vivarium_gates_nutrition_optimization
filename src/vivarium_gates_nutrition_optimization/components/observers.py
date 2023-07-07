@@ -1,17 +1,26 @@
 from vivarium.framework.engine import Builder
 from vivarium.framework.event import Event
 from vivarium.framework.population import PopulationView
-from vivarium_public_health.metrics.disease import DiseaseObserver
+from vivarium_public_health.metrics import DiseaseObserver, ResultsStratifier as ResultsStratifier_
 from vivarium_public_health.utilities import to_years
+from vivarium_public_health.metrics.stratification import Source, SourceType
 
 from vivarium_gates_nutrition_optimization.constants import models
 
+class ResultsStratifier(ResultsStratifier_):
+    def register_stratifications(self, builder: Builder) -> None:
+        super().register_stratifications(builder)
+
+        self.setup_stratification(
+            builder,
+            name='pregnancy_outcome',
+            sources=[Source('pregnancy_outcome', SourceType.COLUMN)],
+            categories=models.PREGNANCY_OUTCOMES,
+        )
 
 class PregnancyObserver(DiseaseObserver):
     def __init__(self):
         super().__init__("pregnancy")
-
-        # noinspection PyMethodMayBeStatic
 
     def _get_population_view(self, builder: Builder) -> PopulationView:
         columns_required = [
@@ -37,13 +46,11 @@ class PregnancyObserver(DiseaseObserver):
                 )
                 new_observations[key] = transition_mask.sum()
 
-            for outcome in models.PREGNANCY_OUTCOMES:
-                key = f"outcome_{outcome}_count_{label}"
+                key = f"birth_count_{label}"
                 term_mask = (
                     group_mask
-                    & (pop["pregnancy_outcome"] == outcome)
-                    & (pop[self.previous_state_column_name] == transition.from_state)
-                    & (pop[self.current_state_column_name] == transition.to_state)
+                    & (pop[self.previous_state_column_name] == models.PREGNANT_STATE_NAME)
+                    & (pop[self.current_state_column_name] == models.POSTPARTUM_STATE_NAME)
                 )
                 new_observations[key] = term_mask.sum()
 
