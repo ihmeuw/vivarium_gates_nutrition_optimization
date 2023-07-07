@@ -49,7 +49,7 @@ class NewChildren:
         sex_of_child = self.randomness.choice(
             index,
             choices=["Male", "Female"],
-            p=[self.male_sex_percentage, 1-self.male_sex_percentage],
+            p=[self.male_sex_percentage, 1 - self.male_sex_percentage],
             additional_key="sex_of_child",
         )
         lbwsg = self.lbwsg(sex_of_child)
@@ -179,7 +179,9 @@ class BirthRecorder:
             & (pop["pregnancy"] == models.POSTPARTUM_STATE_NAME)
         )
 
-        new_births = pop.loc[new_birth_mask, ["pregnancy_duration"]]
+        new_births = pop.loc[new_birth_mask, ["pregnancy_duration", "birth_weight"]].rename(
+            columns={"pregnancy_duration": "gestational_age"}
+        )
 
         self.births.append(new_births)
 
