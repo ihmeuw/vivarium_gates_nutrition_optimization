@@ -33,27 +33,20 @@ class PregnancyObserver(DiseaseObserver):
         ]
         return builder.population.get_view(columns_required)
 
-    def on_collect_metrics(self, event: Event) -> None:
-        pop = self.population_view.get(
-            event.index, query='tracked == True and alive == "alive"'
-        )
-        new_observations = {}
-        groups = self.stratifier.group(pop.index, self.config.include, self.config.exclude)
-        for label, group_mask in groups:
-            for transition in self.transitions:
-                key = f"{self.disease}_{transition}_event_count_{label}"
-                transition_mask = (
-                    group_mask
-                    & (pop[self.previous_state_column_name] == transition.from_state)
-                    & (pop[self.current_state_column_name] == transition.to_state)
-                )
-                new_observations[key] = transition_mask.sum()
+    # def on_collect_metrics(self, event: Event) -> None:
+    #     pop = self.population_view.get(
+    #         event.index, query='tracked == True and alive == "alive"'
+    #     )
+    #     new_observations = {}
+    #     groups = self.stratifier.group(pop.index, self.config.include, self.config.exclude)
+    #     for label, group_mask in groups:
+    #         for transition in self.transitions:
+    #             key = f"{self.disease}_{transition}_event_count_{label}"
+    #             transition_mask = (
+    #                 group_mask
+    #                 & (pop[self.previous_state_column_name] == transition.from_state)
+    #                 & (pop[self.current_state_column_name] == transition.to_state)
+    #             )
+    #             new_observations[key] = transition_mask.sum()
 
-                # add separate birth outcome counts
-                if (
-                    transition.from_state == models.PREGNANT_STATE_NAME
-                    and transition.to_state == models.POSTPARTUM_STATE_NAME
-                ):
-                    new_observations[f"birth_count_{label}"] = transition_mask.sum()
-
-        self.counts.update(new_observations)
+    #     self.counts.update(new_observations)
