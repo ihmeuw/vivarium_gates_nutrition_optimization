@@ -2,7 +2,7 @@ components:
     vivarium_public_health:
         population:
             - BasePopulation()
-            - Mortality()
+
         metrics:
 #            - DisabilityObserver()
             - MortalityObserver()
