@@ -6,13 +6,13 @@ components:
         metrics:
 #            - DisabilityObserver()
             - MortalityObserver()
-            - ResultsStratifier()
 
     vivarium_gates_nutrition_optimization:
         components:
             - Pregnancy()
             - PregnancyObserver()
             - BirthRecorder()
+            - ResultsStratifier()
 
 configuration:
     input_data:
@@ -44,6 +44,9 @@ configuration:
     observers:
         default:
             - 'age'
+        pregnancy:
+            include:
+            - 'pregnancy_outcome'
         # disability:
         #     include:
         #     exclude:

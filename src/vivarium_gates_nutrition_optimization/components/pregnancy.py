@@ -23,7 +23,7 @@ class PregnantState(DiseaseState):
         super().__init__(*args, **kwargs)
         self.new_children = NewChildren()
         self._sub_components += [self.new_children]
-        
+
     @property
     def columns_created(self):
         return [
