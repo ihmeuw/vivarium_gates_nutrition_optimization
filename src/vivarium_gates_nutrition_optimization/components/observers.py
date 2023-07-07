@@ -49,12 +49,11 @@ class PregnancyObserver(DiseaseObserver):
                 )
                 new_observations[key] = transition_mask.sum()
 
-                key = f"birth_count_{label}"
-                term_mask = (
-                    group_mask
-                    & (pop[self.previous_state_column_name] == models.PREGNANT_STATE_NAME)
-                    & (pop[self.current_state_column_name] == models.POSTPARTUM_STATE_NAME)
-                )
-                new_observations[key] = term_mask.sum()
+                # add separate birth outcome counts
+                if (
+                    transition.from_state == models.PREGNANT_STATE_NAME
+                    and transition.to_state == models.POSTPARTUM_STATE_NAME
+                ):
+                    new_observations[f"birth_count_{label}"] = transition_mask.sum()
 
         self.counts.update(new_observations)
