@@ -4,6 +4,7 @@ from vivarium.framework.population import SimulantData
 from vivarium.framework.values import Pipeline
 from vivarium_public_health.disease import DiseaseModel, SusceptibleState
 
+from vivarium_gates_nutrition_optimization.components.children import NewChildren
 from vivarium_gates_nutrition_optimization.components.disease import DiseaseState
 from vivarium_gates_nutrition_optimization.constants import data_keys, models
 from vivarium_gates_nutrition_optimization.constants.data_values import DURATIONS
@@ -18,6 +19,11 @@ class NotPregnantState(SusceptibleState):
 
 
 class PregnantState(DiseaseState):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.new_children = NewChildren()
+        self._sub_components += [self.new_children]
+        
     @property
     def columns_created(self):
         return [
@@ -25,7 +31,7 @@ class PregnantState(DiseaseState):
             self.event_count_column,
             "pregnancy_outcome",
             "pregnancy_duration",
-        ]
+        ] + self.new_children.columns_created
 
     def setup(self, builder: Builder):
         super().setup(builder)
@@ -66,32 +72,39 @@ class PregnantState(DiseaseState):
             }
         )
 
-        term_duration_map = {
-            models.STILLBIRTH_OUTCOME: lambda *_: pd.to_timedelta(
-                DURATIONS.FULL_TERM, unit="days"
-            ),
-            models.LIVE_BIRTH_OUTCOME: lambda *_: pd.to_timedelta(
-                DURATIONS.FULL_TERM, unit="days"
-            ),
+        term_child_map = {
+            models.STILLBIRTH_OUTCOME: self.sample_full_term_durations,
+            models.LIVE_BIRTH_OUTCOME: self.sample_full_term_durations,
             models.PARTIAL_TERM_OUTCOME: self.sample_partial_term_durations,
         }
 
-        for term_length, sampling_function in term_duration_map.items():
+        for term_length, sampling_function in term_child_map.items():
             term_pop = pregnancy_outcomes[
                 pregnancy_outcomes["pregnancy_outcome"] == term_length
             ].index
-            pregnancy_outcomes.loc[term_pop, "pregnancy_duration"] = sampling_function(
-                term_pop
-            )
+            pregnancy_outcomes.loc[
+                term_pop, self.new_children.columns_created + ["pregnancy_duration"]
+            ] = sampling_function(term_pop)
 
         return pregnancy_outcomes
 
-    def sample_partial_term_durations(self, partial_term_pop: pd.DataFrame) -> pd.Series:
+    def sample_partial_term_durations(self, partial_term_pop: pd.Index) -> pd.DataFrame:
+        child_status = self.new_children.empty(partial_term_pop)
         low, high = DURATIONS.DETECTION, DURATIONS.PARTIAL_TERM
         draw = self.randomness.get_draw(
             partial_term_pop, additional_key="partial_term_pregnancy_duration"
         )
-        return pd.to_timedelta((low + (high - low) * draw), unit="days")
+        child_status["pregnancy_duration"] = pd.to_timedelta(
+            (low + (high - low) * draw), unit="days"
+        )
+        return child_status
+
+    def sample_full_term_durations(self, full_term_pop: pd.Index) -> pd.DataFrame:
+        child_status = self.new_children.generate_children(full_term_pop)
+        child_status["pregnancy_duration"] = pd.to_timedelta(
+            7 * child_status["gestational_age"], unit="days"
+        )
+        return child_status.drop(columns=["gestational_age"])
 
     def get_dwell_time_pipeline(self, builder: Builder) -> Pipeline:
         return builder.value.register_value_producer(
