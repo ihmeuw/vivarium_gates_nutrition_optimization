@@ -12,24 +12,18 @@ for an example.
 
    No logging is done here. Logging is done in vivarium inputs itself and forwarded.
 """
-from typing import Union
 
 import pandas as pd
 import vivarium_inputs.validation.sim as validation
-from gbd_mapping import causes, covariates, risk_factors
 from vivarium.framework.artifact import EntityKey
-from vivarium_gbd_access import constants as gbd_constants
-from vivarium_gbd_access import gbd
-from vivarium_gbd_access import utilities as vga_utils
 from vivarium_inputs import core as vi_core
 from vivarium_inputs import globals as vi_globals
 from vivarium_inputs import interface
 from vivarium_inputs import utilities as vi_utils
-from vivarium_inputs import utility_data
-from vivarium_inputs.mapping_extension import alternative_risk_factors
 
 from vivarium_gates_nutrition_optimization.constants import data_keys, metadata
-from vivarium_gates_nutrition_optimization.data import sampling
+from vivarium_gates_nutrition_optimization.data import sampling,  extra_gbd
+from vivarium_gates_nutrition_optimization.data.utilities import get_entity
 
 
 def get_data(lookup_key: str, location: str) -> pd.DataFrame:
@@ -59,9 +53,20 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
         data_keys.PREGNANCY.SBR: load_sbr,
         data_keys.PREGNANCY.RAW_INCIDENCE_RATE_MISCARRIAGE: load_raw_incidence_data,
         data_keys.PREGNANCY.RAW_INCIDENCE_RATE_ECTOPIC: load_raw_incidence_data,
+
         data_keys.LBWSG.DISTRIBUTION: load_metadata,
         data_keys.LBWSG.CATEGORIES: load_metadata,
         data_keys.LBWSG.EXPOSURE: load_lbwsg_exposure,
+
+        data_keys.MATERNAL_DISORDERS.TOTAL_CSMR: load_standard_data,
+        data_keys.MATERNAL_DISORDERS.TOTAL_INCIDENCE_RATE: load_standard_data,
+        data_keys.MATERNAL_DISORDERS.HEMORRHAGE_CSMR: load_standard_data,
+        data_keys.MATERNAL_DISORDERS.HEMORRHAGE_INCIDENCE_RATE: load_standard_data,
+        data_keys.MATERNAL_DISORDERS.YLDS: load_maternal_disorders_ylds,
+        data_keys.MATERNAL_DISORDERS.PROBABILITY_FATAL: load_probability_fatal_maternal_disorder,
+        data_keys.MATERNAL_DISORDERS.PROBABILITY_NONFATAL: load_probability_nonfatal_maternal_disorder,
+        data_keys.MATERNAL_DISORDERS.PROBABILITY_HEMORRHAGE: load_probability_maternal_hemorrhage,
+
     }
     return mapping[lookup_key](lookup_key, location)
 
@@ -156,19 +161,6 @@ def load_categorical_paf(key: str, location: str) -> pd.DataFrame:
     return paf
 
 
-def _load_em_from_meid(location, meid, measure):
-    location_id = utility_data.get_location_id(location)
-    data = gbd.get_modelable_entity_draws(meid, location_id)
-    data = data[data.measure_id == vi_globals.MEASURES[measure]]
-    data = vi_utils.normalize(data, fill_value=0)
-    data = data.filter(vi_globals.DEMOGRAPHIC_COLUMNS + vi_globals.DRAW_COLUMNS)
-    data = vi_utils.reshape(data)
-    data = vi_utils.scrub_gbd_conventions(data, location)
-    data = vi_utils.split_interval(data, interval_column="age", split_column_prefix="age")
-    data = vi_utils.split_interval(data, interval_column="year", split_column_prefix="year")
-    return vi_utils.sort_hierarchical_data(data).droplevel("location")
-
-
 ##################
 # Pregnancy Data #
 ##################
@@ -212,19 +204,7 @@ def load_sbr(key: str, location: str) -> pd.DataFrame:
 
 def load_lbwsg_exposure(key: str, location: str) -> pd.DataFrame:
     entity = get_entity(data_keys.LBWSG.EXPOSURE)
-    location_id = utility_data.get_location_id(location)
-    data = vga_utils.get_draws(
-        gbd_id_type="rei_id",
-        gbd_id=entity.gbd_id,
-        source=gbd_constants.SOURCES.EXPOSURE,
-        location_id=location_id,
-        sex_id=gbd_constants.SEX.MALE + gbd_constants.SEX.FEMALE,
-        age_group_id=164,  # Birth prevalence
-        gbd_round_id=gbd_constants.ROUND_IDS.GBD_2019,
-        decomp_step=gbd_constants.DECOMP_STEP.STEP_4,
-    )
-    # This data set is big, so let's reduce it by a factor of ~40
-    data = data[data["year_id"] == 2019].drop(columns="year_id")
+    data = extra_gbd.load_lbwsg_exposure
     # This category was a mistake in GBD 2019, so drop.
     extra_residual_category = vi_globals.EXTRA_RESIDUAL_CATEGORY[entity.name]
     data = data.loc[data["parameter"] != extra_residual_category]
@@ -241,18 +221,67 @@ def load_lbwsg_exposure(key: str, location: str) -> pd.DataFrame:
     data = reshape_to_vivarium_format(data, location)
     return data
 
+###########################
+# Maternal Disorders Data #
+###########################
 
-def get_entity(key: Union[str, EntityKey]):
-    # Map of entity types to their gbd mappings.
-    type_map = {
-        "cause": causes,
-        "covariate": covariates,
-        "risk_factor": risk_factors,
-        "alternative_risk_factor": alternative_risk_factors,
-    }
-    key = EntityKey(key)
-    return type_map[key.type][key.name]
+def load_maternal_disorders_ylds(key: str, location: str) -> pd.DataFrame:
+    # YLDS updated equation 4/14: (maternal_ylds - anemia_ylds) /
+    #   (maternal_incidence - (acmr - csmr) * maternal_incidence - csmr)
+    groupby_cols = ['age_group_id', 'sex_id', 'year_id']
+    draw_cols = [f"draw_{i}" for i in range(1000)]
 
+    all_ylds = extra_gbd.get_maternal_disorder_ylds(location)
+    all_ylds = all_ylds[groupby_cols + draw_cols]
+    all_ylds = reshape_to_vivarium_format(all_ylds, location)
+
+    anemia_ylds = extra_gbd.get_anemia_ylds(location)
+    anemia_ylds = anemia_ylds.groupby(groupby_cols)[draw_cols].sum().reset_index()
+    anemia_ylds = reshape_to_vivarium_format(anemia_ylds, location)
+
+    acmr = get_data(data_keys.POPULATION.ACMR, location)
+    csmr = get_data(data_keys.MATERNAL_DISORDERS.TOTAL_CSMR, location)
+    incidence = get_data(data_keys.MATERNAL_DISORDERS.TOTAL_INCIDENCE_RATE, location)
+    idx_cols = incidence.index.names
+    incidence = incidence.reset_index()
+    # FIXME: Why only here???
+    #   Update incidence for 55-59 year age group to match 50-54 year age group
+    to_duplicate = incidence.loc[(incidence.sex == 'Female') & (incidence.age_start == 50.0)]
+    to_duplicate['age_start'] = 55.0
+    to_duplicate['age_end'] = 60.0
+    to_drop = incidence.loc[(incidence.sex == 'Female') & (incidence.age_start == 55.0)]
+    incidence = pd.concat([
+        incidence.drop(to_drop.index), to_duplicate
+    ]).set_index(idx_cols).sort_index()
+
+    ylds_per_case = (
+        (all_ylds - anemia_ylds)
+        / (incidence - (acmr - csmr) * incidence - csmr)
+    )
+    return ylds_per_case
+
+
+def load_probability_fatal_maternal_disorder(key: str, location: str):
+    md_csmr = get_data(data_keys.MATERNAL_DISORDERS.TOTAL_CSMR, location)
+    pregnancy_end_rate = get_pregnancy_end_incidence(location)
+    return  md_csmr / pregnancy_end_rate
+
+def load_probability_nonfatal_maternal_disorder(key: str, location: str):
+    md_inc = get_data(data_keys.MATERNAL_DISORDERS.TOTAL_INCIDENCE_RATE, location)
+    md_csmr = get_data(data_keys.MATERNAL_DISORDERS.TOTAL_CSMR, location)
+    pregnancy_end_rate = get_pregnancy_end_incidence(location)
+    return  (md_inc - md_csmr) / pregnancy_end_rate
+
+def load_probability_maternal_hemorrhage(key: str, location: str):
+    mh_inc = get_data(data_keys.MATERNAL_DISORDERS.HEMORRHAGE_INCIDENCE_RATE, location)
+    mh_csmr = get_data(data_keys.MATERNAL_DISORDERS.HEMORRHAGE_CSMR, location)
+    pregnancy_end_rate = get_pregnancy_end_incidence(location)
+    return (mh_inc - mh_csmr) / pregnancy_end_rate
+
+
+##############
+#   Helpers  #
+##############
 
 def reshape_to_vivarium_format(df, location):
     df = vi_utils.reshape(df, value_cols=vi_globals.DRAW_COLUMNS)
