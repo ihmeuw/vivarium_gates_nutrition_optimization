@@ -21,7 +21,7 @@ from vivarium_inputs import globals as vi_globals
 from vivarium_inputs import interface
 from vivarium_inputs import utilities as vi_utils
 
-from vivarium_gates_nutrition_optimization.constants import data_keys, metadata
+from vivarium_gates_nutrition_optimization.constants import data_keys, metadata, extr
 from vivarium_gates_nutrition_optimization.data import sampling,  extra_gbd
 from vivarium_gates_nutrition_optimization.data.utilities import get_entity
 
@@ -204,7 +204,7 @@ def load_sbr(key: str, location: str) -> pd.DataFrame:
 
 def load_lbwsg_exposure(key: str, location: str) -> pd.DataFrame:
     entity = get_entity(data_keys.LBWSG.EXPOSURE)
-    data = extra_gbd.load_lbwsg_exposure
+    data = extra_gbd.load_lbwsg_exposure(location)
     # This category was a mistake in GBD 2019, so drop.
     extra_residual_category = vi_globals.EXTRA_RESIDUAL_CATEGORY[entity.name]
     data = data.loc[data["parameter"] != extra_residual_category]
