@@ -21,7 +21,7 @@ from vivarium_inputs import globals as vi_globals
 from vivarium_inputs import interface
 from vivarium_inputs import utilities as vi_utils
 
-from vivarium_gates_nutrition_optimization.constants import data_keys, metadata, extr
+from vivarium_gates_nutrition_optimization.constants import data_keys, metadata
 from vivarium_gates_nutrition_optimization.data import sampling,  extra_gbd
 from vivarium_gates_nutrition_optimization.data.utilities import get_entity
 
