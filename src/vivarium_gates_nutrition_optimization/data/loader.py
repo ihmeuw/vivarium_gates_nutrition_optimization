@@ -22,7 +22,7 @@ from vivarium_inputs import interface
 from vivarium_inputs import utilities as vi_utils
 
 from vivarium_gates_nutrition_optimization.constants import data_keys, metadata
-from vivarium_gates_nutrition_optimization.data import sampling,  extra_gbd
+from vivarium_gates_nutrition_optimization.data import extra_gbd, sampling
 from vivarium_gates_nutrition_optimization.data.utilities import get_entity
 
 
@@ -53,11 +53,9 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
         data_keys.PREGNANCY.SBR: load_sbr,
         data_keys.PREGNANCY.RAW_INCIDENCE_RATE_MISCARRIAGE: load_raw_incidence_data,
         data_keys.PREGNANCY.RAW_INCIDENCE_RATE_ECTOPIC: load_raw_incidence_data,
-
         data_keys.LBWSG.DISTRIBUTION: load_metadata,
         data_keys.LBWSG.CATEGORIES: load_metadata,
         data_keys.LBWSG.EXPOSURE: load_lbwsg_exposure,
-
         data_keys.MATERNAL_DISORDERS.TOTAL_CSMR: load_standard_data,
         data_keys.MATERNAL_DISORDERS.TOTAL_INCIDENCE_RATE: load_standard_data,
         data_keys.MATERNAL_DISORDERS.HEMORRHAGE_CSMR: load_standard_data,
@@ -66,7 +64,6 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
         data_keys.MATERNAL_DISORDERS.PROBABILITY_FATAL: load_probability_fatal_maternal_disorder,
         data_keys.MATERNAL_DISORDERS.PROBABILITY_NONFATAL: load_probability_nonfatal_maternal_disorder,
         data_keys.MATERNAL_DISORDERS.PROBABILITY_HEMORRHAGE: load_probability_maternal_hemorrhage,
-
     }
     return mapping[lookup_key](lookup_key, location)
 
@@ -221,12 +218,14 @@ def load_lbwsg_exposure(key: str, location: str) -> pd.DataFrame:
     data = reshape_to_vivarium_format(data, location)
     return data
 
+
 ###########################
 # Maternal Disorders Data #
 ###########################
 
+
 def load_maternal_disorders_ylds(key: str, location: str) -> pd.DataFrame:
-    groupby_cols = ['age_group_id', 'sex_id', 'year_id']
+    groupby_cols = ["age_group_id", "sex_id", "year_id"]
     draw_cols = [f"draw_{i}" for i in range(1000)]
 
     all_md_ylds = extra_gbd.get_maternal_disorder_ylds(location)
@@ -242,13 +241,15 @@ def load_maternal_disorders_ylds(key: str, location: str) -> pd.DataFrame:
     idx_cols = incidence.index.names
     incidence = incidence.reset_index()
     #   Update incidence for 55-59 year age group to match 50-54 year age group
-    to_duplicate = incidence.loc[(incidence.sex == 'Female') & (incidence.age_start == 50.0)]
-    to_duplicate['age_start'] = 55.0
-    to_duplicate['age_end'] = 60.0
-    to_drop = incidence.loc[(incidence.sex == 'Female') & (incidence.age_start == 55.0)]
-    incidence = pd.concat([
-        incidence.drop(to_drop.index), to_duplicate
-    ]).set_index(idx_cols).sort_index()
+    to_duplicate = incidence.loc[(incidence.sex == "Female") & (incidence.age_start == 50.0)]
+    to_duplicate["age_start"] = 55.0
+    to_duplicate["age_end"] = 60.0
+    to_drop = incidence.loc[(incidence.sex == "Female") & (incidence.age_start == 55.0)]
+    incidence = (
+        pd.concat([incidence.drop(to_drop.index), to_duplicate])
+        .set_index(idx_cols)
+        .sort_index()
+    )
 
     return (all_md_ylds - anemia_ylds) / (incidence - csmr)
 
@@ -256,13 +257,15 @@ def load_maternal_disorders_ylds(key: str, location: str) -> pd.DataFrame:
 def load_probability_fatal_maternal_disorder(key: str, location: str):
     md_csmr = get_data(data_keys.MATERNAL_DISORDERS.TOTAL_CSMR, location)
     pregnancy_end_rate = get_pregnancy_end_incidence(location)
-    return  md_csmr / pregnancy_end_rate
+    return md_csmr / pregnancy_end_rate
+
 
 def load_probability_nonfatal_maternal_disorder(key: str, location: str):
     md_inc = get_data(data_keys.MATERNAL_DISORDERS.TOTAL_INCIDENCE_RATE, location)
     md_csmr = get_data(data_keys.MATERNAL_DISORDERS.TOTAL_CSMR, location)
     pregnancy_end_rate = get_pregnancy_end_incidence(location)
-    return  (md_inc - md_csmr) / pregnancy_end_rate
+    return (md_inc - md_csmr) / pregnancy_end_rate
+
 
 def load_probability_maternal_hemorrhage(key: str, location: str):
     mh_inc = get_data(data_keys.MATERNAL_DISORDERS.HEMORRHAGE_INCIDENCE_RATE, location)
@@ -274,6 +277,7 @@ def load_probability_maternal_hemorrhage(key: str, location: str):
 ##############
 #   Helpers  #
 ##############
+
 
 def reshape_to_vivarium_format(df, location):
     df = vi_utils.reshape(df, value_cols=vi_globals.DRAW_COLUMNS)

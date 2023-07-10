@@ -66,6 +66,7 @@ class __LowBirthWeightShortGestation(NamedTuple):
 
 LBWSG = __LowBirthWeightShortGestation()
 
+
 class __MaternalDisorders(NamedTuple):
     TOTAL_CSMR: str = "cause.maternal_disorders.cause_specific_mortality_rate"
     TOTAL_INCIDENCE_RATE: str = "cause.maternal_disorders.incidence_rate"
@@ -84,6 +85,7 @@ class __MaternalDisorders(NamedTuple):
     @property
     def log_name(self):
         return "maternal_disorders"
+
 
 MATERNAL_DISORDERS = __MaternalDisorders()
 
