@@ -226,25 +226,21 @@ def load_lbwsg_exposure(key: str, location: str) -> pd.DataFrame:
 ###########################
 
 def load_maternal_disorders_ylds(key: str, location: str) -> pd.DataFrame:
-    # YLDS updated equation 4/14: (maternal_ylds - anemia_ylds) /
-    #   (maternal_incidence - (acmr - csmr) * maternal_incidence - csmr)
     groupby_cols = ['age_group_id', 'sex_id', 'year_id']
     draw_cols = [f"draw_{i}" for i in range(1000)]
 
-    all_ylds = extra_gbd.get_maternal_disorder_ylds(location)
-    all_ylds = all_ylds[groupby_cols + draw_cols]
-    all_ylds = reshape_to_vivarium_format(all_ylds, location)
+    all_md_ylds = extra_gbd.get_maternal_disorder_ylds(location)
+    all_md_ylds = all_md_ylds[groupby_cols + draw_cols]
+    all_md_ylds = reshape_to_vivarium_format(all_md_ylds, location)
 
     anemia_ylds = extra_gbd.get_anemia_ylds(location)
     anemia_ylds = anemia_ylds.groupby(groupby_cols)[draw_cols].sum().reset_index()
     anemia_ylds = reshape_to_vivarium_format(anemia_ylds, location)
 
-    acmr = get_data(data_keys.POPULATION.ACMR, location)
     csmr = get_data(data_keys.MATERNAL_DISORDERS.TOTAL_CSMR, location)
     incidence = get_data(data_keys.MATERNAL_DISORDERS.TOTAL_INCIDENCE_RATE, location)
     idx_cols = incidence.index.names
     incidence = incidence.reset_index()
-    # FIXME: Why only here???
     #   Update incidence for 55-59 year age group to match 50-54 year age group
     to_duplicate = incidence.loc[(incidence.sex == 'Female') & (incidence.age_start == 50.0)]
     to_duplicate['age_start'] = 55.0
@@ -254,11 +250,7 @@ def load_maternal_disorders_ylds(key: str, location: str) -> pd.DataFrame:
         incidence.drop(to_drop.index), to_duplicate
     ]).set_index(idx_cols).sort_index()
 
-    ylds_per_case = (
-        (all_ylds - anemia_ylds)
-        / (incidence - (acmr - csmr) * incidence - csmr)
-    )
-    return ylds_per_case
+    return (all_md_ylds - anemia_ylds) / (incidence - csmr)
 
 
 def load_probability_fatal_maternal_disorder(key: str, location: str):
