@@ -29,8 +29,12 @@ THROWAWAY_COLUMNS = [f"{state}_event_count" for state in models.STATES]
 DEATH_COLUMN_TEMPLATE = "death_due_to_{CAUSE_OF_DEATH}_age_{AGE_GROUP}"
 YLLS_COLUMN_TEMPLATE = "ylls_due_to_{CAUSE_OF_DEATH}_age_{AGE_GROUP}"
 YLDS_COLUMN_TEMPLATE = "ylds_due_to_{CAUSE_OF_DISABILITY}_age_{AGE_GROUP}"
-STATE_PERSON_TIME_COLUMN_TEMPLATE = "{STATE}_person_time_age_{AGE_GROUP}_pregnancy_outcome_{PREGNANCY_OUTCOME}"
-TRANSITION_COUNT_COLUMN_TEMPLATE = "{TRANSITION}_event_count_age_{AGE_GROUP}_pregnancy_outcome_{PREGNANCY_OUTCOME}"
+STATE_PERSON_TIME_COLUMN_TEMPLATE = (
+    "{STATE}_person_time_age_{AGE_GROUP}_pregnancy_outcome_{PREGNANCY_OUTCOME}"
+)
+TRANSITION_COUNT_COLUMN_TEMPLATE = (
+    "{TRANSITION}_event_count_age_{AGE_GROUP}_pregnancy_outcome_{PREGNANCY_OUTCOME}"
+)
 
 COLUMN_TEMPLATES = {
     "deaths": DEATH_COLUMN_TEMPLATE,
