@@ -133,6 +133,27 @@ def Pregnancy():
             "excess_mortality_rate": lambda *_: 0.0,
         },
     )
+
+    maternal_disorder = DiseaseState(
+        models.MATERNAL_DISORDER_STATE_NAME,
+        get_data_functions={
+            "prevalence": lambda *_: 0.0,
+            "disability_weight": lambda *_: 0.0,
+            "excess_mortality_rate": lambda *_: 0.0,
+            "dwell_time": lambda *_: pd.Timedelta(days=DURATIONS.CHILDBIRTH),
+        },
+    )
+
+    no_maternal_disorder = DiseaseState(
+        models.NO_MATERNAL_DISORDER_STATE_NAME,
+        get_data_functions={
+            "prevalence": lambda *_: 0.0,
+            "disability_weight": lambda *_: 0.0,
+            "excess_mortality_rate": lambda *_: 0.0,
+            "dwell_time": lambda *_: pd.Timedelta(days=DURATIONS.CHILDBIRTH),
+        },
+    )
+
     postpartum = DiseaseState(
         models.POSTPARTUM_STATE_NAME,
         get_data_functions={
@@ -143,7 +164,14 @@ def Pregnancy():
         },
     )
     pregnant.allow_self_transitions()
-    pregnant.add_transition(postpartum)
+    pregnant.add_transition(maternal_disorder)
+    pregnant.add_transition(no_maternal_disorder)
+
+    maternal_disorder.allow_self_transitions()
+    maternal_disorder.add_transition(postpartum)
+
+    no_maternal_disorder.allow_self_transitions()
+    no_maternal_disorder.add_transition(postpartum)
 
     postpartum.allow_self_transitions()
     postpartum.add_transition(not_pregnant)
