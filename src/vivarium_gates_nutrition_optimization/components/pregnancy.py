@@ -123,6 +123,7 @@ class PregnantState(DiseaseState):
         )
 
 
+
 def Pregnancy():
     not_pregnant = NotPregnantState(models.PREGNANT_STATE_NAME)
     pregnant = PregnantState(
@@ -138,8 +139,8 @@ def Pregnancy():
         models.MATERNAL_DISORDER_STATE_NAME,
         get_data_functions={
             "prevalence": lambda *_: 0.0,
-            "disability_weight": lambda *_: 0.0,
-            "excess_mortality_rate": lambda *_: 0.0,
+            "disability_weight": lambda *_: 0.0, ## Put correct DW function here
+            "excess_mortality_rate": lambda *_: 0.0, ## Put CSMR here
             "dwell_time": lambda *_: pd.Timedelta(days=DURATIONS.CHILDBIRTH),
         },
     )
@@ -164,8 +165,8 @@ def Pregnancy():
         },
     )
     pregnant.allow_self_transitions()
-    pregnant.add_transition(maternal_disorder)
-    pregnant.add_transition(no_maternal_disorder)
+    pregnant.add_transition(maternal_disorder) ## Add maternal disorder incidence here?
+    pregnant.add_transition(no_maternal_disorder) ## Add 1- maternal disorder incidence here?
 
     maternal_disorder.allow_self_transitions()
     maternal_disorder.add_transition(postpartum)
@@ -178,8 +179,9 @@ def Pregnancy():
 
     return DiseaseModel(
         models.PREGNANCY_MODEL_NAME,
-        states=[not_pregnant, pregnant, postpartum],
-        get_data_functions={"cause_specific_mortality_rate": lambda *_: 0.0},
+        states=[not_pregnant, pregnant, maternal_disorder, no_maternal_disorder, postpartum],
+        get_data_functions={"cause_specific_mortality_rate": lambda *_: 0.0}
+        ## ???
     )
 
 

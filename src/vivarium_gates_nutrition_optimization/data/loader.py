@@ -48,7 +48,7 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
         data_keys.POPULATION.AGE_BINS: load_age_bins,
         data_keys.POPULATION.DEMOGRAPHY: load_demographic_dimensions,
         data_keys.POPULATION.TMRLE: load_theoretical_minimum_risk_life_expectancy,
-        data_keys.POPULATION.ACMR: load_standard_data,
+        data_keys.POPULATION.ACMR: load_maternal_disorders_csmr,
         data_keys.PREGNANCY.ASFR: load_asfr,
         data_keys.PREGNANCY.SBR: load_sbr,
         data_keys.PREGNANCY.RAW_INCIDENCE_RATE_MISCARRIAGE: load_raw_incidence_data,
@@ -222,6 +222,10 @@ def load_lbwsg_exposure(key: str, location: str) -> pd.DataFrame:
 ###########################
 # Maternal Disorders Data #
 ###########################
+
+def load_maternal_disorders_csmr(location:str) -> pd.DataFrame:
+    return load_standard_data(data_keys.MATERNAL_DISORDERS.TOTAL_CSMR, location)
+   
 
 
 def load_maternal_disorders_ylds(key: str, location: str) -> pd.DataFrame:
