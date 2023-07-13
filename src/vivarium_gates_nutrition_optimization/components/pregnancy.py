@@ -123,7 +123,6 @@ class PregnantState(DiseaseState):
         )
 
 
-
 def Pregnancy():
     not_pregnant = NotPregnantState(models.PREGNANT_STATE_NAME)
     pregnant = PregnantState(
@@ -139,8 +138,8 @@ def Pregnancy():
         models.MATERNAL_DISORDER_STATE_NAME,
         get_data_functions={
             "prevalence": lambda *_: 0.0,
-            "disability_weight": lambda *_: 0.0, ## Put correct DW function here
-            "excess_mortality_rate": lambda *_: 0.0, ## Put CSMR here
+            "disability_weight": get_maternal_disorders_disability_weight,  ## Put correct DW function here
+            # "excess_mortality_rate": lambda *_: 0.0, ## Put CSMR here --Done in artifact
             "dwell_time": lambda *_: pd.Timedelta(days=DURATIONS.CHILDBIRTH),
         },
     )
@@ -165,8 +164,12 @@ def Pregnancy():
         },
     )
     pregnant.allow_self_transitions()
-    pregnant.add_transition(maternal_disorder) ## Add maternal disorder incidence here?
-    pregnant.add_transition(no_maternal_disorder) ## Add 1- maternal disorder incidence here?
+    pregnant.add_transition(
+        maternal_disorder,
+        source_data_type="rate",
+        get_data_functions={"incidence": get_maternal_disorders_incidence},
+    )  ## Add maternal disorder incidence here?
+    pregnant.add_transition(no_maternal_disorder)  ## Add 1- maternal disorder incidence here?
 
     maternal_disorder.allow_self_transitions()
     maternal_disorder.add_transition(postpartum)
@@ -180,8 +183,24 @@ def Pregnancy():
     return DiseaseModel(
         models.PREGNANCY_MODEL_NAME,
         states=[not_pregnant, pregnant, maternal_disorder, no_maternal_disorder, postpartum],
-        get_data_functions={"cause_specific_mortality_rate": lambda *_: 0.0}
-        ## ???
+        # get_data_functions={"cause_specific_mortality_rate": lambda *_: 0.0} -- done in artifact
+    )
+
+
+def get_maternal_disorders_disability_weight(builder: Builder):
+    maternal_disorder_ylds = builder.lookup.build_table(
+        builder.data.load(data_keys.MATERNAL_DISORDERS.YLDS),
+        key_columns=["sex"],
+        parameter_columns=["age", "year"],
+    )
+    return maternal_disorder_ylds * 365 / builder.time.step_size().days
+
+
+def get_maternal_disorders_incidence(builder: Builder):
+    return builder.lookup.build_table(
+        builder.data.load(data_keys.MATERNAL_DISORDERS.TOTAL_INCIDENCE_RATE),
+        key_columns=["sex"],
+        parameter_columns=["age", "year"],
     )
 
 

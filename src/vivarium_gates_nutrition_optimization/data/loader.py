@@ -225,9 +225,9 @@ def load_lbwsg_exposure(key: str, location: str) -> pd.DataFrame:
 # Maternal Disorders Data #
 ###########################
 
-def load_maternal_disorders_csmr(location:str) -> pd.DataFrame:
+
+def load_maternal_disorders_csmr(location: str) -> pd.DataFrame:
     return load_standard_data(data_keys.MATERNAL_DISORDERS.TOTAL_CSMR, location)
-   
 
 
 def load_maternal_disorders_ylds(key: str, location: str) -> pd.DataFrame:
@@ -258,9 +258,6 @@ def load_maternal_disorders_ylds(key: str, location: str) -> pd.DataFrame:
     )
 
     return (all_md_ylds - anemia_ylds) / (incidence - csmr)
-
-def load_maternal_disorders_disability_weight(key: str, location: str) -> pd.DataFrame:
-     ylds = get_data(data_keys.MATERNAL_DISORDERS.YLDS)
 
 
 def load_probability_fatal_maternal_disorder(key: str, location: str):
