@@ -167,10 +167,17 @@ def Pregnancy():
     pregnant.add_transition(
         maternal_disorder,
         source_data_type="rate",
-        get_data_functions={"incidence": get_maternal_disorders_incidence},
-    )  ## Add maternal disorder incidence here?
-    pregnant.add_transition(no_maternal_disorder)  ## Add 1- maternal disorder incidence here?
-
+        get_data_functions={"incidence_rate": lambda builder, cause: builder.data.load(
+                data_keys.MATERNAL_DISORDERS.TOTAL_INCIDENCE_RATE
+            )},
+    ) 
+    pregnant.add_transition(
+        maternal_disorder,
+        source_data_type="rate",
+        get_data_functions={"incidence_rate": lambda builder, cause: 1 - builder.data.load(
+                data_keys.MATERNAL_DISORDERS.TOTAL_INCIDENCE_RATE
+            )},
+    )
     maternal_disorder.allow_self_transitions()
     maternal_disorder.add_transition(postpartum)
 
@@ -194,14 +201,6 @@ def get_maternal_disorders_disability_weight(builder: Builder):
         parameter_columns=["age", "year"],
     )
     return maternal_disorder_ylds * 365 / builder.time.step_size().days
-
-
-def get_maternal_disorders_incidence(builder: Builder):
-    return builder.lookup.build_table(
-        builder.data.load(data_keys.MATERNAL_DISORDERS.TOTAL_INCIDENCE_RATE),
-        key_columns=["sex"],
-        parameter_columns=["age", "year"],
-    )
 
 
 def get_birth_outcome_probabilities(builder: Builder) -> pd.DataFrame:
