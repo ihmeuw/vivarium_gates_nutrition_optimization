@@ -37,6 +37,7 @@ class __Pregnancy(NamedTuple):
     )
     RAW_INCIDENCE_RATE_ECTOPIC: str = "cause.ectopic_pregnancy.raw_incidence_rate"
     CAUSE_SPECIFIC_MORTALITY_RATE: str = "cause.pregnancy.cause_specific_mortality_rate"
+    RESTRICTIONS: str = "cause.pregnancy.restrictions"
 
     @property
     def name(self):

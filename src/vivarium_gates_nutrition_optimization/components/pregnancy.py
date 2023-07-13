@@ -138,7 +138,7 @@ def Pregnancy():
         models.MATERNAL_DISORDER_STATE_NAME,
         get_data_functions={
             "prevalence": lambda *_: 0.0,
-            "disability_weight": get_maternal_disorders_disability_weight,  ## Put correct DW function here
+            "disability_weight": lambda builder, cause: builder.data.load(data_keys.MATERNAL_DISORDERS.YLDS),  ## Put correct DW function here
             # "excess_mortality_rate": lambda *_: 0.0, ## Put CSMR here --Done in artifact
             "dwell_time": lambda *_: pd.Timedelta(days=DURATIONS.CHILDBIRTH),
         },
@@ -167,16 +167,12 @@ def Pregnancy():
     pregnant.add_transition(
         maternal_disorder,
         source_data_type="rate",
-        get_data_functions={"incidence_rate": lambda builder, cause: builder.data.load(
-                data_keys.MATERNAL_DISORDERS.TOTAL_INCIDENCE_RATE
-            )},
+        get_data_functions={"incidence_rate": lambda *_: 0.5},
     ) 
     pregnant.add_transition(
-        maternal_disorder,
+        no_maternal_disorder,
         source_data_type="rate",
-        get_data_functions={"incidence_rate": lambda builder, cause: 1 - builder.data.load(
-                data_keys.MATERNAL_DISORDERS.TOTAL_INCIDENCE_RATE
-            )},
+        get_data_functions={"incidence_rate": lambda *_: 0.5},
     )
     maternal_disorder.allow_self_transitions()
     maternal_disorder.add_transition(postpartum)
@@ -193,8 +189,12 @@ def Pregnancy():
         # get_data_functions={"cause_specific_mortality_rate": lambda *_: 0.0} -- done in artifact
     )
 
+def get_no_disorder_incidence(builder: Builder,cause):
+    incidence = builder.data.load(data_keys.MATERNAL_DISORDERS.TOTAL_INCIDENCE_RATE)
+    incidence['value'] = 1 - incidence['value']
+    return incidence
 
-def get_maternal_disorders_disability_weight(builder: Builder):
+def get_maternal_disorders_disability_weight(builder: Builder, cause):
     maternal_disorder_ylds = builder.lookup.build_table(
         builder.data.load(data_keys.MATERNAL_DISORDERS.YLDS),
         key_columns=["sex"],

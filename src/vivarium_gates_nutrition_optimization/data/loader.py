@@ -54,11 +54,12 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
         data_keys.PREGNANCY.RAW_INCIDENCE_RATE_MISCARRIAGE: load_raw_incidence_data,
         data_keys.PREGNANCY.RAW_INCIDENCE_RATE_ECTOPIC: load_raw_incidence_data,
         data_keys.PREGNANCY.CAUSE_SPECIFIC_MORTALITY_RATE: load_maternal_disorders_csmr,
+        data_keys.PREGNANCY.RESTRICTIONS: load_pregnancy_restrictions,
         data_keys.LBWSG.DISTRIBUTION: load_metadata,
         data_keys.LBWSG.CATEGORIES: load_metadata,
         data_keys.LBWSG.EXPOSURE: load_lbwsg_exposure,
         data_keys.MATERNAL_DISORDERS.TOTAL_CSMR: load_maternal_disorders_csmr,
-        data_keys.MATERNAL_DISORDERS.EXCESS_MORTALITY: load_maternal_disorders_csmr,
+        data_keys.MATERNAL_DISORDERS.EXCESS_MORTALITY_RATE: load_maternal_disorders_csmr,
         data_keys.MATERNAL_DISORDERS.TOTAL_INCIDENCE_RATE: load_standard_data,
         data_keys.MATERNAL_DISORDERS.HEMORRHAGE_CSMR: load_standard_data,
         data_keys.MATERNAL_DISORDERS.HEMORRHAGE_INCIDENCE_RATE: load_standard_data,
@@ -127,6 +128,8 @@ def load_metadata(key: str, location: str):
         entity_metadata = entity_metadata.to_dict()
     return entity_metadata
 
+def load_pregnancy_restrictions(key:str, location: str):
+    return {"yld_only":False}
 
 def load_categorical_paf(key: str, location: str) -> pd.DataFrame:
     try:
@@ -226,7 +229,7 @@ def load_lbwsg_exposure(key: str, location: str) -> pd.DataFrame:
 ###########################
 
 
-def load_maternal_disorders_csmr(location: str) -> pd.DataFrame:
+def load_maternal_disorders_csmr(key: str, location: str) -> pd.DataFrame:
     return load_standard_data(data_keys.MATERNAL_DISORDERS.TOTAL_CSMR, location)
 
 
