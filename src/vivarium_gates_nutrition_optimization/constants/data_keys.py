@@ -36,6 +36,7 @@ class __Pregnancy(NamedTuple):
         "cause.maternal_abortion_and_miscarriage.raw_incidence_rate"
     )
     RAW_INCIDENCE_RATE_ECTOPIC: str = "cause.ectopic_pregnancy.raw_incidence_rate"
+    CAUSE_SPECIFIC_MORTALITY_RATE: str = "cause.pregnancy.cause_specific_mortality_rate"
 
     @property
     def name(self):
@@ -70,6 +71,7 @@ LBWSG = __LowBirthWeightShortGestation()
 class __MaternalDisorders(NamedTuple):
     TOTAL_CSMR: str = "cause.maternal_disorders.cause_specific_mortality_rate"
     TOTAL_INCIDENCE_RATE: str = "cause.maternal_disorders.incidence_rate"
+    EXCESS_MORTALITY_RATE: str = "cause.maternal_disorders.excess_mortality_rate"
     HEMORRHAGE_CSMR: str = "cause.maternal_hemorrhage.cause_specific_mortality_rate"
     HEMORRHAGE_INCIDENCE_RATE: str = "cause.maternal_hemorrhage.incidence_rate"
     YLDS: str = "cause.maternal_disorders.ylds"

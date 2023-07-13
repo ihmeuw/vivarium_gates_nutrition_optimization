@@ -53,10 +53,12 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
         data_keys.PREGNANCY.SBR: load_sbr,
         data_keys.PREGNANCY.RAW_INCIDENCE_RATE_MISCARRIAGE: load_raw_incidence_data,
         data_keys.PREGNANCY.RAW_INCIDENCE_RATE_ECTOPIC: load_raw_incidence_data,
+        data_keys.PREGNANCY.CAUSE_SPECIFIC_MORTALITY_RATE: load_maternal_disorders_csmr,
         data_keys.LBWSG.DISTRIBUTION: load_metadata,
         data_keys.LBWSG.CATEGORIES: load_metadata,
         data_keys.LBWSG.EXPOSURE: load_lbwsg_exposure,
-        data_keys.MATERNAL_DISORDERS.TOTAL_CSMR: load_standard_data,
+        data_keys.MATERNAL_DISORDERS.TOTAL_CSMR: load_maternal_disorders_csmr,
+        data_keys.MATERNAL_DISORDERS.EXCESS_MORTALITY: load_maternal_disorders_csmr,
         data_keys.MATERNAL_DISORDERS.TOTAL_INCIDENCE_RATE: load_standard_data,
         data_keys.MATERNAL_DISORDERS.HEMORRHAGE_CSMR: load_standard_data,
         data_keys.MATERNAL_DISORDERS.HEMORRHAGE_INCIDENCE_RATE: load_standard_data,
@@ -256,6 +258,9 @@ def load_maternal_disorders_ylds(key: str, location: str) -> pd.DataFrame:
     )
 
     return (all_md_ylds - anemia_ylds) / (incidence - csmr)
+
+def load_maternal_disorders_disability_weight(key: str, location: str) -> pd.DataFrame:
+     ylds = get_data(data_keys.MATERNAL_DISORDERS.YLDS)
 
 
 def load_probability_fatal_maternal_disorder(key: str, location: str):
