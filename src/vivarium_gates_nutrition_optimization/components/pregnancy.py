@@ -5,7 +5,7 @@ from vivarium.framework.values import Pipeline
 from vivarium_public_health.disease import DiseaseModel, SusceptibleState
 
 from vivarium_gates_nutrition_optimization.components.children import NewChildren
-from vivarium_gates_nutrition_optimization.components.disease import DiseaseState
+from vivarium_gates_nutrition_optimization.components.disease import DiseaseState, MultiTransitionDiseaseState
 from vivarium_gates_nutrition_optimization.constants import data_keys, models
 from vivarium_gates_nutrition_optimization.constants.data_values import DURATIONS
 from vivarium_gates_nutrition_optimization.constants.metadata import (
@@ -18,7 +18,7 @@ class NotPregnantState(SusceptibleState):
         super(SusceptibleState, self).__init__(cause, *args, name_prefix="not_", **kwargs)
 
 
-class PregnantState(DiseaseState):
+class PregnantState(MultiTransitionDiseaseState):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.new_children = NewChildren()
