@@ -167,12 +167,12 @@ def Pregnancy():
     pregnant.add_transition(
         maternal_disorder,
         source_data_type="rate",
-        get_data_functions={"incidence_rate": lambda *_: 0.5},
+        get_data_functions={"incidence_rate": lambda *_: 365 / 7 *0.75},
     ) 
     pregnant.add_transition(
         no_maternal_disorder,
         source_data_type="rate",
-        get_data_functions={"incidence_rate": lambda *_: 0.5},
+        get_data_functions={"incidence_rate": lambda *_: 365 / 7*0.25},
     )
     maternal_disorder.allow_self_transitions()
     maternal_disorder.add_transition(postpartum)
@@ -189,10 +189,35 @@ def Pregnancy():
         # get_data_functions={"cause_specific_mortality_rate": lambda *_: 0.0} -- done in artifact
     )
 
-def get_no_disorder_incidence(builder: Builder,cause):
-    incidence = builder.data.load(data_keys.MATERNAL_DISORDERS.TOTAL_INCIDENCE_RATE)
-    incidence['value'] = 1 - incidence['value']
-    return incidence
+def get_maternal_disorders_incidence(builder: Builder,cause):
+    asfr = builder.data.load(data_keys.PREGNANCY.ASFR).set_index(ARTIFACT_INDEX_COLUMNS)
+    sbr = (
+        builder.data.load(data_keys.PREGNANCY.SBR)
+        .set_index("year_start")
+        .drop(columns=["year_end"])
+        .reindex(asfr.index, level="year_start")
+    )
+
+    raw_incidence_miscarriage = builder.data.load(
+        data_keys.PREGNANCY.RAW_INCIDENCE_RATE_MISCARRIAGE
+    ).set_index(ARTIFACT_INDEX_COLUMNS)
+    raw_incidence_ectopic = builder.data.load(
+        data_keys.PREGNANCY.RAW_INCIDENCE_RATE_ECTOPIC
+    ).set_index(ARTIFACT_INDEX_COLUMNS)
+
+    total_incidence = (
+        asfr
+        + asfr.multiply(sbr["value"], axis=0)
+        + raw_incidence_ectopic
+        + raw_incidence_miscarriage
+    )
+    md_incidence = builder.data.load(data_keys.MATERNAL_DISORDERS.TOTAL_INCIDENCE_RATE).set_index(ARTIFACT_INDEX_COLUMNS)
+    return md_incidence / total_incidence
+
+def get_no_maternal_disorders_incidence(builder, cause):
+    md_incidence = get_maternal_disorders_incidence(builder, cause)
+    md_incidence['value'] = 1 - md_incidence['value']
+    return md_incidence
 
 def get_maternal_disorders_disability_weight(builder: Builder, cause):
     maternal_disorder_ylds = builder.lookup.build_table(
