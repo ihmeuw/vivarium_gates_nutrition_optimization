@@ -10,6 +10,7 @@ components:
     vivarium_gates_nutrition_optimization:
         components:
             - Pregnancy()
+            - MaternalDisorders()
             - PregnancyObserver()
             - BirthRecorder()
             - ResultsStratifier()

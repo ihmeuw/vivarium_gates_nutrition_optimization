@@ -21,13 +21,18 @@ def MaternalDisorders():
 
     healthy.allow_self_transitions()
     healthy.add_transition(
-        infected, source_data_type="rate"
-    )  ## Should this still be proportion?
+        infected, source_data_type="rate", get_data_functions={"incidence_rate": lambda *_: 0.75}
+    ) 
     infected.allow_self_transitions()
     infected.add_transition(
-        recovered, source_data_type="rate"
-    )  ## Should this still be proportion?
+        recovered)
     recovered.allow_self_transitions()
 
-    return DiseaseModel(cause, states=[healthy, infected, recovered])
+    return DiseaseModel(
+        cause,
+        states=[healthy, infected, recovered],
+        get_data_functions={
+            "cause_specific_mortality_rate": lambda *_: 0.0,
+        },
+    )
     ## Add CSMR here--get through artifact?
