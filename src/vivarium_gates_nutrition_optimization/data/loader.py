@@ -56,14 +56,11 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
         data_keys.LBWSG.DISTRIBUTION: load_metadata,
         data_keys.LBWSG.CATEGORIES: load_metadata,
         data_keys.LBWSG.EXPOSURE: load_lbwsg_exposure,
-        data_keys.MATERNAL_DISORDERS.TOTAL_CSMR: load_standard_data,
-        data_keys.MATERNAL_DISORDERS.TOTAL_INCIDENCE_RATE: load_standard_data,
-        data_keys.MATERNAL_DISORDERS.HEMORRHAGE_CSMR: load_standard_data,
-        data_keys.MATERNAL_DISORDERS.HEMORRHAGE_INCIDENCE_RATE: load_standard_data,
-        data_keys.MATERNAL_DISORDERS.YLDS: load_maternal_disorders_ylds,
-        data_keys.MATERNAL_DISORDERS.PROBABILITY_FATAL: load_probability_fatal_maternal_disorder,
-        data_keys.MATERNAL_DISORDERS.PROBABILITY_NONFATAL: load_probability_nonfatal_maternal_disorder,
-        data_keys.MATERNAL_DISORDERS.PROBABILITY_HEMORRHAGE: load_probability_maternal_hemorrhage,
+        data_keys.MATERNAL_DISORDERS.CSMR: load_pregnant_maternal_disorder_csmr,
+        data_keys.MATERNAL_DISORDERS.EXCESS_MORTALITY_RATE: load_pregnant_maternal_disorder_csmr,
+        data_keys.MATERNAL_DISORDERS.INCIDENCE_RATE: load_pregnant_maternal_disorder_incidence,
+        data_keys.MATERNAL_DISORDERS.DISABILITY_WEIGHT: load_maternal_disorders_disability_weight,
+
     }
     return mapping[lookup_key](lookup_key, location)
 
@@ -236,8 +233,8 @@ def load_maternal_disorders_ylds(key: str, location: str) -> pd.DataFrame:
     anemia_ylds = anemia_ylds.groupby(groupby_cols)[draw_cols].sum().reset_index()
     anemia_ylds = reshape_to_vivarium_format(anemia_ylds, location)
 
-    csmr = get_data(data_keys.MATERNAL_DISORDERS.TOTAL_CSMR, location)
-    incidence = get_data(data_keys.MATERNAL_DISORDERS.TOTAL_INCIDENCE_RATE, location)
+    csmr = load_standard_data(data_keys.MATERNAL_DISORDERS.CSMR, location)
+    incidence = load_raw_incidence_data(data_keys.MATERNAL_DISORDERS.INCIDENCE_RATE, location)
     idx_cols = incidence.index.names
     incidence = incidence.reset_index()
     #   Update incidence for 55-59 year age group to match 50-54 year age group
@@ -251,27 +248,22 @@ def load_maternal_disorders_ylds(key: str, location: str) -> pd.DataFrame:
         .sort_index()
     )
 
-    return (all_md_ylds - anemia_ylds) / (incidence - csmr)
+    ylds_per_case =  (all_md_ylds - anemia_ylds) / (incidence - csmr)
+    return ylds_per_case
 
+def load_maternal_disorders_disability_weight(key: str, location: str):
+    ylds = load_maternal_disorders_ylds(key, location)
+    return ylds
 
-def load_probability_fatal_maternal_disorder(key: str, location: str):
-    md_csmr = get_data(data_keys.MATERNAL_DISORDERS.TOTAL_CSMR, location)
+def load_pregnant_maternal_disorder_incidence(key: str, location: str):
+    total_incidence = load_raw_incidence_data(data_keys.MATERNAL_DISORDERS.INCIDENCE_RATE, location)
     pregnancy_end_rate = get_pregnancy_end_incidence(location)
-    return md_csmr / pregnancy_end_rate
+    return total_incidence / pregnancy_end_rate
 
-
-def load_probability_nonfatal_maternal_disorder(key: str, location: str):
-    md_inc = get_data(data_keys.MATERNAL_DISORDERS.TOTAL_INCIDENCE_RATE, location)
-    md_csmr = get_data(data_keys.MATERNAL_DISORDERS.TOTAL_CSMR, location)
+def load_pregnant_maternal_disorder_csmr(key: str, location: str):
+    total_csmr = load_standard_data(data_keys.MATERNAL_DISORDERS.CSMR, location)
     pregnancy_end_rate = get_pregnancy_end_incidence(location)
-    return (md_inc - md_csmr) / pregnancy_end_rate
-
-
-def load_probability_maternal_hemorrhage(key: str, location: str):
-    mh_inc = get_data(data_keys.MATERNAL_DISORDERS.HEMORRHAGE_INCIDENCE_RATE, location)
-    mh_csmr = get_data(data_keys.MATERNAL_DISORDERS.HEMORRHAGE_CSMR, location)
-    pregnancy_end_rate = get_pregnancy_end_incidence(location)
-    return (mh_inc - mh_csmr) / pregnancy_end_rate
+    return total_csmr / pregnancy_end_rate
 
 
 ##############
