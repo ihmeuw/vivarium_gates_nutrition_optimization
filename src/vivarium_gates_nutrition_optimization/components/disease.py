@@ -8,8 +8,9 @@ from vivarium.framework.population import PopulationView, SimulantData
 from vivarium.framework.randomness import RandomnessStream
 from vivarium.framework.state_machine import State, Transition
 from vivarium.framework.values import Pipeline, list_combiner, union_post_processor
-from vivarium_public_health.disease import BaseDiseaseState
+from vivarium_public_health.disease import BaseDiseaseState, SusceptibleState
 from vivarium_public_health.utilities import is_non_zero
+from vivarium_gates_nutrition_optimization.components.transition import ParturitionSelectionRateTransition
 
 
 class DiseaseState(BaseDiseaseState):
@@ -397,3 +398,28 @@ class DiseaseState(BaseDiseaseState):
 
     def __repr__(self) -> str:
         return "DiseaseState({})".format(self.state_id)
+
+class ParturitionSelectionState(SusceptibleState):
+
+    def add_transition(
+        self,
+        output: State,
+        source_data_type: str = "rate",
+        get_data_functions: Dict[str, Callable] = None,
+        **kwargs,
+    ) -> Transition:
+        
+        if source_data_type == "rate":
+            if get_data_functions is None:
+                get_data_functions = {
+                    "incidence_rate": lambda builder, cause: builder.data.load(
+                        f"{self.cause_type}.{cause}.incidence_rate"
+                    )
+                }
+            elif "incidence_rate" not in get_data_functions:
+                raise ValueError("You must supply an incidence rate function.")
+
+
+        transition = ParturitionSelectionRateTransition(self, output, get_data_functions, **kwargs)
+        self.transition_set.append(transition)
+        return transition

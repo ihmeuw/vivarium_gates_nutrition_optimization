@@ -162,7 +162,7 @@ def Pregnancy():
 
     return DiseaseModel(
         models.PREGNANCY_MODEL_NAME,
-        states=[not_pregnant, pregnant, postpartum],
+        states=[not_pregnant, pregnant, parturition, postpartum],
         get_data_functions={"cause_specific_mortality_rate": lambda *_: 0.0},
     )
 

@@ -16,7 +16,7 @@ class TransitionString(str):
 PREGNANCY_MODEL_NAME = data_keys.PREGNANCY.name
 PREGNANT_STATE_NAME = "pregnant"
 NOT_PREGNANT_STATE_NAME = "not_pregnant"
-PARTURITION_STATE_NAME = " parturition"
+PARTURITION_STATE_NAME = "parturition"
 POSTPARTUM_STATE_NAME = "postpartum"
 PREGNANCY_MODEL_STATES = (
     NOT_PREGNANT_STATE_NAME,
