@@ -8,12 +8,12 @@ from vivarium.framework.population import PopulationView, SimulantData
 from vivarium.framework.randomness import RandomnessStream
 from vivarium.framework.state_machine import State, Transition
 from vivarium.framework.values import Pipeline, list_combiner, union_post_processor
-from vivarium_public_health.disease import BaseDiseaseState, SusceptibleState
+from vivarium_public_health.disease import BaseDiseaseState, SusceptibleState, DiseaseState as DiseaseState_
 from vivarium_public_health.utilities import is_non_zero
 from vivarium_gates_nutrition_optimization.components.transition import ParturitionSelectionRateTransition
 
 
-class DiseaseState(BaseDiseaseState):
+class DiseaseState(DiseaseState_):
     """State representing a disease in a state machine model."""
 
     def __init__(
@@ -41,7 +41,7 @@ class DiseaseState(BaseDiseaseState):
         side_effect_function : callable, optional
             A function to be called when this state is entered.
         """
-        super().__init__(cause, **kwargs)
+        super(DiseaseState_,self).__init__(cause, **kwargs)
 
         self.excess_mortality_rate_pipeline_name = f"{self.state_id}.excess_mortality_rate"
         self.excess_mortality_rate_paf_pipeline_name = (
@@ -74,7 +74,7 @@ class DiseaseState(BaseDiseaseState):
         builder : `engine.Builder`
             Interface to several simulation tools.
         """
-        super().setup(builder)
+        super(DiseaseState_,self).setup(builder)
         self.prevalence = self.get_prevalence_table(builder)
         self.birth_prevalence = self.get_birth_prevalence_table(builder)
         self.dwell_time = self.get_dwell_time_pipeline(builder)
@@ -290,7 +290,7 @@ class DiseaseState(BaseDiseaseState):
     ########################
 
     def get_initial_event_times(self, pop_data: SimulantData) -> pd.DataFrame:
-        pop_update = super().get_initial_event_times(pop_data)
+        pop_update = super(DiseaseState_,self).get_initial_event_times(pop_data)
 
         simulants_with_condition = self.population_view.subview([self._model]).get(
             pop_data.index, query=f'{self._model}=="{self.state_id}"'
@@ -342,7 +342,7 @@ class DiseaseState(BaseDiseaseState):
         elif source_data_type == "proportion":
             if "proportion" not in get_data_functions:
                 raise ValueError("You must supply a proportion function.")
-        return super().add_transition(output, source_data_type, get_data_functions, **kwargs)
+        return super(DiseaseState_,self).add_transition(output, source_data_type, get_data_functions, **kwargs)
 
     def next_state(
         self, index: pd.Index, event_time: pd.Timestamp, population_view: PopulationView
@@ -359,7 +359,7 @@ class DiseaseState(BaseDiseaseState):
             A view of the internal state of the simulation.
         """
         eligible_index = self._filter_for_transition_eligibility(index, event_time)
-        return super().next_state(eligible_index, event_time, population_view)
+        return super(DiseaseState_,self).next_state(eligible_index, event_time, population_view)
 
     def with_condition(self, index: pd.Index) -> pd.Index:
         pop = self.population_view.subview(["alive", self._model]).get(index)
