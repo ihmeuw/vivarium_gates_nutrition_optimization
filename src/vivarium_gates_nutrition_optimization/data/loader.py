@@ -56,10 +56,11 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
         data_keys.LBWSG.DISTRIBUTION: load_metadata,
         data_keys.LBWSG.CATEGORIES: load_metadata,
         data_keys.LBWSG.EXPOSURE: load_lbwsg_exposure,
+
         data_keys.MATERNAL_DISORDERS.CSMR: load_pregnant_maternal_disorder_csmr,
         data_keys.MATERNAL_DISORDERS.EXCESS_MORTALITY_RATE: load_pregnant_maternal_disorder_csmr,
         data_keys.MATERNAL_DISORDERS.INCIDENCE_RATE: load_pregnant_maternal_disorder_incidence,
-        data_keys.MATERNAL_DISORDERS.DISABILITY_WEIGHT: load_maternal_disorders_disability_weight,
+        data_keys.MATERNAL_DISORDERS.YLDS: load_maternal_disorders_ylds,
 
     }
     return mapping[lookup_key](lookup_key, location)
@@ -250,10 +251,6 @@ def load_maternal_disorders_ylds(key: str, location: str) -> pd.DataFrame:
 
     ylds_per_case =  (all_md_ylds - anemia_ylds) / (incidence - csmr)
     return ylds_per_case
-
-def load_maternal_disorders_disability_weight(key: str, location: str):
-    ylds = load_maternal_disorders_ylds(key, location)
-    return ylds
 
 def load_pregnant_maternal_disorder_incidence(key: str, location: str):
     total_incidence = load_raw_incidence_data(data_keys.MATERNAL_DISORDERS.INCIDENCE_RATE, location)

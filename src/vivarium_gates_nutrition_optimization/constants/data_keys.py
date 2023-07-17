@@ -70,8 +70,8 @@ LBWSG = __LowBirthWeightShortGestation()
 class __MaternalDisorders(NamedTuple):
     CSMR: str = "cause.maternal_disorders.cause_specific_mortality_rate"
     EXCESS_MORTALITY_RATE: str = "cause.maternal_disorders.excess_mortality_rate"
-    DISABILITY_WEIGHT: str = "cause.maternal_disorders.disability_weight"
     INCIDENCE_RATE: str = "cause.maternal_disorders.incidence_rate"
+    YLDS: str = "cause.maternal_disorders.ylds"
 
     @property
     def name(self):
