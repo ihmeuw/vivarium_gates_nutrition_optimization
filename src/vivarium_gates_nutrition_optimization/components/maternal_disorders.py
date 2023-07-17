@@ -1,8 +1,14 @@
 from vivarium_public_health.disease import DiseaseModel, SusceptibleState, RecoveredState
 import numpy as np
+from vivarium.framework.engine import Builder
 from vivarium_gates_nutrition_optimization.components.disease import DiseaseState, ParturitionSelectionState
 from vivarium_gates_nutrition_optimization.constants import data_keys, models
 from vivarium_gates_nutrition_optimization.constants.data_values import DURATIONS
+from vivarium_gates_nutrition_optimization.constants.metadata import (
+    ARTIFACT_INDEX_COLUMNS,
+)
+from vivarium_public_health.utilities import to_years
+
 
 
 def MaternalDisorders():
@@ -12,8 +18,7 @@ def MaternalDisorders():
         cause,
         get_data_functions={
             "prevalence": lambda *_: 0.0,
-            "disability_weight": lambda *_: 0.0,  ## Add proper DW here--get through artifact?
-            "excess_mortality_rate": lambda *_: 0.0,  ## add proper EMR here -- get through artifact?
+            "disability_weight": get_maternal_disorders_disability_weight,
             "dwell_time": lambda *_: DURATIONS.PARTURITION, ## Do this as a timestep instead
         },
     )
@@ -21,8 +26,7 @@ def MaternalDisorders():
 
     susceptible.allow_self_transitions()
     susceptible.add_transition(
-        with_condition, source_data_type="rate", get_data_functions={"incidence_rate": lambda *_:365 / 7 * -np.log(1 - 0.75)}
-    ) 
+        with_condition, source_data_type="rate") 
     with_condition.allow_self_transitions()
     with_condition.add_transition(
         recovered)
@@ -31,8 +35,10 @@ def MaternalDisorders():
     return DiseaseModel(
         cause,
         states=[susceptible, with_condition, recovered],
-        get_data_functions={
-            "cause_specific_mortality_rate": lambda *_: 0.0,
-        },
     )
-    ## Add CSMR here--get through artifact?
+
+
+def get_maternal_disorders_disability_weight(builder: Builder, cause: str):
+    ylds = builder.data.load(data_keys.MATERNAL_DISORDERS.YLDS).set_index(ARTIFACT_INDEX_COLUMNS)
+    timestep = builder.time.step_size()
+    return ylds.div(to_years(timestep())).reset_index()
