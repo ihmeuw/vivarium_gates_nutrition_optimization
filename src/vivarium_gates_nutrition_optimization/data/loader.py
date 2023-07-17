@@ -61,6 +61,7 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
         data_keys.MATERNAL_DISORDERS.EXCESS_MORTALITY_RATE: load_pregnant_maternal_disorder_csmr,
         data_keys.MATERNAL_DISORDERS.INCIDENCE_RATE: load_pregnant_maternal_disorder_incidence,
         data_keys.MATERNAL_DISORDERS.YLDS: load_maternal_disorders_ylds,
+        data_keys.MATERNAL_DISORDERS.RESTRICTIONS: load_maternal_disorders_restrictions,
 
     }
     return mapping[lookup_key](lookup_key, location)
@@ -262,7 +263,8 @@ def load_pregnant_maternal_disorder_csmr(key: str, location: str):
     pregnancy_end_rate = get_pregnancy_end_incidence(location)
     return total_csmr / pregnancy_end_rate
 
-
+def load_maternal_disorders_restrictions(key: str, location:str):
+    return {"yld_only": False}
 ##############
 #   Helpers  #
 ##############
