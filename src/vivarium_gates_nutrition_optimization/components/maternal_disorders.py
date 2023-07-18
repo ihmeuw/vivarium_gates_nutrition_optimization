@@ -19,7 +19,7 @@ def MaternalDisorders():
         get_data_functions={
             "prevalence": lambda *_: 0.0,
             "disability_weight": get_maternal_disorders_disability_weight,
-            "dwell_time": lambda *_: DURATIONS.PARTURITION, ## Do this as a timestep instead
+            "dwell_time": lambda builder, cause: builder.time.step_size()(),
         },
     )
     recovered = RecoveredState(cause)
