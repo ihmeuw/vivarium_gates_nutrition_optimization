@@ -10,7 +10,6 @@ class _Durations(NamedTuple):
     POSTPARTUM = 6 * 7
     DETECTION = 6 * 7
     PARTIAL_TERM = 24 * 7
-    PARTURITION = 1 * 7
 
 
 DURATIONS = _Durations()
