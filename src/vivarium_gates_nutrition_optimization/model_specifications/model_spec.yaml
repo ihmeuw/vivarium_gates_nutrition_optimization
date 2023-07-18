@@ -2,7 +2,6 @@ components:
     vivarium_public_health:
         population:
             - BasePopulation()
-            - Mortality()
         metrics:
             - DisabilityObserver()
             - MortalityObserver()
@@ -11,6 +10,7 @@ components:
         components:
             - Pregnancy()
             - MaternalDisorders()
+            - Mortality()
             - PregnancyObserver()
             - BirthRecorder()
             - ResultsStratifier()
