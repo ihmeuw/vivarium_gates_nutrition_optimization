@@ -1,14 +1,21 @@
-from vivarium_public_health.disease import DiseaseModel, SusceptibleState, RecoveredState
 import numpy as np
 from vivarium.framework.engine import Builder
-from vivarium_gates_nutrition_optimization.components.disease import DiseaseState, ParturitionSelectionState
+from vivarium_public_health.disease import (
+    DiseaseModel,
+    RecoveredState,
+    SusceptibleState,
+)
+from vivarium_public_health.utilities import to_years
+
+from vivarium_gates_nutrition_optimization.components.disease import (
+    DiseaseState,
+    ParturitionSelectionState,
+)
 from vivarium_gates_nutrition_optimization.constants import data_keys, models
 from vivarium_gates_nutrition_optimization.constants.data_values import DURATIONS
 from vivarium_gates_nutrition_optimization.constants.metadata import (
     ARTIFACT_INDEX_COLUMNS,
 )
-from vivarium_public_health.utilities import to_years
-
 
 
 def MaternalDisorders():
@@ -25,11 +32,9 @@ def MaternalDisorders():
     recovered = RecoveredState(cause)
 
     susceptible.allow_self_transitions()
-    susceptible.add_transition(
-        with_condition, source_data_type="rate") 
+    susceptible.add_transition(with_condition, source_data_type="rate")
     with_condition.allow_self_transitions()
-    with_condition.add_transition(
-        recovered)
+    with_condition.add_transition(recovered)
     recovered.allow_self_transitions()
 
     return DiseaseModel(
@@ -39,6 +44,8 @@ def MaternalDisorders():
 
 
 def get_maternal_disorders_disability_weight(builder: Builder, cause: str):
-    ylds = builder.data.load(data_keys.MATERNAL_DISORDERS.YLDS).set_index(ARTIFACT_INDEX_COLUMNS)
+    ylds = builder.data.load(data_keys.MATERNAL_DISORDERS.YLDS).set_index(
+        ARTIFACT_INDEX_COLUMNS
+    )
     timestep = builder.time.step_size()
     return ylds.div(to_years(timestep())).reset_index()

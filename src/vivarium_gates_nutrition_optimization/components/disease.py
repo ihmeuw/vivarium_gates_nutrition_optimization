@@ -8,9 +8,14 @@ from vivarium.framework.population import PopulationView, SimulantData
 from vivarium.framework.randomness import RandomnessStream
 from vivarium.framework.state_machine import State, Transition
 from vivarium.framework.values import Pipeline, list_combiner, union_post_processor
-from vivarium_public_health.disease import BaseDiseaseState, SusceptibleState, DiseaseState as DiseaseState_
+from vivarium_public_health.disease import BaseDiseaseState
+from vivarium_public_health.disease import DiseaseState as DiseaseState_
+from vivarium_public_health.disease import SusceptibleState
 from vivarium_public_health.utilities import is_non_zero
-from vivarium_gates_nutrition_optimization.components.transition import ParturitionSelectionRateTransition
+
+from vivarium_gates_nutrition_optimization.components.transition import (
+    ParturitionSelectionRateTransition,
+)
 
 
 class DiseaseState(DiseaseState_):
@@ -41,7 +46,7 @@ class DiseaseState(DiseaseState_):
         side_effect_function : callable, optional
             A function to be called when this state is entered.
         """
-        super(DiseaseState_,self).__init__(cause, **kwargs)
+        super(DiseaseState_, self).__init__(cause, **kwargs)
 
         self.excess_mortality_rate_pipeline_name = f"{self.state_id}.excess_mortality_rate"
         self.excess_mortality_rate_paf_pipeline_name = (
@@ -74,7 +79,7 @@ class DiseaseState(DiseaseState_):
         builder : `engine.Builder`
             Interface to several simulation tools.
         """
-        super(DiseaseState_,self).setup(builder)
+        super(DiseaseState_, self).setup(builder)
         self.prevalence = self.get_prevalence_table(builder)
         self.birth_prevalence = self.get_birth_prevalence_table(builder)
         self.dwell_time = self.get_dwell_time_pipeline(builder)
@@ -290,7 +295,7 @@ class DiseaseState(DiseaseState_):
     ########################
 
     def get_initial_event_times(self, pop_data: SimulantData) -> pd.DataFrame:
-        pop_update = super(DiseaseState_,self).get_initial_event_times(pop_data)
+        pop_update = super(DiseaseState_, self).get_initial_event_times(pop_data)
 
         simulants_with_condition = self.population_view.subview([self._model]).get(
             pop_data.index, query=f'{self._model}=="{self.state_id}"'
@@ -342,7 +347,9 @@ class DiseaseState(DiseaseState_):
         elif source_data_type == "proportion":
             if "proportion" not in get_data_functions:
                 raise ValueError("You must supply a proportion function.")
-        return super(DiseaseState_,self).add_transition(output, source_data_type, get_data_functions, **kwargs)
+        return super(DiseaseState_, self).add_transition(
+            output, source_data_type, get_data_functions, **kwargs
+        )
 
     def next_state(
         self, index: pd.Index, event_time: pd.Timestamp, population_view: PopulationView
@@ -359,7 +366,9 @@ class DiseaseState(DiseaseState_):
             A view of the internal state of the simulation.
         """
         eligible_index = self._filter_for_transition_eligibility(index, event_time)
-        return super(DiseaseState_,self).next_state(eligible_index, event_time, population_view)
+        return super(DiseaseState_, self).next_state(
+            eligible_index, event_time, population_view
+        )
 
     def with_condition(self, index: pd.Index) -> pd.Index:
         pop = self.population_view.subview(["alive", self._model]).get(index)
@@ -399,8 +408,8 @@ class DiseaseState(DiseaseState_):
     def __repr__(self) -> str:
         return "DiseaseState({})".format(self.state_id)
 
-class ParturitionSelectionState(SusceptibleState):
 
+class ParturitionSelectionState(SusceptibleState):
     def add_transition(
         self,
         output: State,
@@ -408,7 +417,6 @@ class ParturitionSelectionState(SusceptibleState):
         get_data_functions: Dict[str, Callable] = None,
         **kwargs,
     ) -> Transition:
-        
         if source_data_type == "rate":
             if get_data_functions is None:
                 get_data_functions = {
@@ -419,7 +427,8 @@ class ParturitionSelectionState(SusceptibleState):
             elif "incidence_rate" not in get_data_functions:
                 raise ValueError("You must supply an incidence rate function.")
 
-
-        transition = ParturitionSelectionRateTransition(self, output, get_data_functions, **kwargs)
+        transition = ParturitionSelectionRateTransition(
+            self, output, get_data_functions, **kwargs
+        )
         self.transition_set.append(transition)
         return transition
