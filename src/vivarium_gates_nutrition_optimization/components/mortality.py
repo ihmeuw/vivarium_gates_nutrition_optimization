@@ -19,10 +19,11 @@ class MaternalMortality:
         self.years_of_life_lost_column_name = "years_of_life_lost"
 
         self.mortality_probability_pipeline_name = "mortality_probability"
-    
+
     @property
     def name(self) -> str:
         return "maternal_mortality"
+
     def __repr__(self) -> str:
         return f"MaternalMortality()"
 
