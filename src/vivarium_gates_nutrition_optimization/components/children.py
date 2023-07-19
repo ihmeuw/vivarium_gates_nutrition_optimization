@@ -177,7 +177,7 @@ class BirthRecorder:
                 )
             )
             & (pop["previous_pregnancy"] == models.PREGNANT_STATE_NAME)
-            & (pop["pregnancy"] == models.POSTPARTUM_STATE_NAME)
+            & (pop["pregnancy"] == models.PARTURITION_STATE_NAME)
         )
 
         new_births = pop.loc[new_birth_mask, ["pregnancy_duration", "birth_weight"]].rename(
