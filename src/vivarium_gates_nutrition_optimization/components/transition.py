@@ -1,19 +1,27 @@
 import pandas as pd
-from vivarium.framework.utilities import rate_to_probability
-from vivarium_public_health.disease.transition import RateTransition
+from vivarium_public_health.disease.transition import ProportionTransition
+from vivarium.framework.engine import Builder
 
 
-class ParturitionSelectionRateTransition(RateTransition):
-    def compute_transition_rate(self, index):
-        transition_rate = pd.Series(0, index=index)
+class ParturitionSelectionTransition(ProportionTransition):
+    def setup(self, builder: Builder):
+        super().setup(builder)
+
+        pipeline_name = (
+            f"{self.input_state.cause}_to_{self.output_state.cause}.transition_rate"
+        )
+        self.transition_proportion = builder.value.register_value_producer(
+            pipeline_name,
+            source=self.compute_transition_proportion,
+            requires_columns=["age", "sex", "alive"],
+            requires_values=[f"{pipeline_name}.paf"],
+        )
+
+    def compute_transition_proporiton(self, index):
+        transition_proportion = pd.Series(0, index=index)
         sub_pop = self.population_view.get(
             index, query="(alive == 'alive') & (pregnancy == 'parturition')"
         ).index
-        base_rates = self.base_rate(sub_pop)
-        joint_paf = self.joint_paf(sub_pop)
-        transition_rate.loc[sub_pop] = base_rates * (1 - joint_paf)
-        return transition_rate
 
-    ## Skip Post-Processing so we don't need to rescale by timestep
-    def _probability(self, index):
-        return rate_to_probability(self.transition_rate(index, skip_post_processor=True))
+        transition_proportion.loc[sub_pop] = self.transition_proportion(sub_pop)
+        return transition_proportion
