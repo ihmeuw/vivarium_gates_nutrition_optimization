@@ -15,6 +15,7 @@ class __Population(NamedTuple):
     AGE_BINS: str = "population.age_bins"
     DEMOGRAPHY: str = "population.demographic_dimensions"
     TMRLE: str = "population.theoretical_minimum_risk_life_expectancy"
+    ACMR: str = "cause.all_causes.cause_specific_mortality_rate"
 
     @property
     def name(self):
@@ -67,12 +68,15 @@ LBWSG = __LowBirthWeightShortGestation()
 
 
 class __MaternalDisorders(NamedTuple):
-    RAW_INCIDENCE_RATE: str = "cause.maternal_disorders.raw_incidence_rate"
-    INCIDENT_PROBABILITY: str = "cause.maternal_disorders.incident_probability"
-    CSMR: str = "cause.maternal_disorders.cause_specific_mortality_rate"
-    MORTALITY_PROBABILITY: str = "cause.maternal_disorders.mortality_probability"
+    TOTAL_CSMR: str = "cause.maternal_disorders.cause_specific_mortality_rate"
+    TOTAL_INCIDENCE_RATE: str = "cause.maternal_disorders.incidence_rate"
+    HEMORRHAGE_CSMR: str = "cause.maternal_hemorrhage.cause_specific_mortality_rate"
+    HEMORRHAGE_INCIDENCE_RATE: str = "cause.maternal_hemorrhage.incidence_rate"
     YLDS: str = "cause.maternal_disorders.ylds"
-    # RESTRICTIONS: str = "cause.maternal_disorders.restrictions"
+
+    PROBABILITY_FATAL: str = "covariate.probability_fatal_maternal_disorder.estimate"
+    PROBABILITY_NONFATAL: str = "covariate.probability_nonfatal_maternal_disorder.estimate"
+    PROBABILITY_HEMORRHAGE: str = "covariate.probability_maternal_hemorrhage.estimate"
 
     @property
     def name(self):
