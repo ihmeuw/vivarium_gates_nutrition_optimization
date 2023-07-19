@@ -67,7 +67,7 @@ LBWSG = __LowBirthWeightShortGestation()
 
 
 class __MaternalDisorders(NamedTuple):
-    INCIDENCE_RATE: str = "cause.maternal_disorders.raw_incidence_rate"
+    RAW_INCIDENCE_RATE: str = "cause.maternal_disorders.raw_incidence_rate"
     INCIDENT_PROBABILITY: str = "cause.maternal_disorders.incident_probability"
     CSMR: str = "cause.maternal_disorders.cause_specific_mortality_rate"
     MORTALITY_PROBABILITY: str = "cause.maternal_disorders.mortality_probability"

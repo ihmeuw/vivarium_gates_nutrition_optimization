@@ -56,12 +56,11 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
         data_keys.LBWSG.DISTRIBUTION: load_metadata,
         data_keys.LBWSG.CATEGORIES: load_metadata,
         data_keys.LBWSG.EXPOSURE: load_lbwsg_exposure,
-        data_keys.MATERNAL_DISORDERS.INCIDENCE_RATE: load_raw_incidence_data,
+        data_keys.MATERNAL_DISORDERS.RAW_INCIDENCE_RATE: load_raw_incidence_data,
         data_keys.MATERNAL_DISORDERS.CSMR: load_standard_data,
         data_keys.MATERNAL_DISORDERS.MORTALITY_PROBABILITY: load_maternal_disorders_mortality_probability,
         data_keys.MATERNAL_DISORDERS.INCIDENT_PROBABILITY: load_pregnant_maternal_disorders_incidence,
         data_keys.MATERNAL_DISORDERS.YLDS: load_maternal_disorders_ylds,
-        # data_keys.MATERNAL_DISORDERS.RESTRICTIONS: load_maternal_disorders_restrictions,
 
     }
     return mapping[lookup_key](lookup_key, location)
@@ -236,7 +235,7 @@ def load_maternal_disorders_ylds(key: str, location: str) -> pd.DataFrame:
     anemia_ylds = reshape_to_vivarium_format(anemia_ylds, location)
 
     csmr = load_standard_data(data_keys.MATERNAL_DISORDERS.CSMR, location)
-    incidence = load_raw_incidence_data(data_keys.MATERNAL_DISORDERS.INCIDENCE_RATE, location)
+    incidence = load_raw_incidence_data(data_keys.MATERNAL_DISORDERS.RAW_INCIDENCE_RATE, location)
     idx_cols = incidence.index.names
     incidence = incidence.reset_index()
     #   Update incidence for 55-59 year age group to match 50-54 year age group
@@ -254,7 +253,7 @@ def load_maternal_disorders_ylds(key: str, location: str) -> pd.DataFrame:
     return ylds_per_case
 
 def load_pregnant_maternal_disorders_incidence(key: str, location: str):
-    total_incidence = get_data(data_keys.MATERNAL_DISORDERS.INCIDENCE_RATE, location)
+    total_incidence = get_data(data_keys.MATERNAL_DISORDERS.RAW_INCIDENCE_RATE, location)
     pregnancy_end_rate = get_pregnancy_end_incidence(location)
     maternal_disorders_incidence = total_incidence / pregnancy_end_rate
     ## We have to normalize, since this comes to a probability with some values > 1
@@ -262,7 +261,7 @@ def load_pregnant_maternal_disorders_incidence(key: str, location: str):
 
 def load_maternal_disorders_mortality_probability(key: str, location: str):
     total_csmr = get_data(data_keys.MATERNAL_DISORDERS.CSMR, location)
-    total_incidence = get_data(data_keys.MATERNAL_DISORDERS.INCIDENCE_RATE, location)
+    total_incidence = get_data(data_keys.MATERNAL_DISORDERS.RAW_INCIDENCE_RATE, location)
     return total_csmr / total_incidence
 
 ##############
