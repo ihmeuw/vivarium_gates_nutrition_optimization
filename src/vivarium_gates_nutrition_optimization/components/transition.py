@@ -1,6 +1,7 @@
 import pandas as pd
 from vivarium.framework.engine import Builder
 from vivarium_public_health.disease.transition import ProportionTransition
+
 from vivarium_gates_nutrition_optimization.constants import data_keys
 
 
@@ -29,4 +30,3 @@ class ParturitionSelectionTransition(ProportionTransition):
 
     def _probability(self, index):
         return self.proportion_pipeline(index)
-    

@@ -104,7 +104,9 @@ class MaternalMortality:
         self.population_view.update(pop_update)
 
     def on_time_step(self, event: Event) -> None:
-        pop = self.population_view.get(event.index, query="(alive == 'alive') & (pregnancy == 'parturition')")
+        pop = self.population_view.get(
+            event.index, query="(alive == 'alive') & (pregnancy == 'parturition')"
+        )
         mortality_probability = self.mortality_probability(pop.index)
 
         deaths = self.random.filter_for_probability(
