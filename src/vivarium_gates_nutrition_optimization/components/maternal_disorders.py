@@ -33,7 +33,7 @@ def MaternalDisorders():
     recovered = RecoveredState(cause)
 
     susceptible.allow_self_transitions()
-    susceptible.add_transition(with_condition, source_data_type="rate")
+    susceptible.add_transition(with_condition)
     with_condition.allow_self_transitions()
     with_condition.add_transition(recovered)
     recovered.allow_self_transitions()
