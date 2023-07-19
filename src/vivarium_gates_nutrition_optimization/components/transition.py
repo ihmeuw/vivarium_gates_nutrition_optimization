@@ -17,7 +17,7 @@ class ParturitionSelectionTransition(ProportionTransition):
             requires_values=[f"{pipeline_name}.paf"],
         )
 
-    def compute_transition_proporiton(self, index):
+    def compute_transition_proportion(self, index):
         transition_proportion = pd.Series(0, index=index)
         sub_pop = self.population_view.get(
             index, query="(alive == 'alive') & (pregnancy == 'parturition')"

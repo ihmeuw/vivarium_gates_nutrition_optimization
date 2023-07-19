@@ -66,7 +66,7 @@ class MaternalMortality:
 
     def _get_mortality_probability_source(self, builder: Builder):
         probability_data = builder.data.load(
-            data_keys.MATERNAL_DISORDERS.mortality_probability
+            data_keys.MATERNAL_DISORDERS.MORTALITY_PROBABILITY
         )
         return builder.lookup.build_table(
             probability_data, key_columns=["sex"], parameter_columns=["age", "year"]

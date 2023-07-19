@@ -26,6 +26,7 @@ def MaternalDisorders():
         get_data_functions={
             "prevalence": lambda *_: 0.0,
             "disability_weight": get_maternal_disorders_disability_weight,
+            "excess_mortality_rate": lambda *_: 0.0,
             "dwell_time": lambda builder, cause: builder.time.step_size()(),
         },
     )
@@ -40,6 +41,7 @@ def MaternalDisorders():
     return DiseaseModel(
         cause,
         states=[susceptible, with_condition, recovered],
+        get_data_functions={"cause_specific_mortality_rate": lambda *_: 0.0},
     )
 
 
