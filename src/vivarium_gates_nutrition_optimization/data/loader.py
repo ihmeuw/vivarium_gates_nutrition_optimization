@@ -256,15 +256,15 @@ def load_maternal_disorders_ylds(key: str, location: str) -> pd.DataFrame:
 def load_pregnant_maternal_disorders_incidence(key: str, location: str):
     total_incidence = get_data(data_keys.MATERNAL_DISORDERS.INCIDENCE_RATE, location)
     pregnancy_end_rate = get_pregnancy_end_incidence(location)
-    return total_incidence / pregnancy_end_rate
+    maternal_disorders_incidence = total_incidence / pregnancy_end_rate
+    ## We have to normalize, since this comes to a probability with some values > 1
+    return maternal_disorders_incidence.applymap(lambda value: 1 if value > 1 else value)
 
 def load_maternal_disorders_mortality_probability(key: str, location: str):
     total_csmr = get_data(data_keys.MATERNAL_DISORDERS.CSMR, location)
     total_incidence = get_data(data_keys.MATERNAL_DISORDERS.INCIDENCE_RATE, location)
     return total_csmr / total_incidence
 
-# def load_maternal_disorders_restrictions(key: str, location:str):
-#     return {"yld_only": False}
 ##############
 #   Helpers  #
 ##############
