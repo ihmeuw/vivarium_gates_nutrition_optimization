@@ -15,7 +15,6 @@ class __Population(NamedTuple):
     AGE_BINS: str = "population.age_bins"
     DEMOGRAPHY: str = "population.demographic_dimensions"
     TMRLE: str = "population.theoretical_minimum_risk_life_expectancy"
-    ACMR: str = "cause.all_causes.cause_specific_mortality_rate"
 
     @property
     def name(self):
@@ -68,11 +67,12 @@ LBWSG = __LowBirthWeightShortGestation()
 
 
 class __MaternalDisorders(NamedTuple):
+    INCIDENCE_RATE: str = "cause.maternal_disorders.raw_incidence_rate"
+    INCIDENT_PROBABILITY: str = "cause.maternal_disorders.incident_probability"
     CSMR: str = "cause.maternal_disorders.cause_specific_mortality_rate"
-    EXCESS_MORTALITY_RATE: str = "cause.maternal_disorders.excess_mortality_rate"
-    INCIDENCE_RATE: str = "cause.maternal_disorders.incidence_rate"
+    MORTALITY_PROBABILITY: str = "cause.maternal_disorders.mortality_probability"
     YLDS: str = "cause.maternal_disorders.ylds"
-    RESTRICTIONS: str = "cause.maternal_disorders.restrictions"
+    # RESTRICTIONS: str = "cause.maternal_disorders.restrictions"
 
     @property
     def name(self):

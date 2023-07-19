@@ -48,7 +48,7 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
         data_keys.POPULATION.AGE_BINS: load_age_bins,
         data_keys.POPULATION.DEMOGRAPHY: load_demographic_dimensions,
         data_keys.POPULATION.TMRLE: load_theoretical_minimum_risk_life_expectancy,
-        data_keys.POPULATION.ACMR: load_standard_data,
+
         data_keys.PREGNANCY.ASFR: load_asfr,
         data_keys.PREGNANCY.SBR: load_sbr,
         data_keys.PREGNANCY.RAW_INCIDENCE_RATE_MISCARRIAGE: load_raw_incidence_data,
@@ -56,12 +56,12 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
         data_keys.LBWSG.DISTRIBUTION: load_metadata,
         data_keys.LBWSG.CATEGORIES: load_metadata,
         data_keys.LBWSG.EXPOSURE: load_lbwsg_exposure,
-
-        data_keys.MATERNAL_DISORDERS.CSMR: load_pregnant_maternal_disorder_csmr,
-        data_keys.MATERNAL_DISORDERS.EXCESS_MORTALITY_RATE: load_pregnant_maternal_disorder_csmr,
-        data_keys.MATERNAL_DISORDERS.INCIDENCE_RATE: load_pregnant_maternal_disorder_incidence,
+        data_keys.MATERNAL_DISORDERS.INCIDENCE_RATE: load_raw_incidence_data,
+        data_keys.MATERNAL_DISORDERS.CSMR: load_standard_data,
+        data_keys.MATERNAL_DISORDERS.MORTALITY_PROBABILITY: load_maternal_disorders_mortality_probability,
+        data_keys.MATERNAL_DISORDERS.INCIDENT_PROBABILITY: load_pregnant_maternal_disorders_incidence,
         data_keys.MATERNAL_DISORDERS.YLDS: load_maternal_disorders_ylds,
-        data_keys.MATERNAL_DISORDERS.RESTRICTIONS: load_maternal_disorders_restrictions,
+        # data_keys.MATERNAL_DISORDERS.RESTRICTIONS: load_maternal_disorders_restrictions,
 
     }
     return mapping[lookup_key](lookup_key, location)
@@ -253,18 +253,18 @@ def load_maternal_disorders_ylds(key: str, location: str) -> pd.DataFrame:
     ylds_per_case =  (all_md_ylds - anemia_ylds) / (incidence - csmr)
     return ylds_per_case
 
-def load_pregnant_maternal_disorder_incidence(key: str, location: str):
-    total_incidence = load_raw_incidence_data(data_keys.MATERNAL_DISORDERS.INCIDENCE_RATE, location)
+def load_pregnant_maternal_disorders_incidence(key: str, location: str):
+    total_incidence = get_data(data_keys.MATERNAL_DISORDERS.INCIDENCE_RATE, location)
     pregnancy_end_rate = get_pregnancy_end_incidence(location)
     return total_incidence / pregnancy_end_rate
 
-def load_pregnant_maternal_disorder_csmr(key: str, location: str):
-    total_csmr = load_standard_data(data_keys.MATERNAL_DISORDERS.CSMR, location)
-    pregnancy_end_rate = get_pregnancy_end_incidence(location)
-    return total_csmr / pregnancy_end_rate
+def load_maternal_disorders_mortality_probability(key: str, location: str):
+    total_csmr = get_data(data_keys.MATERNAL_DISORDERS.CSMR, location)
+    total_incidence = get_data(data_keys.MATERNAL_DISORDERS.INCIDENCE_RATE, location)
+    return total_csmr / total_incidence
 
-def load_maternal_disorders_restrictions(key: str, location:str):
-    return {"yld_only": False}
+# def load_maternal_disorders_restrictions(key: str, location:str):
+#     return {"yld_only": False}
 ##############
 #   Helpers  #
 ##############
