@@ -1,6 +1,6 @@
 import pandas as pd
-from vivarium_public_health.disease.transition import ProportionTransition
 from vivarium.framework.engine import Builder
+from vivarium_public_health.disease.transition import ProportionTransition
 
 
 class ParturitionSelectionTransition(ProportionTransition):

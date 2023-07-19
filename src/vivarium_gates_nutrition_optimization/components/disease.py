@@ -11,10 +11,11 @@ from vivarium.framework.values import Pipeline, list_combiner, union_post_proces
 from vivarium_public_health.disease import DiseaseState as DiseaseState_
 from vivarium_public_health.disease import SusceptibleState
 from vivarium_public_health.utilities import is_non_zero
-from vivarium_gates_nutrition_optimization.constants import data_keys
+
 from vivarium_gates_nutrition_optimization.components.transition import (
     ParturitionSelectionTransition,
 )
+from vivarium_gates_nutrition_optimization.constants import data_keys
 
 
 class DiseaseState(DiseaseState_):

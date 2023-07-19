@@ -10,7 +10,7 @@ components:
         components:
             - Pregnancy()
             - MaternalDisorders()
-            - Mortality()
+            - MaternalMortality()
             - PregnancyObserver()
             - BirthRecorder()
             - ResultsStratifier()
