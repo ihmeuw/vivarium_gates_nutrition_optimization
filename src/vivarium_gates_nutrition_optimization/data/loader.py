@@ -249,8 +249,7 @@ def load_maternal_disorders_ylds(key: str, location: str) -> pd.DataFrame:
         .sort_index()
     )
 
-    ylds_per_case =  (all_md_ylds - anemia_ylds) / (incidence - csmr)
-    return ylds_per_case
+    return (all_md_ylds - anemia_ylds) / (incidence - csmr)
 
 def load_pregnant_maternal_disorders_incidence(key: str, location: str):
     total_incidence = get_data(data_keys.MATERNAL_DISORDERS.RAW_INCIDENCE_RATE, location)
