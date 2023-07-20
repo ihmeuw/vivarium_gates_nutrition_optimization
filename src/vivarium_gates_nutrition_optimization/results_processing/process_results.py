@@ -27,10 +27,18 @@ def make_measure_data(data):
         ylls=get_by_cause_measure_data(data, "ylls"),
         ylds=get_by_cause_measure_data(data, "ylds"),
         deaths=get_by_cause_measure_data(data, "deaths"),
-        pregnancy_state_person_time=get_state_person_time_measure_data(data, "pregnancy_state_person_time"),
-        pregnancy_transition_count=get_transition_count_measure_data(data, "pregnancy_transition_count"),
-        maternal_disorders_state_person_time=get_state_person_time_measure_data(data, "maternal_disorders_state_person_time"),
-        maternal_disorders_transition_count=get_transition_count_measure_data(data, "maternal_disorders_transition_count"),
+        pregnancy_state_person_time=get_state_person_time_measure_data(
+            data, "pregnancy_state_person_time"
+        ),
+        pregnancy_transition_count=get_transition_count_measure_data(
+            data, "pregnancy_transition_count"
+        ),
+        maternal_disorders_state_person_time=get_state_person_time_measure_data(
+            data, "maternal_disorders_state_person_time"
+        ),
+        maternal_disorders_transition_count=get_transition_count_measure_data(
+            data, "maternal_disorders_transition_count"
+        ),
     )
     return measure_data
 

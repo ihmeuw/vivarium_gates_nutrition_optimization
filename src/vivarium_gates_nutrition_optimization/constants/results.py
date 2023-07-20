@@ -29,12 +29,8 @@ THROWAWAY_COLUMNS = [f"{state}_event_count" for state in models.STATES]
 DEATH_COLUMN_TEMPLATE = "death_due_to_{CAUSE_OF_DEATH}_age_{AGE_GROUP}"
 YLLS_COLUMN_TEMPLATE = "ylls_due_to_{CAUSE_OF_DEATH}_age_{AGE_GROUP}"
 YLDS_COLUMN_TEMPLATE = "ylds_due_to_{CAUSE_OF_DISABILITY}_age_{AGE_GROUP}"
-PREGNANCY_STATE_PERSON_TIME_COLUMN_TEMPLATE = (
-    "pregnancy_{PREGNANCY_STATE}_person_time_age_{AGE_GROUP}_pregnancy_outcome_{PREGNANCY_OUTCOME}"
-)
-PREGNANCY_TRANSITION_COUNT_COLUMN_TEMPLATE = (
-    "pregnancy_{PREGNANCY_TRANSITION}_event_count_age_{AGE_GROUP}_pregnancy_outcome_{PREGNANCY_OUTCOME}"
-)
+PREGNANCY_STATE_PERSON_TIME_COLUMN_TEMPLATE = "pregnancy_{PREGNANCY_STATE}_person_time_age_{AGE_GROUP}_pregnancy_outcome_{PREGNANCY_OUTCOME}"
+PREGNANCY_TRANSITION_COUNT_COLUMN_TEMPLATE = "pregnancy_{PREGNANCY_TRANSITION}_event_count_age_{AGE_GROUP}_pregnancy_outcome_{PREGNANCY_OUTCOME}"
 
 MATERNAL_DISORDERS_PERSON_TIME_COLUMN_TEMPLATE = (
     "maternal_disorders_{MATERNAL_DISORDERS_STATE}_person_time_age_{AGE_GROUP}"
@@ -72,9 +68,7 @@ CAUSES_OF_DEATH = (
     "other_causes",
     "maternal_disorders",
 )
-CAUSES_OF_DISABILITY = (
-    "maternal_disorders",
-)
+CAUSES_OF_DISABILITY = ("maternal_disorders",)
 
 TEMPLATE_FIELD_MAP = {
     "AGE_GROUP": AGE_GROUPS,
