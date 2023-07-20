@@ -3,12 +3,14 @@ components:
         population:
             - BasePopulation()
         metrics:
-#            - DisabilityObserver()
+            - DisabilityObserver()
             - MortalityObserver()
 
     vivarium_gates_nutrition_optimization:
         components:
             - Pregnancy()
+            - MaternalDisorders()
+            - MaternalMortality()
             - PregnancyObserver()
             - BirthRecorder()
             - ResultsStratifier()
@@ -16,7 +18,7 @@ components:
 configuration:
     input_data:
         input_draw_number: 0
-        artifact_path: '/mnt/team/simulation_science/costeffectiveness/artifacts/vivarium_gates_nutrition_optimization/model1.2/ethiopia.hdf'
+        artifact_path: '/mnt/team/simulation_science/costeffectiveness/artifacts/vivarium_gates_nutrition_optimization/model2.0.1/ethiopia.hdf'
     interpolation:
         order: 0
         extrapolate: True

@@ -133,6 +133,15 @@ def Pregnancy():
             "excess_mortality_rate": lambda *_: 0.0,
         },
     )
+    parturition = DiseaseState(
+        models.PARTURITION_STATE_NAME,
+        get_data_functions={
+            "prevalence": lambda *_: 0.0,
+            "disability_weight": lambda *_: 0.0,
+            "excess_mortality_rate": lambda *_: 0.0,
+            "dwell_time": lambda builder, cause: builder.time.step_size()(),
+        },
+    )
     postpartum = DiseaseState(
         models.POSTPARTUM_STATE_NAME,
         get_data_functions={
@@ -143,14 +152,17 @@ def Pregnancy():
         },
     )
     pregnant.allow_self_transitions()
-    pregnant.add_transition(postpartum)
+    pregnant.add_transition(parturition)
+
+    parturition.allow_self_transitions()
+    parturition.add_transition(postpartum)
 
     postpartum.allow_self_transitions()
     postpartum.add_transition(not_pregnant)
 
     return DiseaseModel(
         models.PREGNANCY_MODEL_NAME,
-        states=[not_pregnant, pregnant, postpartum],
+        states=[not_pregnant, pregnant, parturition, postpartum],
         get_data_functions={"cause_specific_mortality_rate": lambda *_: 0.0},
     )
 
