@@ -4,11 +4,11 @@ components:
             - BasePopulation()
         metrics:
             - DisabilityObserver()
-            - MortalityObserver()
             - DiseaseObserver("maternal_disorders")
 
     vivarium_gates_nutrition_optimization:
         components:
+            - MaternalMortalityObserver()
             - Pregnancy()
             - PregnancyObserver()
             - BirthRecorder()
