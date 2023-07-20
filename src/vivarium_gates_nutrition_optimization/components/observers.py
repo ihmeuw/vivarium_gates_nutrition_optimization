@@ -32,8 +32,8 @@ class PregnancyObserver(DiseaseObserver):
             "pregnancy_outcome",
         ]
         return builder.population.get_view(columns_required)
-    
-class MaternalMortalityObserver(MortalityObserver):
 
+
+class MaternalMortalityObserver(MortalityObserver):
     def on_post_setup(self, event: Event) -> None:
         self.causes_of_death += ["maternal_disorders"]
