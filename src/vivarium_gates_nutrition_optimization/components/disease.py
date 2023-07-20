@@ -11,10 +11,7 @@ from vivarium.framework.values import Pipeline, list_combiner, union_post_proces
 from vivarium_public_health.disease import DiseaseState as DiseaseState_
 from vivarium_public_health.disease import SusceptibleState
 from vivarium_public_health.utilities import is_non_zero
-
-from vivarium_gates_nutrition_optimization.components.transition import (
-    ParturitionSelectionTransition,
-)
+from vivarium_public_health.disease.transition import ProportionTransition
 from vivarium_gates_nutrition_optimization.constants import data_keys
 
 
@@ -429,3 +426,29 @@ class ParturitionSelectionState(SusceptibleState):
         )
         self.transition_set.append(transition)
         return transition
+
+class ParturitionSelectionTransition(ProportionTransition):
+    def setup(self, builder: Builder):
+        super().setup(builder)
+
+        pipeline_name = (
+            f"{self.input_state.cause}_to_{self.output_state.cause}.transition_proportion"
+        )
+        self.proportion_pipeline = builder.value.register_value_producer(
+            pipeline_name,
+            source=self.compute_transition_proportion,
+            requires_columns=["age", "sex", "alive"],
+        )
+        self.population_view = builder.population.get_view(["alive", "pregnancy"])
+
+    def compute_transition_proportion(self, index):
+        transition_proportion = pd.Series(0.0, index=index)
+        sub_pop = self.population_view.get(
+            index, query="(alive == 'alive') & (pregnancy == 'parturition')"
+        ).index
+
+        transition_proportion.loc[sub_pop] = self.proportion(sub_pop)
+        return transition_proportion
+
+    def _probability(self, index):
+        return self.proportion_pipeline(index)
