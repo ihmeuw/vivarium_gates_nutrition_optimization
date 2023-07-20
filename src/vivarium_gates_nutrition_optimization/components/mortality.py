@@ -66,18 +66,16 @@ class MaternalMortality:
             ]
         )
 
-    def _get_mortality_probability_source(self, builder: Builder):
+    def _get_mortality_probability(self, builder: Builder):
         probability_data = builder.data.load(
             data_keys.MATERNAL_DISORDERS.MORTALITY_PROBABILITY
         )
-        return builder.lookup.build_table(
+        probability_pipeline_source = builder.lookup.build_table(
             probability_data, key_columns=["sex"], parameter_columns=["age", "year"]
         )
-
-    def _get_mortality_probability(self, builder: Builder):
         return builder.value.register_value_producer(
             self.mortality_probability_pipeline_name,
-            source=self._get_mortality_probability_source(builder),
+            source=probability_pipeline_source,
             requires_columns=["age", "sex"],
         )
 
