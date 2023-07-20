@@ -72,7 +72,6 @@ class __MaternalDisorders(NamedTuple):
     CSMR: str = "cause.maternal_disorders.cause_specific_mortality_rate"
     MORTALITY_PROBABILITY: str = "cause.maternal_disorders.mortality_probability"
     YLDS: str = "cause.maternal_disorders.ylds"
-    # RESTRICTIONS: str = "cause.maternal_disorders.restrictions"
 
     @property
     def name(self):
