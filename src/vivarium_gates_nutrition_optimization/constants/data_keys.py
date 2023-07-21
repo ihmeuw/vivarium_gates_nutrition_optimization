@@ -84,4 +84,20 @@ class __MaternalDisorders(NamedTuple):
 
 MATERNAL_DISORDERS = __MaternalDisorders()
 
-MAKE_ARTIFACT_KEY_GROUPS = [POPULATION, PREGNANCY, LBWSG, MATERNAL_DISORDERS]
+class __MaternalHemorrhage(NamedTuple):
+    RAW_INCIDENCE_RATE: str = "cause.maternal_hemorrhage.raw_incidence_rate"
+    CSMR: str = "cause.maternal_hemorrhage.cause_specific_mortality_rate"
+    INCIDENT_PROBABILITY: str = "cause.maternal_hemorrhage.incident_probability"
+
+    @property
+    def name(self):
+        return "maternal_hemorrhage"
+
+    @property
+    def log_name(self):
+        return "maternal_disorders"
+
+
+MATERNAL_HEMORRHAGE = __MaternalHemorrhage()
+
+MAKE_ARTIFACT_KEY_GROUPS = [POPULATION, PREGNANCY, LBWSG, MATERNAL_DISORDERS, MATERNAL_HEMORRHAGE]

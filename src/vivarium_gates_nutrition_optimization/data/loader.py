@@ -60,6 +60,10 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
         data_keys.MATERNAL_DISORDERS.MORTALITY_PROBABILITY: load_maternal_disorders_mortality_probability,
         data_keys.MATERNAL_DISORDERS.INCIDENT_PROBABILITY: load_pregnant_maternal_disorders_incidence,
         data_keys.MATERNAL_DISORDERS.YLDS: load_maternal_disorders_ylds,
+
+        data_keys.MATERNAL_HEMORRHAGE.RAW_INCIDENCE_RATE: load_raw_incidence_data,
+        data_keys.MATERNAL_HEMORRHAGE.CSMR: load_standard_data,
+        data_keys.MATERNAL_HEMORRHAGE.INCIDENT_PROBABILITY: load_pregnant_maternal_hemorrhage_incidence,
     }
     return mapping[lookup_key](lookup_key, location)
 
@@ -264,6 +268,14 @@ def load_maternal_disorders_mortality_probability(key: str, location: str):
     total_csmr = get_data(data_keys.MATERNAL_DISORDERS.CSMR, location)
     total_incidence = get_data(data_keys.MATERNAL_DISORDERS.RAW_INCIDENCE_RATE, location)
     return total_csmr / total_incidence
+
+def load_pregnant_maternal_hemorrhage_incidence(key: str, location: str):
+    mh_incidence = get_data(data_keys.MATERNAL_HEMORRHAGE.RAW_INCIDENCE_RATE, location)
+    mh_csmr = get_data(data_keys.MATERNAL_HEMORRHAGE.CSMR, location)
+    pregnancy_end_rate = get_pregnancy_end_incidence(location)
+    maternal_hemorrhage_incidence = (mh_incidence - mh_csmr) / pregnancy_end_rate
+    ## I'm not as sure we need to normalize here, but we may as well.
+    return maternal_hemorrhage_incidence.applymap(lambda value: 1 if value > 1 else value)
 
 
 ##############
