@@ -1,7 +1,7 @@
 from vivarium.framework.engine import Builder
 from vivarium.framework.event import Event
 from vivarium.framework.population import PopulationView
-from vivarium_public_health.metrics import DiseaseObserver
+from vivarium_public_health.metrics import DiseaseObserver, MortalityObserver
 from vivarium_public_health.metrics import ResultsStratifier as ResultsStratifier_
 from vivarium_public_health.metrics.stratification import Source, SourceType
 from vivarium_public_health.utilities import to_years
@@ -32,3 +32,8 @@ class PregnancyObserver(DiseaseObserver):
             "pregnancy_outcome",
         ]
         return builder.population.get_view(columns_required)
+
+
+class MaternalMortalityObserver(MortalityObserver):
+    def on_post_setup(self, event: Event) -> None:
+        self.causes_of_death += ["maternal_disorders"]
