@@ -96,7 +96,7 @@ class __MaternalHemorrhage(NamedTuple):
 
     @property
     def log_name(self):
-        return "maternal_disorders"
+        return "maternal_hemorrhage"
 
 
 MATERNAL_HEMORRHAGE = __MaternalHemorrhage()
