@@ -84,6 +84,7 @@ class __MaternalDisorders(NamedTuple):
 
 MATERNAL_DISORDERS = __MaternalDisorders()
 
+
 class __MaternalHemorrhage(NamedTuple):
     RAW_INCIDENCE_RATE: str = "cause.maternal_hemorrhage.raw_incidence_rate"
     CSMR: str = "cause.maternal_hemorrhage.cause_specific_mortality_rate"
@@ -100,4 +101,10 @@ class __MaternalHemorrhage(NamedTuple):
 
 MATERNAL_HEMORRHAGE = __MaternalHemorrhage()
 
-MAKE_ARTIFACT_KEY_GROUPS = [POPULATION, PREGNANCY, LBWSG, MATERNAL_DISORDERS, MATERNAL_HEMORRHAGE]
+MAKE_ARTIFACT_KEY_GROUPS = [
+    POPULATION,
+    PREGNANCY,
+    LBWSG,
+    MATERNAL_DISORDERS,
+    MATERNAL_HEMORRHAGE,
+]
