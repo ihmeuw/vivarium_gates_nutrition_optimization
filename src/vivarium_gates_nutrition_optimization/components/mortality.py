@@ -103,7 +103,7 @@ class MaternalMortality:
 
     def on_time_step(self, event: Event) -> None:
         pop = self.population_view.get(
-            event.index, query="(alive == 'alive') & (pregnancy == 'parturition')"
+            event.index, query="(alive == 'alive') & (maternal_disorders == 'maternal_disorders')"
         )
         mortality_probability = self.mortality_probability(pop.index)
 
