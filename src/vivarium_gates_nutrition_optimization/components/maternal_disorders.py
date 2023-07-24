@@ -51,7 +51,7 @@ def MaternalHemorrhage():
         cause,
         get_data_functions={
             "prevalence": lambda *_: 0.0,
-            "disability_weight": 0.0,
+            "disability_weight": lambda *_: 0.0,
             "excess_mortality_rate": lambda *_: 0.0,
             "dwell_time": lambda builder, cause: builder.time.step_size()(),
         },
