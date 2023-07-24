@@ -420,7 +420,7 @@ class ParturitionSelectionState(SusceptibleState):
             output,
             get_data_functions={
                 "proportion": lambda builder, cause: builder.data.load(
-                    f"cause.{cause}.incident_probability"
+                    data_keys.MATERNAL_DISORDERS.INCIDENT_PROBABILITY
                 )
             },
             **kwargs,
