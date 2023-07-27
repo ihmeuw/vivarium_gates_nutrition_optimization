@@ -4,11 +4,15 @@ import scipy.stats
 from vivarium.framework.engine import Builder
 from vivarium.framework.population import SimulantData
 
-from vivarium_gates_nutrition_optimization.constants import data_keys, data_values, models
+from vivarium_gates_nutrition_optimization.constants import (
+    data_keys,
+    data_values,
+    models,
+)
 from vivarium_gates_nutrition_optimization.constants.data_values import (  # RR_SCALAR,; SEVERE_ANEMIA_AMONG_PREGNANT_WOMEN_THRESHOLD,; TMREL_HEMOGLOBIN_ON_MATERNAL_DISORDERS,
     ANEMIA_DISABILITY_WEIGHTS,
-    HEMOGLOBIN_DISTRIBUTION_PARAMETERS,
     ANEMIA_THRESHOLD_DATA,
+    HEMOGLOBIN_DISTRIBUTION_PARAMETERS,
 )
 
 
@@ -209,10 +213,9 @@ class Hemoglobin:
 
 
 class Anemia:
-
     @property
     def name(self):
-        return 'anemia'
+        return "anemia"
 
     def setup(self, builder: Builder):
         self.hemoglobin = builder.value.get_value("hemoglobin.exposure")
@@ -228,7 +231,7 @@ class Anemia:
             requires_values=["hemoglobin.exposure"],
         )
 
-        self.disability_weight =  builder.value.register_value_producer(
+        self.disability_weight = builder.value.register_value_producer(
             "anemia.disability_weight",
             source=self.compute_disability_weight,
             requires_columns=["alive", "pregnancy"],
@@ -239,7 +242,7 @@ class Anemia:
             self.disability_weight,
         )
 
-        self.population_view = builder.population.get_view(['alive', 'pregnancy'])
+        self.population_view = builder.population.get_view(["alive", "pregnancy"])
 
     def anemia_source(self, index: pd.Index) -> pd.Series:
         hemoglobin_level = self.hemoglobin(index)
@@ -251,28 +254,27 @@ class Anemia:
             index=index,
             name="anemia_levels",
         )
-    
+
     def compute_disability_weight(self, index: pd.Index):
         anemia_levels = self.anemia_levels(index)
         raw_anemia_disability_weight = anemia_levels.map(ANEMIA_DISABILITY_WEIGHTS)
         ## Why?
         postpartum_scalar = (
-            (data_values.DURATIONS.POSTPARTUM + data_values.DURATIONS.PARTURITION)
-            / data_values.DURATIONS.POSTPARTUM
-        )
+            data_values.DURATIONS.POSTPARTUM + data_values.DURATIONS.PARTURITION
+        ) / data_values.DURATIONS.POSTPARTUM
         dw_map = {
             models.NOT_PREGNANT_STATE_NAME: raw_anemia_disability_weight,
             models.PREGNANT_STATE_NAME: raw_anemia_disability_weight,
             ## I need to clarify exactly how and why we are pausing YLD accumulation
             models.PARTURITION_STATE_NAME: pd.Series(0, index=index),
-            models.POSTPARTUM_STATE_NAME: postpartum_scalar * raw_anemia_disability_weight
+            models.POSTPARTUM_STATE_NAME: postpartum_scalar * raw_anemia_disability_weight,
         }
 
         pop = self.population_view.get(index)
         alive = pop["alive"] == "alive"
         disability_weight = pd.Series(np.nan, index=index)
         for state, dw in dw_map.items():
-            in_state = alive & (pop['pregnancy'] == state)
+            in_state = alive & (pop["pregnancy"] == state)
             disability_weight[in_state] = dw.loc[in_state]
 
         return disability_weight
