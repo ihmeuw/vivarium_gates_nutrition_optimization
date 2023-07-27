@@ -28,15 +28,6 @@ INFANT_MALE_PERCENTAGES = {
 MATERNAL_HEMORRHAGE_HEMOGLOBIN_POSTPARTUM_SHIFT = 6.8  # g/L
 PROBABILITY_MODERATE_MATERNAL_HEMORRHAGE = (0.85, 0.81, 0.89)
 
-# state: (mean_params, sd_params)
-HEMOGLOBIN_CORRECTION_FACTORS = {
-    models.NOT_PREGNANT_STATE_NAME: ((1.0, 1.0, 1.0), (1.0, 1.0, 1.0)),
-    models.PREGNANT_STATE_NAME: (
-        (0.919325, 0.86, 0.98),
-        (1.032920188, 1.032920188, 1.032920188),
-    ),
-}
-
 
 class _HemoglobinDistributionParameters(NamedTuple):
     XMAX: int = 220
@@ -82,27 +73,27 @@ HEMOGLOBIN_THRESHOLD_DATA = pd.DataFrame(
     ],
 )
 
-MATERNAL_BMI_ANEMIA_THRESHOLD = 100.0  # g/L, units of hemoglobin exposure distribution
+# MATERNAL_BMI_ANEMIA_THRESHOLD = 100.0  # g/L, units of hemoglobin exposure distribution
 
-SEVERE_ANEMIA_AMONG_PREGNANT_WOMEN_THRESHOLD = 70.0  # g/L
+# SEVERE_ANEMIA_AMONG_PREGNANT_WOMEN_THRESHOLD = 70.0  # g/L
 
 
-# Risk Effects
-RR_MATERNAL_HEMORRHAGE_ATTRIBUTABLE_TO_HEMOGLOBIN = (
-    3.54,
-    1.2,
-    10.4,
-)  # (median, lower, upper) 95% CI
-HEMOGLOBIN_SCALE_FACTOR_MODERATE_HEMORRHAGE = 0.9
-HEMOGLOBIN_SCALE_FACTOR_SEVERE_HEMORRHAGE = 0.833
+# # Risk Effects
+# RR_MATERNAL_HEMORRHAGE_ATTRIBUTABLE_TO_HEMOGLOBIN = (
+#     3.54,
+#     1.2,
+#     10.4,
+# )  # (median, lower, upper) 95% CI
+# HEMOGLOBIN_SCALE_FACTOR_MODERATE_HEMORRHAGE = 0.9
+# HEMOGLOBIN_SCALE_FACTOR_SEVERE_HEMORRHAGE = 0.833
 
-TMREL_HEMOGLOBIN_ON_MATERNAL_DISORDERS = 120.0
-RR_SCALAR = (
-    10.0  # Conversion factor between hemoglobin units (g/L) and relative risk units (g/dL)
-)
+# TMREL_HEMOGLOBIN_ON_MATERNAL_DISORDERS = 120.0
+# RR_SCALAR = (
+#     10.0  # Conversion factor between hemoglobin units (g/L) and relative risk units (g/dL)
+# )
 
-RR_STILLBIRTH_PROBABILITY_ATTRIBUTABLE_TO_HEMOGLOBIN = (
-    3.87,
-    1.88,
-    8.06,
-)  # (median, lower, upper) 95% CI
+# RR_STILLBIRTH_PROBABILITY_ATTRIBUTABLE_TO_HEMOGLOBIN = (
+#     3.87,
+#     1.88,
+#     8.06,
+# )  # (median, lower, upper) 95% CI
