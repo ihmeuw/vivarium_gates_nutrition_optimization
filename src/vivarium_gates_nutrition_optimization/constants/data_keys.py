@@ -101,14 +101,13 @@ class __MaternalHemorrhage(NamedTuple):
 
 MATERNAL_HEMORRHAGE = __MaternalHemorrhage()
 
+
 class _Hemoglobin(NamedTuple):
     MEAN: TargetString = TargetString("risk_factor.hemoglobin.mean")
     STANDARD_DEVIATION: TargetString = TargetString(
         "risk_factor.hemoglobin.standard_deviation"
     )
-    PREGNANT_PROPORTION_WITH_HEMOGLOBIN_BELOW_70: TargetString = TargetString(
-        "risk_factor.hemoglobin.pregnant_proportion_below_70_gL"
-    )
+    PREGNANCY_CORRECTION_FACTORS: str = "covariate.pregnancy_correction_factors.estimate"
 
     @property
     def name(self):

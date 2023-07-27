@@ -1,8 +1,14 @@
 import numpy as np
 import pandas as pd
 from scipy import stats
+from typing import Tuple
 from vivarium.framework.randomness import get_hash
 
+def get_norm_from_quantiles(mean: float, lower: float, upper: float,
+                            quantiles: Tuple[float, float] = (0.025, 0.975)) -> stats.norm:
+    stdnorm_quantiles = stats.norm.ppf(quantiles)
+    sd = (upper - lower) / (stdnorm_quantiles[1] - stdnorm_quantiles[0])
+    return stats.norm(loc=mean, scale=sd)
 
 def generate_vectorized_lognormal_draws(
     df: pd.DataFrame,
