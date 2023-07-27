@@ -82,7 +82,7 @@ HEMOGLOBIN_THRESHOLD_DATA = pd.DataFrame(
 
 MATERNAL_BMI_ANEMIA_THRESHOLD = 100.0  # g/L, units of hemoglobin exposure distribution
 
-SEVERE_ANEMIA_AMONG_PREGNANT_WOMEN_THRESHOLD = 70.0 # g/L
+SEVERE_ANEMIA_AMONG_PREGNANT_WOMEN_THRESHOLD = 70.0  # g/L
 
 
 # Risk Effects
@@ -95,7 +95,9 @@ HEMOGLOBIN_SCALE_FACTOR_MODERATE_HEMORRHAGE = 0.9
 HEMOGLOBIN_SCALE_FACTOR_SEVERE_HEMORRHAGE = 0.833
 
 TMREL_HEMOGLOBIN_ON_MATERNAL_DISORDERS = 120.0
-RR_SCALAR = 10.0  # Conversion factor between hemoglobin units (g/L) and relative risk units (g/dL)
+RR_SCALAR = (
+    10.0  # Conversion factor between hemoglobin units (g/L) and relative risk units (g/dL)
+)
 
 RR_STILLBIRTH_PROBABILITY_ATTRIBUTABLE_TO_HEMOGLOBIN = (
     3.87,

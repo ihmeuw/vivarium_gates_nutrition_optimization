@@ -93,9 +93,9 @@ class Hemoglobin:
         # )
 
         builder.value.register_value_producer(
-            'anemia.disability_weight',
+            "anemia.disability_weight",
             source=self.disability_weight,
-            requires_values=['hemoglobin.exposure']
+            requires_values=["hemoglobin.exposure"],
         )
 
         # self.hemorrhage_rr = builder.lookup.build_table(
@@ -179,7 +179,6 @@ class Hemoglobin:
     #     per_simulant_rr = rr ** per_simulant_exposure
     #     return (1 - paf) * per_simulant_rr
 
-
     @staticmethod
     def _gamma_ppf(propensity, mean, sd):
         """Returns the quantile for the given quantile rank (`propensity`) of a Gamma
@@ -221,13 +220,9 @@ class Hemoglobin:
         )
         gumbel = ~gamma
 
-        ret_val = pd.Series(
-            index=propensity_distribution.index, name="value", dtype=float
-        )
+        ret_val = pd.Series(index=propensity_distribution.index, name="value", dtype=float)
         ret_val.loc[gamma] = self._gamma_ppf(propensity, mean, sd)[gamma]
-        ret_val.loc[gumbel] = self._mirrored_gumbel_ppf_2017(propensity, mean, sd)[
-            gumbel
-        ]
+        ret_val.loc[gumbel] = self._mirrored_gumbel_ppf_2017(propensity, mean, sd)[gumbel]
         return ret_val
 
     def disability_weight(self, index: pd.Index) -> pd.Series:

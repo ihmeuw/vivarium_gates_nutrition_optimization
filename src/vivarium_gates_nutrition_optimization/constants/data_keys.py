@@ -101,6 +101,7 @@ class __MaternalHemorrhage(NamedTuple):
 
 MATERNAL_HEMORRHAGE = __MaternalHemorrhage()
 
+
 class _Hemoglobin(NamedTuple):
     MEAN: TargetString = TargetString("risk_factor.hemoglobin.mean")
     STANDARD_DEVIATION: TargetString = TargetString(
