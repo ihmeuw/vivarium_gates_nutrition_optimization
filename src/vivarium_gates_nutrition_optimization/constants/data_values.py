@@ -64,7 +64,7 @@ for key, states in _hemoglobin_state_map.items():
 ANEMIA_THRESHOLD_DATA = pd.DataFrame(
     _htd,
     columns=[
-        "pregnancy_status",
+        "pregnancy",
         "sex",
         "age_start",
         "age_end",

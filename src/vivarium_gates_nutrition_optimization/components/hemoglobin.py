@@ -219,7 +219,7 @@ class Anemia:
 
         self.thresholds = builder.lookup.build_table(
             ANEMIA_THRESHOLD_DATA,
-            key_columns=["sex", "pregnancy_status"],
+            key_columns=["sex", "pregnancy"],
             parameter_columns=["age"],
         )
         self.anemia_levels = builder.value.register_value_producer(
@@ -227,12 +227,11 @@ class Anemia:
             source=self.anemia_source,
             requires_values=["hemoglobin.exposure"],
         )
-        
+
         self.disability_weight =  builder.value.register_value_producer(
             "anemia.disability_weight",
             source=self.compute_disability_weight,
-            requires_columns=["alive", "pregnancy_status"],
-            requires_values=['anemia.disability_weight'],
+            requires_columns=["alive", "pregnancy"],
         )
 
         builder.value.register_value_modifier(
@@ -240,7 +239,7 @@ class Anemia:
             self.disability_weight,
         )
 
-        self.population_view = builder.population.get_view(['alive', 'pregnancy_status'])
+        self.population_view = builder.population.get_view(['alive', 'pregnancy'])
 
     def anemia_source(self, index: pd.Index) -> pd.Series:
         hemoglobin_level = self.hemoglobin(index)
@@ -272,7 +271,7 @@ class Anemia:
         alive = pop["alive"] == "alive"
         disability_weight = pd.Series(np.nan, index=index)
         for state, dw in dw_map.items():
-            in_state = alive & (pop['pregnancy_status'] == state)
+            in_state = alive & (pop['pregnancy'] == state)
             disability_weight[in_state] = dw.loc[in_state]
 
         return disability_weight
