@@ -255,7 +255,7 @@ class Anemia:
     def compute_disability_weight(self, index: pd.Index):
         anemia_levels = self.anemia_levels(index)
         raw_anemia_disability_weight = anemia_levels.map(ANEMIA_DISABILITY_WEIGHTS)
-
+        ## Why?
         postpartum_scalar = (
             (data_values.DURATIONS.POSTPARTUM + data_values.DURATIONS.PARTURITION)
             / data_values.DURATIONS.POSTPARTUM
@@ -263,6 +263,7 @@ class Anemia:
         dw_map = {
             models.NOT_PREGNANT_STATE_NAME: raw_anemia_disability_weight,
             models.PREGNANT_STATE_NAME: raw_anemia_disability_weight,
+            ## I need to clarify exactly how and why we are pausing YLD accumulation
             models.PARTURITION_STATE_NAME: pd.Series(0, index=index),
             models.POSTPARTUM_STATE_NAME: postpartum_scalar * raw_anemia_disability_weight
         }
