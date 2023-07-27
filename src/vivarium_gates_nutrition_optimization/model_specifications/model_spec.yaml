@@ -13,6 +13,7 @@ components:
             - MaternalHemorrhage()
             - MaternalMortality()
             - Hemoglobin()
+            - Anemia()
             - ResultsStratifier()
             - PregnancyObserver()
             - BirthRecorder()
