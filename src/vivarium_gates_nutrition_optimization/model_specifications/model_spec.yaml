@@ -5,16 +5,18 @@ components:
         metrics:
             - DisabilityObserver()
             - DiseaseObserver("maternal_disorders")
+            - DiseaseObserver("maternal_hemorrhage")
     vivarium_gates_nutrition_optimization:
         components:
-            - MaternalMortalityObserver()
             - Pregnancy()
             - MaternalDisorders()
+            - MaternalHemorrhage()
             - MaternalMortality()
             - Hemoglobin()
+            - ResultsStratifier()
             - PregnancyObserver()
             - BirthRecorder()
-            - ResultsStratifier()
+            - MaternalMortalityObserver()
 
 configuration:
     input_data:
