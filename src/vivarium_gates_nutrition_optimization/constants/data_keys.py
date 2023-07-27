@@ -107,7 +107,6 @@ class _Hemoglobin(NamedTuple):
     STANDARD_DEVIATION: TargetString = TargetString(
         "risk_factor.hemoglobin.standard_deviation"
     )
-    PREGNANCY_CORRECTION_FACTORS: str = "covariate.pregnancy_correction_factors.estimate"
 
     @property
     def name(self):

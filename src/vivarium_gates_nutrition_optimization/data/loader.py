@@ -73,7 +73,6 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
         data_keys.MATERNAL_HEMORRHAGE.INCIDENT_PROBABILITY: load_pregnant_maternal_hemorrhage_incidence,
         data_keys.HEMOGLOBIN.MEAN: get_hemoglobin_data,
         data_keys.HEMOGLOBIN.STANDARD_DEVIATION: get_hemoglobin_data,
-        data_keys.HEMOGLOBIN.PREGNANCY_CORRECTION_FACTORS: load_pregnancy_hemoglobin_correction,
     }
     return mapping[lookup_key](lookup_key, location)
 
@@ -293,7 +292,6 @@ def load_pregnant_maternal_hemorrhage_incidence(key: str, location: str):
 # Hemoglobin Data         #
 ###########################
 
-
 def get_hemoglobin_data(key: str, location: str) -> pd.DataFrame:
     me_id = {
         data_keys.HEMOGLOBIN.MEAN: 10487,
@@ -303,27 +301,15 @@ def get_hemoglobin_data(key: str, location: str) -> pd.DataFrame:
     location_id = utility_data.get_location_id(location)
     hemoglobin_data = gbd.get_modelable_entity_draws(me_id=me_id, location_id=location_id)
     hemoglobin_data = reshape_to_vivarium_format(hemoglobin_data, location)
-    return hemoglobin_data
-
-def load_pregnancy_hemoglobin_correction(key: str, location: str):
-    demography = interface.get_demographic_dimensions(location)
-
-    data = []
-    params = data_values.HEMOGLOBIN_CORRECTION_FACTORS
-
-    np.random.seed(get_hash(f"{key}_pregnant_{location}"))
-    for param_name, param_set in zip(("mean", "stddev"), params):
-        dist = sampling.get_norm_from_quantiles(*param_set)
-        samples = pd.DataFrame(
-            np.tile(dist.rvs(size=1000), (len(demography), 1)),
+    # Add correction factors for 
+    correction_params = data_values.PREGNANCY_CORRECTION_FACTORS[key]
+    dist = sampling.get_norm_from_quantiles(*correction_params)
+    correction_factors = pd.DataFrame(
+            np.tile(dist.rvs(size=1000), (len(hemoglobin_data), 1)),
             columns=vi_globals.DRAW_COLUMNS,
-            index=demography.index,
-        )
-        samples["parameter"] = param_name
-        data.append(samples)
+            index=hemoglobin_data.index,)
 
-    data = pd.concat(data).set_index(["parameter"], append=True)
-    return data
+    return hemoglobin_data * correction_factors
 
 
 ##############

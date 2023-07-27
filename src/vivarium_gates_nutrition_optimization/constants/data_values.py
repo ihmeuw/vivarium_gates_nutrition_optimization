@@ -1,4 +1,5 @@
 from typing import NamedTuple
+from vivarium_gates_nutrition_optimization.constants import data_keys
 
 
 ############################
@@ -20,7 +21,7 @@ INFANT_MALE_PERCENTAGES = {
     "Pakistan": 0.514583,
 }
 
-HEMOGLOBIN_CORRECTION_FACTORS = (
-    (0.919325, 0.86, 0.98),
-    (1.032920188, 1.032920188, 1.032920188),
-)
+PREGNANCY_CORRECTION_FACTORS = {
+    data_keys.HEMOGLOBIN.MEAN: (0.919325, 0.86, 0.98),
+    data_keys.HEMOGLOBIN.STANDARD_DEVIATION: (1.032920188, 1.032920188, 1.032920188),
+}
