@@ -1,6 +1,8 @@
 from typing import NamedTuple
-import pandas as pd
+
 import numpy as np
+import pandas as pd
+
 from vivarium_gates_nutrition_optimization.constants import models
 
 

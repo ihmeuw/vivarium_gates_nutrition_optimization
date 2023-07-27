@@ -1,10 +1,10 @@
 import numpy as np
 import pandas as pd
 import scipy.stats
-
 from vivarium.framework.engine import Builder
 from vivarium.framework.population import SimulantData
 
+from vivarium_gates_nutrition_optimization.constants import data_keys
 from vivarium_gates_nutrition_optimization.constants.data_values import (
     ANEMIA_DISABILITY_WEIGHTS,
     HEMOGLOBIN_DISTRIBUTION_PARAMETERS,
@@ -13,8 +13,6 @@ from vivarium_gates_nutrition_optimization.constants.data_values import (
     SEVERE_ANEMIA_AMONG_PREGNANT_WOMEN_THRESHOLD,
     TMREL_HEMOGLOBIN_ON_MATERNAL_DISORDERS,
 )
-
-from vivarium_gates_nutrition_optimization.constants import data_keys
 
 
 class Hemoglobin:
