@@ -19,7 +19,8 @@ from vivarium.framework.artifact import EntityKey
 from vivarium_inputs import core as vi_core
 from vivarium_inputs import globals as vi_globals
 from vivarium_inputs import interface
-from vivarium_inputs import utilities as vi_utils
+from vivarium_inputs import utilities as vi_utils, utility_data
+from vivarium_gbd_access import gbd
 
 from vivarium_gates_nutrition_optimization.constants import data_keys, metadata
 from vivarium_gates_nutrition_optimization.data import extra_gbd, sampling
@@ -63,6 +64,8 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
         data_keys.MATERNAL_HEMORRHAGE.RAW_INCIDENCE_RATE: load_raw_incidence_data,
         data_keys.MATERNAL_HEMORRHAGE.CSMR: load_standard_data,
         data_keys.MATERNAL_HEMORRHAGE.INCIDENT_PROBABILITY: load_pregnant_maternal_hemorrhage_incidence,
+        data_keys.HEMOGLOBIN.MEAN: get_hemoglobin_data,
+        data_keys.HEMOGLOBIN.STANDARD_DEVIATION: get_hemoglobin_data,
     }
     return mapping[lookup_key](lookup_key, location)
 
@@ -277,6 +280,20 @@ def load_pregnant_maternal_hemorrhage_incidence(key: str, location: str):
     ## I'm not as sure we need to normalize here, but we may as well.
     return maternal_hemorrhage_incidence.applymap(lambda value: 1 if value > 1 else value)
 
+###########################
+# Hemoglobin Data         #
+###########################
+
+def get_hemoglobin_data(key: str, location: str) -> pd.DataFrame:
+    me_id = {
+        data_keys.HEMOGLOBIN.MEAN: 10487,
+        data_keys.HEMOGLOBIN.STANDARD_DEVIATION: 10488
+    }[key]
+
+    location_id = utility_data.get_location_id(location)
+    hemoglobin_data = gbd.get_modelable_entity_draws(me_id=me_id, location_id=location_id)
+    hemoglobin_data = reshape_to_vivarium_format(hemoglobin_data, location)
+    return hemoglobin_data
 
 ##############
 #   Helpers  #
