@@ -102,10 +102,28 @@ class __MaternalHemorrhage(NamedTuple):
 MATERNAL_HEMORRHAGE = __MaternalHemorrhage()
 
 
+class _Hemoglobin(NamedTuple):
+    MEAN: TargetString = TargetString("risk_factor.hemoglobin.mean")
+    STANDARD_DEVIATION: TargetString = TargetString(
+        "risk_factor.hemoglobin.standard_deviation"
+    )
+
+    @property
+    def name(self):
+        return "hemoglobin"
+
+    @property
+    def log_name(self):
+        return "hemoglobin"
+
+
+HEMOGLOBIN = _Hemoglobin()
+
 MAKE_ARTIFACT_KEY_GROUPS = [
     POPULATION,
     PREGNANCY,
     LBWSG,
     MATERNAL_DISORDERS,
     MATERNAL_HEMORRHAGE,
+    HEMOGLOBIN,
 ]
