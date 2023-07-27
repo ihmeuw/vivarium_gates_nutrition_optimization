@@ -5,13 +5,10 @@ from vivarium.framework.engine import Builder
 from vivarium.framework.population import SimulantData
 
 from vivarium_gates_nutrition_optimization.constants import data_keys
-from vivarium_gates_nutrition_optimization.constants.data_values import (
+from vivarium_gates_nutrition_optimization.constants.data_values import (  # RR_SCALAR,; SEVERE_ANEMIA_AMONG_PREGNANT_WOMEN_THRESHOLD,; TMREL_HEMOGLOBIN_ON_MATERNAL_DISORDERS,
     ANEMIA_DISABILITY_WEIGHTS,
     HEMOGLOBIN_DISTRIBUTION_PARAMETERS,
     HEMOGLOBIN_THRESHOLD_DATA,
-    # RR_SCALAR,
-    # SEVERE_ANEMIA_AMONG_PREGNANT_WOMEN_THRESHOLD,
-    # TMREL_HEMOGLOBIN_ON_MATERNAL_DISORDERS,
 )
 
 
