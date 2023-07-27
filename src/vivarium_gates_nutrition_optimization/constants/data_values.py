@@ -1,4 +1,5 @@
 from typing import NamedTuple
+
 from vivarium_gates_nutrition_optimization.constants import data_keys
 
 

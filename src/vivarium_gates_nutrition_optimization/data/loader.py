@@ -13,16 +13,17 @@ for an example.
    No logging is done here. Logging is done in vivarium inputs itself and forwarded.
 """
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 import vivarium_inputs.validation.sim as validation
 from vivarium.framework.artifact import EntityKey
 from vivarium.framework.randomness import get_hash
+from vivarium_gbd_access import gbd
 from vivarium_inputs import core as vi_core
 from vivarium_inputs import globals as vi_globals
 from vivarium_inputs import interface
-from vivarium_inputs import utilities as vi_utils, utility_data
-from vivarium_gbd_access import gbd
+from vivarium_inputs import utilities as vi_utils
+from vivarium_inputs import utility_data
 
 from vivarium_gates_nutrition_optimization.constants import (
     data_keys,

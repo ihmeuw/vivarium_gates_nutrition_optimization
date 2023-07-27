@@ -1,7 +1,8 @@
+from typing import Tuple
+
 import numpy as np
 import pandas as pd
 from scipy import stats
-from typing import Tuple
 from vivarium.framework.randomness import get_hash
 
 
