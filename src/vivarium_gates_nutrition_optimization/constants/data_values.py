@@ -28,8 +28,8 @@ PROBABILITY_MODERATE_MATERNAL_HEMORRHAGE = (0.85, 0.81, 0.89)
 
 # state: (mean_params, sd_params)
 HEMOGLOBIN_CORRECTION_FACTORS = {
-    models.NOT_PREGNANT_STATE: ((1.0, 1.0, 1.0), (1.0, 1.0, 1.0)),
-    models.PREGNANT_STATE: (
+    models.NOT_PREGNANT_STATE_NAME: ((1.0, 1.0, 1.0), (1.0, 1.0, 1.0)),
+    models.PREGNANT_STATE_NAME: (
         (0.919325, 0.86, 0.98),
         (1.032920188, 1.032920188, 1.032920188),
     ),
@@ -59,7 +59,7 @@ _hemoglobin_threshold_data = {
 }
 _hemoglobin_state_map = {
     "pregnant": models.PREGNANCY_MODEL_STATES[1:],
-    "not_pregnant": [models.NOT_PREGNANT_STATE],
+    "not_pregnant": [models.NOT_PREGNANT_STATE_NAME],
 }
 _htd = []
 for key, states in _hemoglobin_state_map.items():

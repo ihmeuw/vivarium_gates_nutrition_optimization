@@ -106,9 +106,6 @@ class _Hemoglobin(NamedTuple):
     STANDARD_DEVIATION: TargetString = TargetString(
         "risk_factor.hemoglobin.standard_deviation"
     )
-    PREGNANT_PROPORTION_WITH_HEMOGLOBIN_BELOW_70: TargetString = TargetString(
-        "risk_factor.hemoglobin.pregnant_proportion_below_70_gL"
-    )
 
     @property
     def name(self):
