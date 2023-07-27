@@ -302,7 +302,7 @@ def get_hemoglobin_data(key: str, location: str) -> pd.DataFrame:
     location_id = utility_data.get_location_id(location)
     hemoglobin_data = gbd.get_modelable_entity_draws(me_id=me_id, location_id=location_id)
     hemoglobin_data = reshape_to_vivarium_format(hemoglobin_data, location)
-    # Add correction factors for
+    # Add correction factors for pregnancies
     correction_params = data_values.PREGNANCY_CORRECTION_FACTORS[key]
     dist = sampling.get_norm_from_quantiles(*correction_params)
     correction_factors = pd.DataFrame(

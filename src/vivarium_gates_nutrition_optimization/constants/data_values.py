@@ -20,7 +20,7 @@ INFANT_MALE_PERCENTAGES = {
     "Nigeria": 0.511785,
     "Pakistan": 0.514583,
 }
-
+## mean, lower, upper to go into distribution
 PREGNANCY_CORRECTION_FACTORS = {
     data_keys.HEMOGLOBIN.MEAN: (0.919325, 0.86, 0.98),
     data_keys.HEMOGLOBIN.STANDARD_DEVIATION: (1.032920188, 1.032920188, 1.032920188),
