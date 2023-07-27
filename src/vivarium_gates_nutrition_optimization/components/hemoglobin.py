@@ -4,11 +4,11 @@ import scipy.stats
 from vivarium.framework.engine import Builder
 from vivarium.framework.population import SimulantData
 
-from vivarium_gates_nutrition_optimization.constants import data_keys
+from vivarium_gates_nutrition_optimization.constants import data_keys, data_values, models
 from vivarium_gates_nutrition_optimization.constants.data_values import (  # RR_SCALAR,; SEVERE_ANEMIA_AMONG_PREGNANT_WOMEN_THRESHOLD,; TMREL_HEMOGLOBIN_ON_MATERNAL_DISORDERS,
     ANEMIA_DISABILITY_WEIGHTS,
     HEMOGLOBIN_DISTRIBUTION_PARAMETERS,
-    HEMOGLOBIN_THRESHOLD_DATA,
+    ANEMIA_THRESHOLD_DATA,
 )
 
 
@@ -69,29 +69,11 @@ class Hemoglobin:
             source=self.raw_hemoglobin,
         )
 
-        self.thresholds = builder.lookup.build_table(
-            HEMOGLOBIN_THRESHOLD_DATA,
-            key_columns=["sex", "pregnancy_status"],
-            parameter_columns=["age"],
-        )
-
-        self.anemia_levels = builder.value.register_value_producer(
-            "anemia_levels",
-            source=self.anemia_source,
-            requires_values=["hemoglobin.exposure"],
-        )
-
         # self.maternal_disorder_risk_effect = builder.value.register_value_producer(
         #     "maternal_disorder_risk_effect",
         #     source=self.maternal_disorder_risk_effect,
         #     requires_values=["hemoglobin.exposure"],
         # )
-
-        builder.value.register_value_producer(
-            "anemia.disability_weight",
-            source=self.disability_weight,
-            requires_values=["hemoglobin.exposure"],
-        )
 
         # self.hemorrhage_rr = builder.lookup.build_table(
         #         builder.data.load(data_keys.MATERNAL_DISORDERS.RR_MATERNAL_HEMORRHAGE_ATTRIBUTABLE_TO_HEMOGLOBIN),
@@ -154,17 +136,6 @@ class Hemoglobin:
             distribution_parameters,
         )
 
-    def anemia_source(self, index: pd.Index) -> pd.Series:
-        hemoglobin_level = self.hemoglobin(index)
-        thresholds = self.thresholds(index)
-        choice_index = (hemoglobin_level.values[np.newaxis].T < thresholds).sum(axis=1)
-
-        return pd.Series(
-            np.array(["none", "mild", "moderate", "severe"])[choice_index],
-            index=index,
-            name="anemia_levels",
-        )
-
     # def maternal_disorder_risk_effect(self, index: pd.Index) -> pd.Series:
     #     hemoglobin_level = self.hemoglobin(index)
     #     rr = self.maternal_disorder_rr(index)
@@ -220,17 +191,6 @@ class Hemoglobin:
         ret_val.loc[gumbel] = self._mirrored_gumbel_ppf_2017(propensity, mean, sd)[gumbel]
         return ret_val
 
-    def disability_weight(self, index: pd.Index) -> pd.Series:
-        hemoglobin_level = self.hemoglobin(index)
-        thresholds = self.thresholds(index)
-        choice_index = (hemoglobin_level.values[np.newaxis].T < thresholds).sum(axis=1)
-        anemia_levels = pd.Series(
-            np.array(["none", "mild", "moderate", "severe"])[choice_index],
-            index=index,
-            name="anemia_levels",
-        )
-        return anemia_levels.map(ANEMIA_DISABILITY_WEIGHTS)
-
     # def adjust_maternal_hemorrhage_probability(self, index, probability):
     #     paf = self.hemorrhage_paf(index)["value"]
     #     rr = self.hemorrhage_rr(index)["value"]
@@ -246,3 +206,73 @@ class Hemoglobin:
     #     probability.loc[anemic, "moderate_maternal_hemorrhage"] = (1 - severe_ratio) * p_maternal_hemorrhage_anemic
     #     probability["not_maternal_hemorrhage"] = (1 - probability["moderate_maternal_hemorrhage"] - probability["severe_maternal_hemorrhage"])
     #     return probability
+
+
+class Anemia:
+
+    @property
+    def name(self):
+        return 'anemia'
+
+    def setup(self, builder: Builder):
+        self.hemoglobin = builder.value.get_value("hemoglobin.exposure")
+
+        self.thresholds = builder.lookup.build_table(
+            ANEMIA_THRESHOLD_DATA,
+            key_columns=["sex", "pregnancy_status"],
+            parameter_columns=["age"],
+        )
+        self.anemia_levels = builder.value.register_value_producer(
+            "anemia_levels",
+            source=self.anemia_source,
+            requires_values=["hemoglobin.exposure"],
+        )
+        
+        self.disability_weight =  builder.value.register_value_producer(
+            "anemia.disability_weight",
+            source=self.compute_disability_weight,
+            requires_columns=["alive", "pregnancy_status"],
+            requires_values=['anemia.disability_weight'],
+        )
+
+        builder.value.register_value_modifier(
+            "disability_weight",
+            self.disability_weight,
+        )
+
+        self.population_view = builder.population.get_view(['alive', 'pregnancy_status'])
+
+    def anemia_source(self, index: pd.Index) -> pd.Series:
+        hemoglobin_level = self.hemoglobin(index)
+        thresholds = self.thresholds(index)
+        choice_index = (hemoglobin_level.values[np.newaxis].T < thresholds).sum(axis=1)
+
+        return pd.Series(
+            np.array(["none", "mild", "moderate", "severe"])[choice_index],
+            index=index,
+            name="anemia_levels",
+        )
+    
+    def compute_disability_weight(self, index: pd.Index):
+        anemia_levels = self.anemia_levels(index)
+        raw_anemia_disability_weight = anemia_levels.map(ANEMIA_DISABILITY_WEIGHTS)
+
+        postpartum_scalar = (
+            (data_values.DURATIONS.POSTPARTUM + data_values.DURATIONS.PARTURITION)
+            / data_values.DURATIONS.POSTPARTUM
+        )
+        dw_map = {
+            models.NOT_PREGNANT_STATE_NAME: raw_anemia_disability_weight,
+            models.PREGNANT_STATE_NAME: raw_anemia_disability_weight,
+            models.PARTURITION_STATE_NAME: pd.Series(0, index=index),
+            models.POSTPARTUM_STATE_NAME: postpartum_scalar * raw_anemia_disability_weight
+        }
+
+        pop = self.population_view.get(index)
+        alive = pop["alive"] == "alive"
+        disability_weight = pd.Series(np.nan, index=index)
+        for state, dw in dw_map.items():
+            in_state = alive & (pop['pregnancy_status'] == state)
+            disability_weight[in_state] = dw.loc[in_state]
+
+        return disability_weight

@@ -13,6 +13,7 @@ class _Durations(NamedTuple):
     ## Days
     FULL_TERM = 40 * 7
     POSTPARTUM = 6 * 7
+    PARTURITION = 1 * 7
     DETECTION = 6 * 7
     PARTIAL_TERM = 24 * 7
 
@@ -60,7 +61,7 @@ for key, states in _hemoglobin_state_map.items():
         for row in _hemoglobin_threshold_data[key]:
             _htd.append((state, "Female", *row))
 
-HEMOGLOBIN_THRESHOLD_DATA = pd.DataFrame(
+ANEMIA_THRESHOLD_DATA = pd.DataFrame(
     _htd,
     columns=[
         "pregnancy_status",
