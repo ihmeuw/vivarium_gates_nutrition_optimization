@@ -39,6 +39,12 @@ def make_measure_data(data):
         maternal_disorders_transition_count=get_transition_count_measure_data(
             data, "maternal_disorders_transition_count"
         ),
+        maternal_hemorrhage_state_person_time=get_state_person_time_measure_data(
+            data, "maternal_hemorrhage_state_person_time"
+        ),
+        maternal_hemorrhage_transition_count=get_transition_count_measure_data(
+            data, "maternal_hemorrhage_transition_count"
+        ),
     )
     return measure_data
 
@@ -51,6 +57,8 @@ class MeasureData(NamedTuple):
     pregnancy_transition_count: pd.DataFrame
     maternal_disorders_state_person_time: pd.DataFrame
     maternal_disorders_transition_count: pd.DataFrame
+    maternal_hemorrhage_state_person_time: pd.DataFrame
+    maternal_hemorrhage_transition_count: pd.DataFrame
 
     def dump(self, output_dir: Path):
         for key, df in self._asdict().items():
