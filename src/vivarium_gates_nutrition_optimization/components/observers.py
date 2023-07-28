@@ -16,25 +16,6 @@ from vivarium_public_health.utilities import to_years
 
 from vivarium_gates_nutrition_optimization.constants import data_values, models
 
-
-def timeit(name):
-    def _wrapper(func):
-        @functools.wraps(func)
-        def _wrapped(*args, **kwargs):
-            start = time.time()
-            result = func(*args, **kwargs)
-            print(name, time.time() - start, " s")
-            return result
-
-        @functools.wraps(func)
-        def _wrapped_passthrough(*args, **kwargs):
-            return func(*args, **kwargs)
-
-        return _wrapped_passthrough
-
-    return _wrapper
-
-
 class ResultsStratifier(ResultsStratifier_):
     def register_stratifications(self, builder: Builder) -> None:
         super().register_stratifications(builder)
@@ -112,7 +93,6 @@ class AnemiaObserver:
         builder.event.register_listener("time_step__prepare", self.on_time_step_prepare)
         builder.value.register_value_modifier("metrics", self.metrics)
 
-    @timeit("anemia_tsp")
     def on_time_step_prepare(self, event: Event):
         pop = self.population_view.get(event.index, query='alive == "alive"')
         pop["anemia_level"] = self.anemia_levels(pop.index)
