@@ -51,6 +51,9 @@ configuration:
         pregnancy:
             include:
             - 'pregnancy_outcome'
+        anemia:
+            include:
+            - 'pregnancy'
         # disability:
         #     include:
         #     exclude:
