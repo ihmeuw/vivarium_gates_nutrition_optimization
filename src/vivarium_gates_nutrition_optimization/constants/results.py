@@ -2,7 +2,7 @@ import itertools
 
 import pandas as pd
 
-from vivarium_gates_nutrition_optimization.constants import models, data_values
+from vivarium_gates_nutrition_optimization.constants import data_values, models
 
 #################################
 # Results columns and variables #
@@ -46,7 +46,9 @@ MATERNAL_HEMORRHAGE_TRANSITION_COUNT_COLUMN_TEMPLATE = (
     "maternal_hemorrhage_{MATERNAL_HEMORRHAGE_TRANSITION}_event_count_age_{AGE_GROUP}"
 )
 
-ANEMIA_STATE_PERSON_TIME_COLUMN_TEMPLATE = "{ANEMIA_LEVEL}_anemia_age_{AGE_GROUP}_pregnancy_{PREGNANCY_STATE}"
+ANEMIA_STATE_PERSON_TIME_COLUMN_TEMPLATE = (
+    "{ANEMIA_LEVEL}_anemia_age_{AGE_GROUP}_pregnancy_{PREGNANCY_STATE}"
+)
 
 COLUMN_TEMPLATES = {
     "deaths": DEATH_COLUMN_TEMPLATE,
@@ -80,7 +82,7 @@ CAUSES_OF_DEATH = (
     "other_causes",
     "maternal_disorders",
 )
-CAUSES_OF_DISABILITY = ("maternal_disorders","anemia")
+CAUSES_OF_DISABILITY = ("maternal_disorders", "anemia")
 
 TEMPLATE_FIELD_MAP = {
     "AGE_GROUP": AGE_GROUPS,
@@ -93,7 +95,7 @@ TEMPLATE_FIELD_MAP = {
     "MATERNAL_DISORDERS_TRANSITION": models.MATERNAL_DISORDERS_MODEL_TRANSITIONS,
     "MATERNAL_HEMORRHAGE_STATE": models.MATERNAL_HEMORRHAGE_MODEL_STATES,
     "MATERNAL_HEMORRHAGE_TRANSITION": models.MATERNAL_HEMORRHAGE_MODEL_TRANSITIONS,
-    "ANEMIA_LEVEL": data_values.ANEMIA_DISABILITY_WEIGHTS.keys()
+    "ANEMIA_LEVEL": data_values.ANEMIA_DISABILITY_WEIGHTS.keys(),
 }
 
 
