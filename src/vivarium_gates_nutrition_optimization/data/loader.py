@@ -13,15 +13,24 @@ for an example.
    No logging is done here. Logging is done in vivarium inputs itself and forwarded.
 """
 
+import numpy as np
 import pandas as pd
 import vivarium_inputs.validation.sim as validation
 from vivarium.framework.artifact import EntityKey
+from vivarium.framework.randomness import get_hash
+from vivarium_gbd_access import gbd
 from vivarium_inputs import core as vi_core
 from vivarium_inputs import globals as vi_globals
 from vivarium_inputs import interface
 from vivarium_inputs import utilities as vi_utils
+from vivarium_inputs import utility_data
 
-from vivarium_gates_nutrition_optimization.constants import data_keys, metadata
+from vivarium_gates_nutrition_optimization.constants import (
+    data_keys,
+    data_values,
+    metadata,
+    models,
+)
 from vivarium_gates_nutrition_optimization.data import extra_gbd, sampling
 from vivarium_gates_nutrition_optimization.data.utilities import get_entity
 
@@ -63,6 +72,8 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
         data_keys.MATERNAL_HEMORRHAGE.RAW_INCIDENCE_RATE: load_raw_incidence_data,
         data_keys.MATERNAL_HEMORRHAGE.CSMR: load_standard_data,
         data_keys.MATERNAL_HEMORRHAGE.INCIDENT_PROBABILITY: load_pregnant_maternal_hemorrhage_incidence,
+        data_keys.HEMOGLOBIN.MEAN: get_hemoglobin_data,
+        data_keys.HEMOGLOBIN.STANDARD_DEVIATION: get_hemoglobin_data,
     }
     return mapping[lookup_key](lookup_key, location)
 
@@ -276,6 +287,34 @@ def load_pregnant_maternal_hemorrhage_incidence(key: str, location: str):
     maternal_hemorrhage_incidence = (mh_incidence - mh_csmr) / pregnancy_end_rate
     ## I'm not as sure we need to normalize here, but we may as well.
     return maternal_hemorrhage_incidence.applymap(lambda value: 1 if value > 1 else value)
+
+
+###########################
+# Hemoglobin Data         #
+###########################
+
+
+def get_hemoglobin_data(key: str, location: str) -> pd.DataFrame:
+    me_id = {
+        data_keys.HEMOGLOBIN.MEAN: 10487,
+        data_keys.HEMOGLOBIN.STANDARD_DEVIATION: 10488,
+    }[key]
+
+    location_id = utility_data.get_location_id(location)
+    hemoglobin_data = gbd.get_modelable_entity_draws(me_id=me_id, location_id=location_id)
+    hemoglobin_data = reshape_to_vivarium_format(hemoglobin_data, location)
+    # Add correction factors for pregnancies
+    correction_params = data_values.PREGNANCY_CORRECTION_FACTORS[key]
+    dist = sampling.get_norm_from_quantiles(*correction_params)
+    # random seed
+    rng = np.random.default_rng(get_hash(f"{key}_{location}"))
+    correction_factors = pd.DataFrame(
+        np.tile(dist.rvs(size=1000, random_state=rng), (len(hemoglobin_data), 1)),
+        columns=vi_globals.DRAW_COLUMNS,
+        index=hemoglobin_data.index,
+    )
+
+    return hemoglobin_data * correction_factors
 
 
 ##############

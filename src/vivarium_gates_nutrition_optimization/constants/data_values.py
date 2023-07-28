@@ -3,7 +3,7 @@ from typing import NamedTuple
 import numpy as np
 import pandas as pd
 
-from vivarium_gates_nutrition_optimization.constants import models
+from vivarium_gates_nutrition_optimization.constants import data_keys, models
 
 
 ############################
@@ -98,3 +98,8 @@ ANEMIA_THRESHOLD_DATA = pd.DataFrame(
 #     1.88,
 #     8.06,
 # )  # (median, lower, upper) 95% CI
+## mean, lower, upper to go into distribution
+PREGNANCY_CORRECTION_FACTORS = {
+    data_keys.HEMOGLOBIN.MEAN: (0.919325, 0.86, 0.98),
+    data_keys.HEMOGLOBIN.STANDARD_DEVIATION: (1.032920188, 1.032920188, 1.032920188),
+}
