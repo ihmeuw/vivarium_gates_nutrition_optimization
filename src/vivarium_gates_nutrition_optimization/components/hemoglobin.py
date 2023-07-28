@@ -258,7 +258,7 @@ class Anemia:
     def compute_disability_weight(self, index: pd.Index):
         anemia_levels = self.anemia_levels(index)
         raw_anemia_disability_weight = anemia_levels.map(ANEMIA_DISABILITY_WEIGHTS)
-        ## rescale postpartum YLDs to account for the pause
+        ## rescale postpartum YLDs the same way as in IV Iron
         postpartum_scalar = (
             data_values.DURATIONS.POSTPARTUM + data_values.DURATIONS.PARTURITION
         ) / data_values.DURATIONS.POSTPARTUM
