@@ -46,6 +46,13 @@ class ResultsStratifier(ResultsStratifier_):
             categories=models.PREGNANCY_OUTCOMES,
         )
 
+        self.setup_stratification(
+            builder,
+            name="pregnancy",
+            sources=[Source("pregnancy", SourceType.COLUMN)],
+            categories=models.PREGNANCY_MODEL_STATES,
+        )
+
 
 class PregnancyObserver(DiseaseObserver):
     def __init__(self):
@@ -92,21 +99,17 @@ class AnemiaObserver:
         self.stratifier = builder.components.get_component(ResultsStratifier.name)
 
         self.person_time = Counter()
-        self.exposure = Counter()
 
         self.anemia_levels = builder.value.get_value("anemia_levels")
         self.hemoglobin = builder.value.get_value("hemoglobin.exposure")
 
         columns_required = [
             "alive",
-            "pregnancy_status",
-            "maternal_hemorrhage",
-            "maternal_bmi_anemia_category",
+            "pregnancy",
         ]
         self.population_view = builder.population.get_view(columns_required)
 
         builder.event.register_listener("time_step__prepare", self.on_time_step_prepare)
-        builder.event.register_listener("collect_metrics", self.on_collect_metrics)
         builder.value.register_value_modifier("metrics", self.metrics)
 
     @timeit("anemia_tsp")
@@ -115,70 +118,21 @@ class AnemiaObserver:
         pop["anemia_level"] = self.anemia_levels(pop.index)
         step_size = to_years(event.step_size)
 
-        anemia_measures = list(
-            itertools.product(
-                data_values.ANEMIA_DISABILITY_WEIGHTS.keys(),
-                models.PREGNANCY_MODEL_STATES,
-                models.MATERNAL_HEMORRHAGE_STATES,
-            )
-        )
-        anemia_masks = {}
-        for anemia_level, pregnancy_status, hemorrhage_state in anemia_measures:
-            key = (anemia_level, pregnancy_status, hemorrhage_state)
-            mask = (
-                (pop["anemia_level"] == anemia_level)
-                & (pop["pregnancy_status"] == pregnancy_status)
-                & (pop["maternal_hemorrhage"] == hemorrhage_state)
-            )
-            anemia_masks[key] = mask
+        anemia_levels = data_values.ANEMIA_DISABILITY_WEIGHTS.keys()
 
         new_person_time = {}
         groups = self.stratifier.group(pop.index, self.config.include, self.config.exclude)
         for label, group_mask in groups:
-            for (
-                anemia_level,
-                pregnancy_status,
-                hemorrhage_state,
-            ), anemia_mask in anemia_masks.items():
-                key = f"{anemia_level}_anemia_person_time_among_{pregnancy_status}_with_{hemorrhage_state}_{label}"
-                group = pop[group_mask & anemia_mask]
+            for anemia_level in anemia_levels:
+                key = f"{anemia_level}_anemia_{label}"
+                group = pop[group_mask & anemia_level]
                 new_person_time[key] = len(group) * step_size
 
         self.person_time.update(new_person_time)
 
-    @timeit("anemia_cm")
-    def on_collect_metrics(self, event: Event):
-        pop = self.population_view.get(event.index, query='alive == "alive"')
-        pop["hemoglobin"] = self.hemoglobin(event.index)
-
-        pregnancy_measures = list(
-            itertools.product(
-                models.PREGNANCY_MODEL_STATES,
-                models.MATERNAL_HEMORRHAGE_MODEL_STATES,
-            )
-        )
-
-        anemia_masks = {}
-        for pregnancy_status, hemorrhage_state in pregnancy_measures:
-            key = (pregnancy_status, hemorrhage_state)
-            mask = (pop["pregnancy_status"] == pregnancy_status) & (
-                pop["maternal_hemorrhage"] == hemorrhage_state
-            )
-            anemia_masks[key] = mask
-
-        new_exposures = {}
-        groups = self.stratifier.group(pop.index, self.config.include, self.config.exclude)
-        for label, group_mask in groups:
-            for (pregnancy_status, hemorrhage_state), pregnancy_mask in anemia_masks.items():
-                key = f"hemoglobin_exposure_sum_among_{pregnancy_status}_with_{hemorrhage_state}_{label}"
-                group = pop[group_mask & pregnancy_mask]
-                new_exposures[key] = group.hemoglobin.sum()
-
-        self.exposure.update(new_exposures)
 
     def metrics(self, index: pd.Index, metrics: Dict) -> Dict:
         metrics.update(self.person_time)
-        metrics.update(self.exposure)
         return metrics
 
 
@@ -186,5 +140,5 @@ class DisabilityObserver(DisabilityObserver_):
     def setup(self, builder: Builder) -> None:
         super().setup(builder)
         self.disability_pipelines["anemia"] = builder.value.get_value(
-            "real_anemia.disability_weight"
+            "anemia.disability_weight"
         )
