@@ -125,7 +125,7 @@ class AnemiaObserver:
         for label, group_mask in groups:
             for anemia_level in anemia_levels:
                 key = f"{anemia_level}_anemia_{label}"
-                group = pop[group_mask & anemia_level]
+                group = pop[group_mask & (pop['anemia_level'] == anemia_level)]
                 new_person_time[key] = len(group) * step_size
 
         self.person_time.update(new_person_time)
