@@ -44,6 +44,7 @@ def MaternalDisorders():
         get_data_functions={"cause_specific_mortality_rate": lambda *_: 0.0},
     )
 
+
 def MaternalHemorrhage():
     cause = models.MATERNAL_HEMORRHAGE_STATE_NAME
     susceptible = ParturitionSelectionState(cause)
@@ -69,6 +70,7 @@ def MaternalHemorrhage():
         states=[susceptible, with_condition, recovered],
         get_data_functions={"cause_specific_mortality_rate": lambda *_: 0.0},
     )
+
 
 def get_maternal_disorders_disability_weight(builder: Builder, cause: str):
     ylds = builder.data.load(data_keys.MATERNAL_DISORDERS.YLDS).set_index(
