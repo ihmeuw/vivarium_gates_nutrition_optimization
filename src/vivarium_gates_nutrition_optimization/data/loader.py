@@ -72,8 +72,13 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
         data_keys.MATERNAL_HEMORRHAGE.RAW_INCIDENCE_RATE: load_raw_incidence_data,
         data_keys.MATERNAL_HEMORRHAGE.CSMR: load_standard_data,
         data_keys.MATERNAL_HEMORRHAGE.INCIDENT_PROBABILITY: load_pregnant_maternal_hemorrhage_incidence,
+        data_keys.MATERNAL_HEMORRHAGE.RR_ATTRIBUTABLE_TO_HEMOGLOBIN: load_rr,
+        data_keys.MATERNAL_HEMORRHAGE.PAF_ATTRIBUTABLE_TO_HEMOGLOBIN: load_paf,
+        data_keys.MATERNAL_DISORDERS.RR_ATTRIBUTABLE_TO_HEMOGLOBIN: load_hemoglobin_maternal_disorders_rr,
+        data_keys.MATERNAL_DISORDERS.PAF_ATTRIBUTABLE_TO_HEMOGLOBIN: load_hemoglobin_maternal_disorders_paf,
         data_keys.HEMOGLOBIN.MEAN: get_hemoglobin_data,
         data_keys.HEMOGLOBIN.STANDARD_DEVIATION: get_hemoglobin_data,
+        data_keys.HEMOGLOBIN.PREGNANT_PROPORTION_WITH_HEMOGLOBIN_BELOW_70: get_hemoglobin_csv_data,
     }
     return mapping[lookup_key](lookup_key, location)
 
@@ -288,6 +293,71 @@ def load_pregnant_maternal_hemorrhage_incidence(key: str, location: str):
     ## I'm not as sure we need to normalize here, but we may as well.
     return maternal_hemorrhage_incidence.applymap(lambda value: 1 if value > 1 else value)
 
+def load_rr(key: str, location: str) -> pd.DataFrame:
+    try:
+        distribution = {
+            data_keys.MATERNAL_DISORDERS.RR_MATERNAL_HEMORRHAGE_ATTRIBUTABLE_TO_HEMOGLOBIN:
+                data_values.RR_MATERNAL_HEMORRHAGE_ATTRIBUTABLE_TO_HEMOGLOBIN,
+        }[key]
+    except KeyError:
+        raise ValueError(f'Unrecognized key {key}')
+
+    # Get a DataFrame with the desired index
+    data = get_data(data_keys.POPULATION.STRUCTURE, location)
+    data = data.reset_index().drop(columns=["value"], axis=1)
+
+    # Sample from the distribution and set values for each draw and return
+    seeds = [f"draw_{i}" for i in range(0, 1000)]
+    dist = sampling.get_lognorm_from_quantiles(*distribution)
+    values = [sampling.get_random_variable(dist, s, key) for s in seeds]
+    data.loc[:, seeds] = values
+    return data.set_index(metadata.ARTIFACT_INDEX_COLUMNS)
+
+
+def load_paf(key: str, location: str) -> pd.DataFrame:
+    try:
+        rr_key = {
+            data_keys.MATERNAL_DISORDERS.PAF_MATERNAL_HEMORRHAGE_ATTRIBUTABLE_TO_HEMOGLOBIN:
+                data_keys.MATERNAL_DISORDERS.RR_MATERNAL_HEMORRHAGE_ATTRIBUTABLE_TO_HEMOGLOBIN,
+        }[key]
+    except KeyError:
+        raise ValueError(f'Unrecognized key {key}')
+
+    rr = get_data(rr_key, location)
+    proportion = get_data(data_keys.HEMOGLOBIN.PREGNANT_PROPORTION_WITH_HEMOGLOBIN_BELOW_70, location)
+
+    return (
+        (rr * proportion + (1 - proportion) - 1)
+        / (rr * proportion + (1 - proportion))
+    )
+
+
+def load_hemoglobin_maternal_disorders_rr(key: str, location: str) -> pd.DataFrame:
+    if key != data_keys.MATERNAL_DISORDERS.RR_MATERNAL_DISORDER_ATTRIBUTABLE_TO_HEMOGLOBIN:
+        raise ValueError(f"Unrecognized key {key}")
+
+    groupby_cols = ['age_group_id', 'sex_id', 'year_id']
+    draw_cols = [f"draw_{i}" for i in range(1000)]
+    rr = extra_gbd.get_hemoglobin_maternal_disorders_rr()
+    rr = rr.groupby(groupby_cols)[draw_cols].sum().reset_index()
+    rr = reshape_to_vivarium_format(rr, location)
+    return rr
+
+
+def load_hemoglobin_maternal_disorders_paf(key: str, location: str) -> pd.DataFrame:
+    location_id = utility_data.get_location_id(location)
+    demography = get_data(data_keys.POPULATION.DEMOGRAPHY, location)
+
+    data = pd.read_csv(paths.HEMOGLOBIN_MATERNAL_DISORDERS_PAF_CSV)
+    data = data.set_index('location_id').loc[location_id]
+    age_bins = utility_data.get_age_bins()
+    data = data.merge(age_bins, on="age_group_id")
+    data.draw = data.draw.apply(lambda d: f"draw_{d}")
+    data = data.pivot(index=["age_start", "age_end"], columns='draw', values='paf')
+    data = (data
+            .reset_index(level='age_end', drop=True)
+            .reindex(demography.index, level='age_start', fill_value=0.))
+    return data
 
 ###########################
 # Hemoglobin Data         #
@@ -316,6 +386,19 @@ def get_hemoglobin_data(key: str, location: str) -> pd.DataFrame:
 
     return hemoglobin_data * correction_factors
 
+def get_hemoglobin_csv_data(key: str, location: str):
+    location_id = utility_data.get_location_id(location)
+    demography = get_data(data_keys.POPULATION.DEMOGRAPHY, location)
+
+    data = pd.read_csv(paths.PREGNANT_PROPORTION_WITH_HEMOGLOBIN_BELOW_70_CSV)
+    data = data.set_index('location_id').loc[location_id]
+    age_bins = utility_data.get_age_bins()
+    data = data.merge(age_bins, on="age_group_id")
+    data = data.pivot(index=["age_start", "age_end"], columns='input_draw', values='value')
+    data = (data
+            .reset_index(level='age_end', drop=True)
+            .reindex(demography.index, level='age_start', fill_value=0.))
+    return data
 
 ##############
 #   Helpers  #
