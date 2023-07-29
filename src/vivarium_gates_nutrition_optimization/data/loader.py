@@ -30,6 +30,7 @@ from vivarium_gates_nutrition_optimization.constants import (
     data_values,
     metadata,
     models,
+    paths,
 )
 from vivarium_gates_nutrition_optimization.data import extra_gbd, sampling
 from vivarium_gates_nutrition_optimization.data.utilities import get_entity
