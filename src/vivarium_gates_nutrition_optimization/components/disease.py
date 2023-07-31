@@ -434,7 +434,7 @@ class ParturitionSelectionTransition(ProportionTransition):
         super().setup(builder)
 
         pipeline_name = (
-            f"{self.input_state.cause}_to_{self.output_state.cause}.transition_proportion"
+            f"{self.output_state.cause}.transition_proportion"
         )
         self.proportion_pipeline = builder.value.register_value_producer(
             pipeline_name,
