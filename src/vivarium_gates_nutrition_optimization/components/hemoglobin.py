@@ -200,30 +200,27 @@ class Hemoglobin:
         tmrel = TMREL_HEMOGLOBIN_ON_MATERNAL_DISORDERS
         per_simulant_exposure = (tmrel - hemoglobin_level + abs(tmrel - hemoglobin_level)) / 2 / RR_SCALAR
         per_simulant_rr = rr ** per_simulant_exposure
-        return maternal_disorder_probability * (1 - paf) * per_simulant_rr
+        maternal_disorder_probability *= (1 - paf) * per_simulant_rr
+        return maternal_disorder_probability.applymap(lambda value: 1 if value > 1 else value)
+    
 
     def adjust_maternal_hemorrhage_probability(self, index, maternal_hemorrhage_probability):
         paf = self.hemorrhage_paf(index)["value"]
         rr = self.hemorrhage_rr(index)["value"]
-        p_maternal_hemorrhage = maternal_hemorrhage_probability["moderate_maternal_hemorrhage"] + maternal_hemorrhage_probability["severe_maternal_hemorrhage"]
-        severe_ratio = maternal_hemorrhage_probability["severe_maternal_hemorrhage"] / p_maternal_hemorrhage
-        p_maternal_hemorrhage_nonanemic = p_maternal_hemorrhage * (1 - paf)
-        p_maternal_hemorrhage_anemic = p_maternal_hemorrhage_nonanemic * rr
         hemoglobin = self.hemoglobin(index)
-        anemic = hemoglobin <= SEVERE_ANEMIA_AMONG_PREGNANT_WOMEN_THRESHOLD
-        maternal_hemorrhage_probability["severe_maternal_hemorrhage"] = severe_ratio * p_maternal_hemorrhage_nonanemic
-        maternal_hemorrhage_probability["moderate_maternal_hemorrhage"] = (1 - severe_ratio) * p_maternal_hemorrhage_nonanemic
-        maternal_hemorrhage_probability.loc[anemic, "severe_maternal_hemorrhage"] = severe_ratio * p_maternal_hemorrhage_anemic
-        maternal_hemorrhage_probability.loc[anemic, "moderate_maternal_hemorrhage"] = (1 - severe_ratio) * p_maternal_hemorrhage_anemic
-        maternal_hemorrhage_probability["not_maternal_hemorrhage"] = (1 - maternal_hemorrhage_probability["moderate_maternal_hemorrhage"] - maternal_hemorrhage_probability["severe_maternal_hemorrhage"])
+        maternal_hemorrhage_probability *= (1 - paf)
+        #Dichotomous risk based on severe anemia
+        maternal_hemorrhage_probability.loc[hemoglobin <= SEVERE_ANEMIA_AMONG_PREGNANT_WOMEN_THRESHOLD] *= rr
         return maternal_hemorrhage_probability
     
     def adjust_hemoglobin_exposure(self, index: pd.Index, hemoglobin_exposure: pd.DataFrame) -> pd.DataFrame:
-        pop = self.population_view.get(index)
-        severe_mask = pop["maternal_hemorrhage"] == "severe_maternal_hemorrhage"
-        moderate_mask = pop["maternal_hemorrhage"] == "moderate_maternal_hemorrhage"
-        hemoglobin_exposure[severe_mask] = hemoglobin_exposure[severe_mask] * HEMOGLOBIN_SCALE_FACTOR_SEVERE_HEMORRHAGE
-        hemoglobin_exposure[moderate_mask] = hemoglobin_exposure[moderate_mask] * HEMOGLOBIN_SCALE_FACTOR_MODERATE_HEMORRHAGE
+        pop = self.population_view.get(index, query="(alive == 'alive') & (maternal_hemorrhage == 'maternal_hemorrhage')")
+
+        severe_mask = pop["hemorrhage_severity"] == "severe"
+        moderate_mask = pop["hemorrhage_severity"] == "moderate"
+        #Multiply hemoglobin exposure by 
+        hemoglobin_exposure[severe_mask] *= HEMOGLOBIN_SCALE_FACTOR_SEVERE_HEMORRHAGE
+        hemoglobin_exposure[moderate_mask] *= HEMOGLOBIN_SCALE_FACTOR_MODERATE_HEMORRHAGE
         return hemoglobin_exposure
 
 
