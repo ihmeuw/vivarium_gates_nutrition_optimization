@@ -3,13 +3,14 @@ import pandas as pd
 import scipy.stats
 from vivarium.framework.engine import Builder
 from vivarium.framework.population import SimulantData
+from vivarium.framework.randomness import RESIDUAL_CHOICE
 
 from vivarium_gates_nutrition_optimization.constants import (
     data_keys,
     data_values,
     models,
 )
-from vivarium_gates_nutrition_optimization.constants.data_values import ( 
+from vivarium_gates_nutrition_optimization.constants.data_values import (
     RR_SCALAR,
     HEMOGLOBIN_SCALE_FACTOR_MODERATE_HEMORRHAGE,
     HEMOGLOBIN_SCALE_FACTOR_SEVERE_HEMORRHAGE,
@@ -51,28 +52,38 @@ class Hemoglobin:
         ]
 
         # load data
-        mean = builder.data.load(data_keys.HEMOGLOBIN.MEAN).set_index(index_columns)["value"].rename("mean")
-        stddev = builder.data.load(data_keys.HEMOGLOBIN.STANDARD_DEVIATION).set_index(index_columns)["value"].rename("stddev")
+        mean = (
+            builder.data.load(data_keys.HEMOGLOBIN.MEAN)
+            .set_index(index_columns)["value"]
+            .rename("mean")
+        )
+        stddev = (
+            builder.data.load(data_keys.HEMOGLOBIN.STANDARD_DEVIATION)
+            .set_index(index_columns)["value"]
+            .rename("stddev")
+        )
         distribution_parameters = pd.concat([mean, stddev], axis=1).reset_index()
 
         self.hemorrhage_rr = builder.lookup.build_table(
-                builder.data.load(data_keys.MATERNAL_DISORDERS.RR_ATTRIBUTABLE_TO_HEMOGLOBIN),
-                key_columns=["sex"],
-                parameter_columns=["age", "year"],
-            )
+            builder.data.load(data_keys.MATERNAL_DISORDERS.RR_ATTRIBUTABLE_TO_HEMOGLOBIN),
+            key_columns=["sex"],
+            parameter_columns=["age", "year"],
+        )
 
         self.hemorrhage_paf = builder.lookup.build_table(
-                builder.data.load(data_keys.MATERNAL_DISORDERS.PAF_ATTRIBUTABLE_TO_HEMOGLOBIN),
-                key_columns=["sex"],
-                parameter_columns=["age", "year"],
-            )
+            builder.data.load(data_keys.MATERNAL_DISORDERS.PAF_ATTRIBUTABLE_TO_HEMOGLOBIN),
+            key_columns=["sex"],
+            parameter_columns=["age", "year"],
+        )
 
         self.maternal_disorder_rr = builder.lookup.build_table(
             builder.data.load(data_keys.MATERNAL_DISORDERS.RR_ATTRIBUTABLE_TO_HEMOGLOBIN),
             key_columns=["sex"],
             parameter_columns=["age", "year"],
         )
-        self.moderate_hemorrhage_probability =  builder.data.load(data_keys.MATERNAL_HEMORRHAGE.MODERATE_HEMORRHAGE_PROBABILITY)
+        self.moderate_hemorrhage_probability = builder.data.load(
+            data_keys.MATERNAL_HEMORRHAGE.MODERATE_HEMORRHAGE_PROBABILITY
+        ).value.values[0]
 
         self.distribution_parameters = builder.value.register_value_producer(
             "hemoglobin.exposure_parameters",
@@ -106,14 +117,14 @@ class Hemoglobin:
             ## Hemoglobin affcts MH
             "maternal_hemorrhage.transition_probability",
             self.adjust_maternal_hemorrhage_probability,
-            requires_values=["hemoglobin.exposure"]
+            requires_values=["hemoglobin.exposure"],
         )
 
         builder.value.register_value_modifier(
             ## MH affects hemoglobin
             "hemoglobin.exposure",
             self.adjust_hemoglobin_exposure,
-            requires_columns=["maternal_hemorrhage"]
+            requires_columns=["maternal_hemorrhage"],
         )
 
         builder.population.initializes_simulants(
@@ -122,7 +133,9 @@ class Hemoglobin:
             requires_streams=[self.name],
         )
 
-        self.population_view = builder.population.get_view(self.columns_created+ ['alive','maternal_hemorrhage'])
+        self.population_view = builder.population.get_view(
+            self.columns_created + ["alive", "maternal_hemorrhage"]
+        )
 
     def on_initialize_simulants(self, pop_data: SimulantData) -> None:
         pop_update = pd.DataFrame(
@@ -146,7 +159,7 @@ class Hemoglobin:
             pop["hemoglobin_percentile"],
             distribution_parameters,
         )
-    
+
     @staticmethod
     def _gamma_ppf(propensity, mean, sd):
         """Returns the quantile for the given quantile rank (`propensity`) of a Gamma
@@ -192,41 +205,51 @@ class Hemoglobin:
         ret_val.loc[gamma] = self._gamma_ppf(propensity, mean, sd)[gamma]
         ret_val.loc[gumbel] = self._mirrored_gumbel_ppf_2017(propensity, mean, sd)[gumbel]
         return ret_val
-    
-    def adjust_maternal_disorder_probability(self, index: pd.Index, maternal_disorder_probability: pd.DataFrame) -> pd.Series:
+
+    def adjust_maternal_disorder_probability(
+        self, index: pd.Index, maternal_disorder_probability: pd.DataFrame
+    ) -> pd.Series:
         hemoglobin_level = self.hemoglobin(index)
         rr = self.maternal_disorder_rr(index)
         paf = self.maternal_disorder_paf(index)["value"]
         tmrel = TMREL_HEMOGLOBIN_ON_MATERNAL_DISORDERS
-        per_simulant_exposure = (tmrel - hemoglobin_level + abs(tmrel - hemoglobin_level)) / 2 / RR_SCALAR
-        per_simulant_rr = rr ** per_simulant_exposure
+        per_simulant_exposure = (
+            (tmrel - hemoglobin_level + abs(tmrel - hemoglobin_level)) / 2 / RR_SCALAR
+        )
+        per_simulant_rr = rr**per_simulant_exposure
         maternal_disorder_probability *= (1 - paf) * per_simulant_rr
         return maternal_disorder_probability.applymap(lambda value: 1 if value > 1 else value)
-    
 
     def adjust_maternal_hemorrhage_probability(self, index, maternal_hemorrhage_probability):
         paf = self.hemorrhage_paf(index)["value"]
         rr = self.hemorrhage_rr(index)["value"]
         hemoglobin = self.hemoglobin(index)
-        maternal_hemorrhage_probability *= (1 - paf)
-        #Dichotomous risk based on severe anemia
-        maternal_hemorrhage_probability.loc[hemoglobin <= SEVERE_ANEMIA_AMONG_PREGNANT_WOMEN_THRESHOLD] *= rr
+        maternal_hemorrhage_probability *= 1 - paf
+        # Dichotomous risk based on severe anemia
+        maternal_hemorrhage_probability.loc[
+            hemoglobin <= SEVERE_ANEMIA_AMONG_PREGNANT_WOMEN_THRESHOLD
+        ] *= rr
         return maternal_hemorrhage_probability
-    
-    def adjust_hemoglobin_exposure(self, index: pd.Index, hemoglobin_exposure: pd.DataFrame) -> pd.DataFrame:
+
+    def adjust_hemoglobin_exposure(
+        self, index: pd.Index, hemoglobin_exposure: pd.DataFrame
+    ) -> pd.DataFrame:
         pop = self.population_view.get(index)
-        maternal_hemorrhage_mask = (pop['alive'] == 'alive') & (pop['maternal_hemorrhage'] == 'maternal_hemorrhage')
+        maternal_hemorrhage_mask = (pop["alive"] == "alive") & (
+            pop["maternal_hemorrhage"] == "maternal_hemorrhage"
+        )
         if not maternal_hemorrhage_mask.any():
             return hemoglobin_exposure
-        
-        p_moderate_hemorrhage = self.moderate_hemorrhage_probability
-        hemorrhage_scale_factors = self.randomness.choice(
-            p_moderate_hemorrhage.index,
-            choices=[HEMOGLOBIN_SCALE_FACTOR_MODERATE_HEMORRHAGE,HEMOGLOBIN_SCALE_FACTOR_SEVERE_HEMORRHAGE],
-            p=[p_moderate_hemorrhage, 1 - p_moderate_hemorrhage],
-            additional_key='hemorrhage_scale_factors')
-
-        hemoglobin_exposure[maternal_hemorrhage_mask] *= hemorrhage_scale_factors
+        # Choose hemorrhage severity and multiply hemoglobin exposure by appropriate hemorrhage scale factor
+        hemoglobin_exposure[maternal_hemorrhage_mask] *= self.randomness.choice(
+            pop[maternal_hemorrhage_mask].index,
+            choices=[
+                HEMOGLOBIN_SCALE_FACTOR_MODERATE_HEMORRHAGE,
+                HEMOGLOBIN_SCALE_FACTOR_SEVERE_HEMORRHAGE,
+            ],
+            p=[self.moderate_hemorrhage_probability, RESIDUAL_CHOICE],
+            additional_key="hemorrhage_scale_factors",
+        )
         return hemoglobin_exposure
 
 

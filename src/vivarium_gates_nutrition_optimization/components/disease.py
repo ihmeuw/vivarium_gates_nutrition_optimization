@@ -433,9 +433,7 @@ class ParturitionSelectionTransition(ProportionTransition):
     def setup(self, builder: Builder):
         super().setup(builder)
 
-        pipeline_name = (
-            f"{self.output_state.cause}.transition_proportion"
-        )
+        pipeline_name = f"{self.output_state.cause}.transition_proportion"
         self.proportion_pipeline = builder.value.register_value_producer(
             pipeline_name,
             source=self.compute_transition_proportion,
