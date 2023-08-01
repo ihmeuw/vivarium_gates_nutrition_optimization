@@ -18,12 +18,11 @@ HEMOGLOBIN_MATERNAL_DISORDERS_PAF_CSV = (
     CSV_RAW_DATA_ROOT / "hemoglobin_and_maternal_disorders_pafs.csv"
 )
 PREVALENCE_LOW_BMI_ANEMIC_CSV = (
-    CSV_RAW_DATA_ROOT / 'prevalence_of_low_bmi_given_hemoglobin_below_10.csv'
+    CSV_RAW_DATA_ROOT / "prevalence_of_low_bmi_given_hemoglobin_below_10.csv"
 )
 PREVALENCE_LOW_BMI_NON_ANEMIC_CSV = (
-    CSV_RAW_DATA_ROOT / 'prevalence_of_low_bmi_given_hemoglobin_above_10.csv'
+    CSV_RAW_DATA_ROOT / "prevalence_of_low_bmi_given_hemoglobin_above_10.csv"
 )
 MATERNAL_INTERVENTION_COVERAGE_CSV = (
-    CSV_RAW_DATA_ROOT / 'simulation_intervention_coverage.csv'
+    CSV_RAW_DATA_ROOT / "simulation_intervention_coverage.csv"
 )
-

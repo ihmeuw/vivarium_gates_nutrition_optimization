@@ -13,9 +13,15 @@ def get_norm_from_quantiles(
     sd = (upper - lower) / (stdnorm_quantiles[1] - stdnorm_quantiles[0])
     return stats.norm(loc=mean, scale=sd)
 
-def get_truncnorm_from_quantiles(mean: float, lower: float, upper: float,
-                                 quantiles: Tuple[float, float] = (0.025, 0.975),
-                                 lower_clip: float = 0.0, upper_clip: float = 1.0) -> stats.truncnorm:
+
+def get_truncnorm_from_quantiles(
+    mean: float,
+    lower: float,
+    upper: float,
+    quantiles: Tuple[float, float] = (0.025, 0.975),
+    lower_clip: float = 0.0,
+    upper_clip: float = 1.0,
+) -> stats.truncnorm:
     stdnorm_quantiles = stats.norm.ppf(quantiles)
     sd = (upper - lower) / (stdnorm_quantiles[1] - stdnorm_quantiles[0])
     try:
@@ -26,8 +32,10 @@ def get_truncnorm_from_quantiles(mean: float, lower: float, upper: float,
         # degenerate case: if upper == lower, then use the mean with sd==0
         return stats.norm(loc=mean, scale=sd)
 
-def get_lognorm_from_quantiles(mean: float, lower: float, upper: float,
-                               quantiles: Tuple[float, float] = (0.025, 0.975)) -> stats.lognorm:
+
+def get_lognorm_from_quantiles(
+    mean: float, lower: float, upper: float, quantiles: Tuple[float, float] = (0.025, 0.975)
+) -> stats.lognorm:
     """Returns a frozen lognormal distribution with the specified mean, such that
     (lower, upper) are approximately equal to the quantiles with ranks
     (quantile_ranks[0], quantile_ranks[1]).
@@ -49,7 +57,9 @@ def get_lognorm_from_quantiles(mean: float, lower: float, upper: float,
         norm_quantiles = np.log([lower, upper])
         # standard deviation of Y = log(X) computed from the above quantiles for Y
         # and the corresponding standard normal quantiles
-        sigma = (norm_quantiles[1] - norm_quantiles[0]) / (stdnorm_quantiles[1] - stdnorm_quantiles[0])
+        sigma = (norm_quantiles[1] - norm_quantiles[0]) / (
+            stdnorm_quantiles[1] - stdnorm_quantiles[0]
+        )
         # Frozen lognormal distribution for X = exp(Y)
         # (s=sigma is the shape parameter; the scale parameter is exp(mu), which equals the mean)
         return stats.lognorm(s=sigma, scale=mean)
