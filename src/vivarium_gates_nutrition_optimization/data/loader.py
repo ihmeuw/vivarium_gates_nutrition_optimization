@@ -359,10 +359,9 @@ def get_moderate_hemorrhage_probability(key: str, location: str) -> pd.DataFrame
     # Clip a bit higher than zero to avoid underflow error
     dist = sampling.get_truncnorm_from_quantiles(*hemorrhage_dist_params, lower_clip=0.1)
     # random seed
-    rng = np.random.default_rng(get_hash(f"hemorrhage_severity_{location}"))
+    rng = np.random.default_rng(get_hash(f"hemorrhage_severity"))
     moderate_hemorrhage_probability = pd.DataFrame(
         [dist.rvs(size=1000, random_state=rng)],
-        index=[location],
         columns=vi_globals.DRAW_COLUMNS,
     )
 
