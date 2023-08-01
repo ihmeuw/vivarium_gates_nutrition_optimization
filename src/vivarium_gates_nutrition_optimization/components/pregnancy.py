@@ -96,7 +96,7 @@ class PregnantState(DiseaseState):
         )
         child_status["pregnancy_duration"] = pd.to_timedelta(
             # (low + (high - low) * draw), unit="days"
-            7 * 1,
+            7 * 2,
             unit="days",
         )
         return child_status
@@ -105,7 +105,7 @@ class PregnantState(DiseaseState):
         child_status = self.new_children.generate_children(full_term_pop)
         child_status["pregnancy_duration"] = pd.to_timedelta(
             # 7 * child_status["gestational_age"], unit="days"
-            7 * 1,
+            7 * 2,
             unit="days",
         )
         return child_status.drop(columns=["gestational_age"])
