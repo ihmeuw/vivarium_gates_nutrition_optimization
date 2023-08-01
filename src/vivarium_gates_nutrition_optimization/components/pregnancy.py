@@ -95,14 +95,16 @@ class PregnantState(DiseaseState):
             partial_term_pop, additional_key="partial_term_pregnancy_duration"
         )
         child_status["pregnancy_duration"] = pd.to_timedelta(
-            (low + (high - low) * draw), unit="days"
+            # (low + (high - low) * draw), unit="days"
+                        7 * 1, unit="days"
         )
         return child_status
 
     def sample_full_term_durations(self, full_term_pop: pd.Index) -> pd.DataFrame:
         child_status = self.new_children.generate_children(full_term_pop)
         child_status["pregnancy_duration"] = pd.to_timedelta(
-            7 * child_status["gestational_age"], unit="days"
+            # 7 * child_status["gestational_age"], unit="days"
+            7 * 1, unit="days"
         )
         return child_status.drop(columns=["gestational_age"])
 
