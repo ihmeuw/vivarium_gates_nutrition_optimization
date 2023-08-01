@@ -73,8 +73,8 @@ class __MaternalDisorders(NamedTuple):
     MORTALITY_PROBABILITY: str = "cause.maternal_disorders.mortality_probability"
     YLDS: str = "cause.maternal_disorders.ylds"
 
-    RR_MATERNAL_DISORDER_ATTRIBUTABLE_TO_HEMOGLOBIN: str = "risk_factor.hemoglobin_on_maternal_disorder.relative_risk"
-    PAF_MATERNAL_DISORDER_ATTRIBUTABLE_TO_HEMOGLOBIN: str = "risk_factor.hemoglobin_on_maternal_disorder.paf"
+    RR_ATTRIBUTABLE_TO_HEMOGLOBIN: str = "risk_factor.hemoglobin_on_maternal_disorder.relative_risk"
+    PAF_ATTRIBUTABLE_TO_HEMOGLOBIN: str = "risk_factor.hemoglobin_on_maternal_disorder.paf"
 
     @property
     def name(self):
@@ -95,6 +95,8 @@ class __MaternalHemorrhage(NamedTuple):
 
     RR_ATTRIBUTABLE_TO_HEMOGLOBIN: str = "risk_factor.hemoglobin_on_maternal_hemorrhage.relative_risk"
     PAF_ATTRIBUTABLE_TO_HEMOGLOBIN: str = "risk_factor.hemoglobin_on_maternal_hemorrhage.paf"
+
+    MODERATE_HEMORRHAGE_PROBABILITY: str = "covariate.moderate_hemorrhage_probability.estimate"
     
     @property
     def name(self):
