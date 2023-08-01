@@ -41,9 +41,6 @@ class Hemoglobin:
             "hemoglobin_distribution_propensity",
             "hemoglobin_percentile",
         ]
-        # load data
-        mean = builder.data.load(data_keys.HEMOGLOBIN.MEAN)
-        stddev = builder.data.load(data_keys.HEMOGLOBIN.STANDARD_DEVIATION)
 
         index_columns = [
             "sex",
@@ -52,9 +49,30 @@ class Hemoglobin:
             "year_start",
             "year_end",
         ]
-        mean = mean.set_index(index_columns)["value"].rename("mean")
-        stddev = stddev.set_index(index_columns)["value"].rename("stddev")
+
+        # load data
+        mean = builder.data.load(data_keys.HEMOGLOBIN.MEAN).set_index(index_columns)["value"].rename("mean")
+        stddev = builder.data.load(data_keys.HEMOGLOBIN.STANDARD_DEVIATION).set_index(index_columns)["value"].rename("stddev")
         distribution_parameters = pd.concat([mean, stddev], axis=1).reset_index()
+
+        self.hemorrhage_rr = builder.lookup.build_table(
+                builder.data.load(data_keys.MATERNAL_DISORDERS.RR_ATTRIBUTABLE_TO_HEMOGLOBIN),
+                key_columns=["sex"],
+                parameter_columns=["age", "year"],
+            )
+
+        self.hemorrhage_paf = builder.lookup.build_table(
+                builder.data.load(data_keys.MATERNAL_DISORDERS.PAF_ATTRIBUTABLE_TO_HEMOGLOBIN),
+                key_columns=["sex"],
+                parameter_columns=["age", "year"],
+            )
+
+        self.maternal_disorder_rr = builder.lookup.build_table(
+            builder.data.load(data_keys.MATERNAL_DISORDERS.RR_ATTRIBUTABLE_TO_HEMOGLOBIN),
+            key_columns=["sex"],
+            parameter_columns=["age", "year"],
+        )
+
         self.distribution_parameters = builder.value.register_value_producer(
             "hemoglobin.exposure_parameters",
             source=builder.lookup.build_table(
@@ -72,27 +90,8 @@ class Hemoglobin:
             requires_streams=[self.name],
         )
 
-
-        self.hemorrhage_rr = builder.lookup.build_table(
-                builder.data.load(data_keys.MATERNAL_DISORDERS.RR_MATERNAL_HEMORRHAGE_ATTRIBUTABLE_TO_HEMOGLOBIN),
-                key_columns=["sex"],
-                parameter_columns=["age", "year"],
-            )
-
-        self.hemorrhage_paf = builder.lookup.build_table(
-                builder.data.load(data_keys.MATERNAL_DISORDERS.PAF_MATERNAL_HEMORRHAGE_ATTRIBUTABLE_TO_HEMOGLOBIN),
-                key_columns=["sex"],
-                parameter_columns=["age", "year"],
-            )
-
-        self.maternal_disorder_rr = builder.lookup.build_table(
-            builder.data.load(data_keys.MATERNAL_DISORDERS.RR_MATERNAL_DISORDER_ATTRIBUTABLE_TO_HEMOGLOBIN),
-            key_columns=["sex"],
-            parameter_columns=["age", "year"],
-        )
-
         self.maternal_disorder_paf = builder.lookup.build_table(
-            builder.data.load(data_keys.MATERNAL_DISORDERS.PAF_MATERNAL_DISORDER_ATTRIBUTABLE_TO_HEMOGLOBIN),
+            builder.data.load(data_keys.MATERNAL_DISORDERS.PAF_ATTRIBUTABLE_TO_HEMOGLOBIN),
             key_columns=["sex"],
             parameter_columns=["age", "year"],
         )
