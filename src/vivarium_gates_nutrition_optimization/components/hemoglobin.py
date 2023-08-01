@@ -72,7 +72,12 @@ class Hemoglobin:
             key_columns=["sex"],
             parameter_columns=["age", "year"],
         )
-
+        self.moderate_hemorrhage_probability = builder.lookup.build_table(
+            builder.data.load(data_keys.MATERNAL_HEMORRHAGE.MODERATE_HEMORRAHGE_PROBABILITY),
+            key_columns=["sex"],
+            parameter_columns=["age", "year"],
+        )
+        self.moderate_hemo
         self.distribution_parameters = builder.value.register_value_producer(
             "hemoglobin.exposure_parameters",
             source=builder.lookup.build_table(
@@ -214,10 +219,15 @@ class Hemoglobin:
     
     def adjust_hemoglobin_exposure(self, index: pd.Index, hemoglobin_exposure: pd.DataFrame) -> pd.DataFrame:
         pop = self.population_view.get(index, query="(alive == 'alive') & (maternal_hemorrhage == 'maternal_hemorrhage')")
-
+        p_moderate_hemorrhage = self.moderate_hemorrhage_probability(pop.index)
+        pop['hemorrhage_severity'] = self.randomness.choice(
+            pop.index,
+            choices=["moderate","severe"],
+            p=[p_moderate_hemorrhage, 1 - p_moderate_hemorrhage],
+            additional_key='hemorrhage_severity')
         severe_mask = pop["hemorrhage_severity"] == "severe"
         moderate_mask = pop["hemorrhage_severity"] == "moderate"
-        #Multiply hemoglobin exposure by 
+        #Multiply hemoglobin exposure by appropriate correction factor
         hemoglobin_exposure[severe_mask] *= HEMOGLOBIN_SCALE_FACTOR_SEVERE_HEMORRHAGE
         hemoglobin_exposure[moderate_mask] *= HEMOGLOBIN_SCALE_FACTOR_MODERATE_HEMORRHAGE
         return hemoglobin_exposure
