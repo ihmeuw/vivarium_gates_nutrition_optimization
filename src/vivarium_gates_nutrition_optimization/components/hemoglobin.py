@@ -218,18 +218,20 @@ class Hemoglobin:
         return maternal_hemorrhage_probability
     
     def adjust_hemoglobin_exposure(self, index: pd.Index, hemoglobin_exposure: pd.DataFrame) -> pd.DataFrame:
-        pop = self.population_view.get(index, query="(alive == 'alive') & (maternal_hemorrhage == 'maternal_hemorrhage')")
+        pop = self.population_view.get(index)
+        maternal_hemorrhage_mask = (pop.alive == 'alive') & (pop['maternal_hemorrhage'] == 'maternal_hemorrhage')
+        if sum(maternal_hemorrhage_mask) == 0:
+            return hemoglobin_exposure
+        
         p_moderate_hemorrhage = self.moderate_hemorrhage_probability(pop.index)
-        pop['hemorrhage_severity'] = self.randomness.choice(
-            pop.index,
-            choices=["moderate","severe"],
-            p=[p_moderate_hemorrhage, 1 - p_moderate_hemorrhage],
+        hemorrhage_scale_factors = self.randomness.choice(
+            pop[maternal_hemorrhage_mask].index,
+            choices=[HEMOGLOBIN_SCALE_FACTOR_MODERATE_HEMORRHAGE,HEMOGLOBIN_SCALE_FACTOR_SEVERE_HEMORRHAGE],
+            p=pd.concat([p_moderate_hemorrhage, 1 - p_moderate_hemorrhage]),
             additional_key='hemorrhage_severity')
-        severe_mask = pop["hemorrhage_severity"] == "severe"
-        moderate_mask = pop["hemorrhage_severity"] == "moderate"
+
         #Multiply hemoglobin exposure by appropriate correction factor
-        hemoglobin_exposure[severe_mask] *= HEMOGLOBIN_SCALE_FACTOR_SEVERE_HEMORRHAGE
-        hemoglobin_exposure[moderate_mask] *= HEMOGLOBIN_SCALE_FACTOR_MODERATE_HEMORRHAGE
+        hemoglobin_exposure.loc[hemorrhage_scale_factors.index] *= hemorrhage_scale_factors
         return hemoglobin_exposure
 
 
