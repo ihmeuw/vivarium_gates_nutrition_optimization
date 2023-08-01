@@ -363,6 +363,7 @@ def get_moderate_hemorrhage_probability(key: str, location: str) -> pd.DataFrame
     moderate_hemorrhage_probability = pd.DataFrame(
         [dist.rvs(size=1000, random_state=rng)],
         columns=vi_globals.DRAW_COLUMNS,
+        index=['probability']
     )
 
     return moderate_hemorrhage_probability
