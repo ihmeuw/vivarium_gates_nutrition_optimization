@@ -75,8 +75,8 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
         data_keys.MATERNAL_HEMORRHAGE.RAW_INCIDENCE_RATE: load_raw_incidence_data,
         data_keys.MATERNAL_HEMORRHAGE.CSMR: load_standard_data,
         data_keys.MATERNAL_HEMORRHAGE.INCIDENT_PROBABILITY: load_pregnant_maternal_hemorrhage_incidence,
-        data_keys.MATERNAL_HEMORRHAGE.RR_ATTRIBUTABLE_TO_HEMOGLOBIN: load_rr,
-        data_keys.MATERNAL_HEMORRHAGE.PAF_ATTRIBUTABLE_TO_HEMOGLOBIN: load_paf,
+        data_keys.MATERNAL_HEMORRHAGE.RR_ATTRIBUTABLE_TO_HEMOGLOBIN: load_hemoglobin_maternal_hemorrhage_rr,
+        data_keys.MATERNAL_HEMORRHAGE.PAF_ATTRIBUTABLE_TO_HEMOGLOBIN: load_hemoglobin_maternal_hemorrhage_paf,
         data_keys.MATERNAL_HEMORRHAGE.MODERATE_HEMORRHAGE_PROBABILITY: get_moderate_hemorrhage_probability,
         data_keys.HEMOGLOBIN.MEAN: get_hemoglobin_data,
         data_keys.HEMOGLOBIN.STANDARD_DEVIATION: get_hemoglobin_data,
@@ -296,7 +296,7 @@ def load_pregnant_maternal_hemorrhage_incidence(key: str, location: str):
     return maternal_hemorrhage_incidence.applymap(lambda value: 1 if value > 1 else value)
 
 
-def load_rr(key: str, location: str) -> pd.DataFrame:
+def load_hemoglobin_maternal_hemorrhage_rr(key: str, location: str) -> pd.DataFrame:
     if key != data_keys.MATERNAL_HEMORRHAGE.RR_ATTRIBUTABLE_TO_HEMOGLOBIN:
         raise ValueError(f"Unrecognized key {key}")
 
@@ -306,15 +306,15 @@ def load_rr(key: str, location: str) -> pd.DataFrame:
     demographic_dimensions = get_data(data_keys.POPULATION.DEMOGRAPHY, location)
 
     rng = np.random.default_rng(get_hash(f"{key}_{location}"))
-    moderate_hemorrhage_rr = pd.DataFrame(
+    maternal_hemorrhage_rr = pd.DataFrame(
         np.tile(dist.rvs(size=1000, random_state=rng), (len(demographic_dimensions), 1)),
         columns=vi_globals.DRAW_COLUMNS,
         index=demographic_dimensions.index,
     )
-    return moderate_hemorrhage_rr
+    return maternal_hemorrhage_rr
 
 
-def load_paf(key: str, location: str) -> pd.DataFrame:
+def load_hemoglobin_maternal_hemorrhage_paf(key: str, location: str) -> pd.DataFrame:
     if key != data_keys.MATERNAL_HEMORRHAGE.PAF_ATTRIBUTABLE_TO_HEMOGLOBIN:
         raise ValueError(f"Unrecognized key {key}")
 
@@ -355,17 +355,15 @@ def load_hemoglobin_maternal_disorders_paf(key: str, location: str) -> pd.DataFr
 
 
 def get_moderate_hemorrhage_probability(key: str, location: str) -> pd.DataFrame:
-    demographic_dimensions = get_data(data_keys.POPULATION.DEMOGRAPHY, location)
-
     hemorrhage_dist_params = data_values.PROBABILITY_MODERATE_MATERNAL_HEMORRHAGE
     # Clip a bit higher than zero to avoid underflow error
     dist = sampling.get_truncnorm_from_quantiles(*hemorrhage_dist_params, lower_clip=0.1)
     # random seed
-    rng = np.random.default_rng(get_hash(f"hemorrhage_severity_{location}"))
+    rng = np.random.default_rng(get_hash(f"hemorrhage_severity"))
     moderate_hemorrhage_probability = pd.DataFrame(
-        np.tile(dist.rvs(size=1000, random_state=rng), (len(demographic_dimensions), 1)),
+        [dist.rvs(size=1000, random_state=rng)],
         columns=vi_globals.DRAW_COLUMNS,
-        index=demographic_dimensions.index,
+        index=['probability']
     )
 
     return moderate_hemorrhage_probability
