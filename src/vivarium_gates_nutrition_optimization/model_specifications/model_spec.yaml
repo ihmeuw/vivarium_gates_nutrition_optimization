@@ -3,7 +3,6 @@ components:
         population:
             - BasePopulation()
         metrics:
-            - DisabilityObserver()
             - DiseaseObserver("maternal_disorders")
             - DiseaseObserver("maternal_hemorrhage")
     vivarium_gates_nutrition_optimization:
@@ -12,15 +11,19 @@ components:
             - MaternalDisorders()
             - MaternalHemorrhage()
             - MaternalMortality()
+            - Hemoglobin()
+            - Anemia()
             - ResultsStratifier()
             - PregnancyObserver()
             - BirthRecorder()
             - MaternalMortalityObserver()
+            - DisabilityObserver()
+            - AnemiaObserver()
 
 configuration:
     input_data:
         input_draw_number: 0
-        artifact_path: '/mnt/team/simulation_science/costeffectiveness/artifacts/vivarium_gates_nutrition_optimization/model2.1/ethiopia.hdf'
+        artifact_path: '/mnt/team/simulation_science/costeffectiveness/artifacts/vivarium_gates_nutrition_optimization/model3.0/ethiopia.hdf'
     interpolation:
         order: 0
         extrapolate: True
@@ -36,7 +39,7 @@ configuration:
         end:
             year: 2025
             month: 12
-            day: 3
+            day: 31
         step_size: 7 # Days
     population:
         population_size: 10_000
@@ -50,6 +53,9 @@ configuration:
         pregnancy:
             include:
             - 'pregnancy_outcome'
+        anemia:
+            include:
+            - 'pregnancy'
         # disability:
         #     include:
         #     exclude:
