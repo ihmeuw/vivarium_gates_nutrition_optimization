@@ -109,14 +109,14 @@ class Hemoglobin:
         )
         builder.value.register_value_modifier(
             ## Hemoglobin affects MD
-            "maternal_disorders.transition_probability",
-            self.adjust_maternal_disorder_probability,
+            "maternal_disorders.transition_proportion",
+            self.adjust_maternal_disorder_proportion,
             requires_values=["hemoglobin.exposure"],
         )
         builder.value.register_value_modifier(
             ## Hemoglobin affcts MH
-            "maternal_hemorrhage.transition_probability",
-            self.adjust_maternal_hemorrhage_probability,
+            "maternal_hemorrhage.transition_proportion",
+            self.adjust_maternal_hemorrhage_proportion,
             requires_values=["hemoglobin.exposure"],
         )
 
@@ -206,7 +206,7 @@ class Hemoglobin:
         ret_val.loc[gumbel] = self._mirrored_gumbel_ppf_2017(propensity, mean, sd)[gumbel]
         return ret_val
 
-    def adjust_maternal_disorder_probability(
+    def adjust_maternal_disorder_proportion(
         self, index: pd.Index, maternal_disorder_probability: pd.DataFrame
     ) -> pd.Series:
         hemoglobin_level = self.hemoglobin(index)
@@ -218,11 +218,11 @@ class Hemoglobin:
         )
         per_simulant_rr = rr**per_simulant_exposure
         maternal_disorder_probability *= (1 - paf) * per_simulant_rr
-        return maternal_disorder_probability.applymap(lambda value: 1 if value > 1 else value)
+        return maternal_disorder_probability.map(lambda value: 1 if value > 1 else value)
 
-    def adjust_maternal_hemorrhage_probability(self, index, maternal_hemorrhage_probability):
-        paf = self.hemorrhage_paf(index)["value"]
-        rr = self.hemorrhage_rr(index)["value"]
+    def adjust_maternal_hemorrhage_proportion(self, index, maternal_hemorrhage_probability):
+        paf = self.hemorrhage_paf(index)
+        rr = self.hemorrhage_rr(index)
         hemoglobin = self.hemoglobin(index)
         maternal_hemorrhage_probability *= 1 - paf
         # Dichotomous risk based on severe anemia
