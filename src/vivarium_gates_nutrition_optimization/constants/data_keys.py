@@ -73,6 +73,11 @@ class __MaternalDisorders(NamedTuple):
     MORTALITY_PROBABILITY: str = "cause.maternal_disorders.mortality_probability"
     YLDS: str = "cause.maternal_disorders.ylds"
 
+    RR_ATTRIBUTABLE_TO_HEMOGLOBIN: str = (
+        "risk_factor.hemoglobin_on_maternal_disorder.relative_risk"
+    )
+    PAF_ATTRIBUTABLE_TO_HEMOGLOBIN: str = "risk_factor.hemoglobin_on_maternal_disorder.paf"
+
     @property
     def name(self):
         return "maternal_disorders"
@@ -90,6 +95,15 @@ class __MaternalHemorrhage(NamedTuple):
     CSMR: str = "cause.maternal_hemorrhage.cause_specific_mortality_rate"
     INCIDENT_PROBABILITY: str = "cause.maternal_hemorrhage.incident_probability"
 
+    RR_ATTRIBUTABLE_TO_HEMOGLOBIN: str = (
+        "risk_factor.hemoglobin_on_maternal_hemorrhage.relative_risk"
+    )
+    PAF_ATTRIBUTABLE_TO_HEMOGLOBIN: str = "risk_factor.hemoglobin_on_maternal_hemorrhage.paf"
+
+    MODERATE_HEMORRHAGE_PROBABILITY: str = (
+        "covariate.moderate_hemorrhage_probability.estimate"
+    )
+
     @property
     def name(self):
         return "maternal_hemorrhage"
@@ -106,6 +120,9 @@ class _Hemoglobin(NamedTuple):
     MEAN: TargetString = TargetString("risk_factor.hemoglobin.mean")
     STANDARD_DEVIATION: TargetString = TargetString(
         "risk_factor.hemoglobin.standard_deviation"
+    )
+    PREGNANT_PROPORTION_WITH_HEMOGLOBIN_BELOW_70: TargetString = TargetString(
+        "risk_factor.hemoglobin.pregnant_proportion_below_70_gL"
     )
 
     @property
