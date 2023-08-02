@@ -41,6 +41,7 @@ class Hemoglobin:
         self.columns_created = [
             "hemoglobin_distribution_propensity",
             "hemoglobin_percentile",
+            "hemglobin_scale_factor",
         ]
 
         index_columns = [
@@ -108,20 +109,17 @@ class Hemoglobin:
             parameter_columns=["age", "year"],
         )
         builder.value.register_value_modifier(
-            ## Hemoglobin affects MD
             "maternal_disorders.transition_proportion",
             self.adjust_maternal_disorder_proportion,
             requires_values=["hemoglobin.exposure"],
         )
         builder.value.register_value_modifier(
-            ## Hemoglobin affcts MH
             "maternal_hemorrhage.transition_proportion",
             self.adjust_maternal_hemorrhage_proportion,
             requires_values=["hemoglobin.exposure"],
         )
 
         builder.value.register_value_modifier(
-            ## MH affects hemoglobin
             "hemoglobin.exposure",
             self.adjust_hemoglobin_exposure,
             requires_columns=["maternal_hemorrhage"],
@@ -145,6 +143,15 @@ class Hemoglobin:
                 ),
                 "hemoglobin_percentile": self.randomness.get_draw(
                     pop_data.index, additional_key="hemoglobin_percentile"
+                ),
+                "hemoglobin_scale_factor": self.randomness.choice(
+                    pop_data.index,
+                    choices=[
+                        HEMOGLOBIN_SCALE_FACTOR_MODERATE_HEMORRHAGE,
+                        HEMOGLOBIN_SCALE_FACTOR_SEVERE_HEMORRHAGE,
+                    ],
+                    p=[self.moderate_hemorrhage_probability, RESIDUAL_CHOICE],
+                    additional_key="hemorrhage_scale_factors",
                 ),
             },
             index=pop_data.index,
@@ -237,21 +244,13 @@ class Hemoglobin:
     ) -> pd.DataFrame:
         pop = self.population_view.get(index)
         # We need to persist this value for both current and recovered maternal hemorrhage
+        # We don't need to undo after postpartum, as simulants become untracked
         maternal_hemorrhage_mask = (pop["alive"] == "alive") & (
             pop["maternal_hemorrhage"] != "susceptible_to_maternal_hemorrhage"
         )
-        if not maternal_hemorrhage_mask.any():
-            return hemoglobin_exposure
-        # Choose hemorrhage severity and multiply hemoglobin exposure by appropriate hemorrhage scale factor
-        hemoglobin_exposure[maternal_hemorrhage_mask] *= self.randomness.choice(
-            pop[maternal_hemorrhage_mask].index,
-            choices=[
-                HEMOGLOBIN_SCALE_FACTOR_MODERATE_HEMORRHAGE,
-                HEMOGLOBIN_SCALE_FACTOR_SEVERE_HEMORRHAGE,
-            ],
-            p=[self.moderate_hemorrhage_probability, RESIDUAL_CHOICE],
-            additional_key="hemorrhage_scale_factors",
-        )
+        hemoglobin_exposure.loc[maternal_hemorrhage_mask] *= pop.loc[
+            maternal_hemorrhage_mask, "hemoglobin_scale_factor"
+        ]
         return hemoglobin_exposure
 
 
