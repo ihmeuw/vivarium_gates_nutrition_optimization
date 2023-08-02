@@ -9,4 +9,4 @@ from .observers import (
     PregnancyObserver,
     ResultsStratifier,
 )
-from .pregnancy import Pregnancy
+from .pregnancy import Pregnancy, UntrackNotPregnant

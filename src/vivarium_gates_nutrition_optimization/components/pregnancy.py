@@ -18,18 +18,6 @@ class NotPregnantState(SusceptibleState):
     def __init__(self, cause, *args, **kwargs):
         super(SusceptibleState, self).__init__(cause, *args, name_prefix="not_", **kwargs)
     
-    def setup(self, builder: Builder):
-        super().setup(builder)
-        builder.event.register_listener("time_step__cleanup", self.on_time_step_cleanup)
-    
-    def on_time_step_cleanup(self, event: Event) -> None:
-        population = self.population_view.get(event.index)
-        pop = population[(population["pregnancy"] == "not_pregnant") & population["tracked"]].copy()
-        if len(pop) > 0:
-            pop["tracked"] = pd.Series(False, index=pop.index)
-            pop["exit_time"] = event.time
-            self.population_view.update(pop)
-
 
 class PregnantState(DiseaseState):
     def __init__(self, *args, **kwargs):
@@ -215,3 +203,26 @@ def get_birth_outcome_probabilities(builder: Builder) -> pd.DataFrame:
     ).reset_index()
 
     return probabilities
+
+class UntrackNotPregnant:
+    """Component for untracking not pregnant simulants"""
+
+    @property
+    def name(self) -> str:
+        return "untrack_not_pregnant"
+
+    # noinspection PyAttributeOutsideInit
+    def setup(self, builder: Builder) -> None:
+        self.population_view = builder.population.get_view(["pregnancy", "exit_time", "tracked"])
+        builder.event.register_listener("time_step__cleanup", self.on_time_step_cleanup)
+
+    def on_time_step_cleanup(self, event: Event) -> None:
+        population = self.population_view.get(event.index)
+        pop = population[(population["pregnancy"] == models.NOT_PREGNANT_STATE_NAME) & population["tracked"]].copy()
+        if len(pop) > 0:
+            pop["tracked"] = pd.Series(False, index=pop.index)
+            pop["exit_time"] = event.time
+            self.population_view.update(pop)
+
+    def __repr__(self) -> str:
+        return "UntrackNotPregnant()"

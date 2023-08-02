@@ -8,6 +8,7 @@ components:
     vivarium_gates_nutrition_optimization:
         components:
             - Pregnancy()
+            - UntrackNotPregnant()
             - MaternalDisorders()
             - MaternalHemorrhage()
             - MaternalMortality()
