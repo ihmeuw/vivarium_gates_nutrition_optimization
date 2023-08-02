@@ -41,7 +41,7 @@ class Hemoglobin:
         self.columns_created = [
             "hemoglobin_distribution_propensity",
             "hemoglobin_percentile",
-            "hemglobin_scale_factor",
+            "hemoglobin_scale_factor",
         ]
 
         index_columns = [
