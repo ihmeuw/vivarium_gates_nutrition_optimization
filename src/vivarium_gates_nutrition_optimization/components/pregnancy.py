@@ -1,9 +1,9 @@
 import pandas as pd
 from vivarium.framework.engine import Builder
+from vivarium.framework.event import Event
 from vivarium.framework.population import SimulantData
 from vivarium.framework.values import Pipeline
 from vivarium_public_health.disease import DiseaseModel, SusceptibleState
-from vivarium.framework.event import Event
 
 from vivarium_gates_nutrition_optimization.components.children import NewChildren
 from vivarium_gates_nutrition_optimization.components.disease import DiseaseState
@@ -17,7 +17,7 @@ from vivarium_gates_nutrition_optimization.constants.metadata import (
 class NotPregnantState(SusceptibleState):
     def __init__(self, cause, *args, **kwargs):
         super(SusceptibleState, self).__init__(cause, *args, name_prefix="not_", **kwargs)
-    
+
 
 class PregnantState(DiseaseState):
     def __init__(self, *args, **kwargs):
@@ -204,6 +204,7 @@ def get_birth_outcome_probabilities(builder: Builder) -> pd.DataFrame:
 
     return probabilities
 
+
 class UntrackNotPregnant:
     """Component for untracking not pregnant simulants"""
 
@@ -213,12 +214,17 @@ class UntrackNotPregnant:
 
     # noinspection PyAttributeOutsideInit
     def setup(self, builder: Builder) -> None:
-        self.population_view = builder.population.get_view(["pregnancy", "exit_time", "tracked"])
+        self.population_view = builder.population.get_view(
+            ["pregnancy", "exit_time", "tracked"]
+        )
         builder.event.register_listener("time_step__cleanup", self.on_time_step_cleanup)
 
     def on_time_step_cleanup(self, event: Event) -> None:
         population = self.population_view.get(event.index)
-        pop = population[(population["pregnancy"] == models.NOT_PREGNANT_STATE_NAME) & population["tracked"]].copy()
+        pop = population[
+            (population["pregnancy"] == models.NOT_PREGNANT_STATE_NAME)
+            & population["tracked"]
+        ].copy()
         if len(pop) > 0:
             pop["tracked"] = pd.Series(False, index=pop.index)
             pop["exit_time"] = event.time
