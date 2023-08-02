@@ -211,6 +211,7 @@ class Hemoglobin:
     ) -> pd.Series:
         hemoglobin_level = self.hemoglobin(index)
         rr = self.maternal_disorder_rr(index)
+        ## annoyingly formatted
         paf = self.maternal_disorder_paf(index)["value"]
         tmrel = TMREL_HEMOGLOBIN_ON_MATERNAL_DISORDERS
         per_simulant_exposure = (
@@ -221,7 +222,7 @@ class Hemoglobin:
         return maternal_disorder_probability.map(lambda value: 1 if value > 1 else value)
 
     def adjust_maternal_hemorrhage_proportion(self, index, maternal_hemorrhage_probability):
-        paf = self.hemorrhage_paf(index)
+        paf = self.hemorrhage_paf(index)["value"]
         rr = self.hemorrhage_rr(index)
         hemoglobin = self.hemoglobin(index)
         maternal_hemorrhage_probability *= 1 - paf
