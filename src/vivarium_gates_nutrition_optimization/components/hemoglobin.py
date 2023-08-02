@@ -252,16 +252,12 @@ class Anemia:
     def compute_disability_weight(self, index: pd.Index):
         anemia_levels = self.anemia_levels(index)
         raw_anemia_disability_weight = anemia_levels.map(ANEMIA_DISABILITY_WEIGHTS)
-        ## rescale postpartum YLDs the same way as in IV Iron
-        postpartum_scalar = (
-            data_values.DURATIONS.POSTPARTUM + data_values.DURATIONS.PARTURITION
-        ) / data_values.DURATIONS.POSTPARTUM
         dw_map = {
             models.NOT_PREGNANT_STATE_NAME: raw_anemia_disability_weight,
             models.PREGNANT_STATE_NAME: raw_anemia_disability_weight,
             ## Pause YLD accumulation during the parturition state
             models.PARTURITION_STATE_NAME: pd.Series(0, index=index),
-            models.POSTPARTUM_STATE_NAME: postpartum_scalar * raw_anemia_disability_weight,
+            models.POSTPARTUM_STATE_NAME: raw_anemia_disability_weight,
         }
 
         pop = self.population_view.get(index)
