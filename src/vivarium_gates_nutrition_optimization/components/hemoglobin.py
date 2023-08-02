@@ -236,8 +236,9 @@ class Hemoglobin:
         self, index: pd.Index, hemoglobin_exposure: pd.DataFrame
     ) -> pd.DataFrame:
         pop = self.population_view.get(index)
+        # We need to persist this value for both current and recovered maternal hemorrhage
         maternal_hemorrhage_mask = (pop["alive"] == "alive") & (
-            pop["maternal_hemorrhage"] == "maternal_hemorrhage"
+            pop["maternal_hemorrhage"] != "susceptible_to_maternal_hemorrhage"
         )
         if not maternal_hemorrhage_mask.any():
             return hemoglobin_exposure
