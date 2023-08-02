@@ -311,7 +311,6 @@ def load_hemoglobin_maternal_hemorrhage_rr(key: str, location: str) -> pd.DataFr
         columns=vi_globals.DRAW_COLUMNS,
         index=demographic_dimensions.index,
     )
-    maternal_hemorrhage_rr = reshape_to_vivarium_format(maternal_hemorrhage_rr, location)
     return maternal_hemorrhage_rr
 
 
