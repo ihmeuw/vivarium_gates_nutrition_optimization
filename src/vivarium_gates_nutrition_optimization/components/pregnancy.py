@@ -123,6 +123,38 @@ class PregnantState(DiseaseState):
             index=pop_data.index,
         )
 
+class PregnancyModel(DiseaseModel):
+
+    def setup(self, builder: Builder):
+        """Perform this component's setup."""
+        super(DiseaseModel, self).setup(builder)
+
+        self.configuration_age_start = builder.configuration.population.age_start
+        self.configuration_age_end = builder.configuration.population.age_end
+
+        cause_specific_mortality_rate = self.load_cause_specific_mortality_rate_data(builder)
+        self.cause_specific_mortality_rate = builder.lookup.build_table(
+            cause_specific_mortality_rate,
+            key_columns=["sex"],
+            parameter_columns=["age", "year"],
+        )
+        builder.value.register_value_modifier(
+            "cause_specific_mortality_rate",
+            self.adjust_cause_specific_mortality_rate,
+            requires_columns=["age", "sex"],
+        )
+
+        self.population_view = builder.population.get_view(["age", "sex", self.state_column])
+        builder.population.initializes_simulants(
+            self.on_initialize_simulants,
+            creates_columns=[self.state_column],
+            requires_columns=["age", "sex"],
+            requires_streams=[f"{self.state_column}_initial_states"],
+        )
+        self.randomness = builder.randomness.get_stream(f"{self.state_column}_initial_states")
+
+        builder.event.register_listener("time_step", self.on_time_step, priority=3)
+        builder.event.register_listener("time_step__cleanup", self.on_time_step_cleanup)
 
 def Pregnancy():
     not_pregnant = NotPregnantState(models.PREGNANT_STATE_NAME)
@@ -161,7 +193,7 @@ def Pregnancy():
     postpartum.allow_self_transitions()
     postpartum.add_transition(not_pregnant)
 
-    return DiseaseModel(
+    return PregnancyModel(
         models.PREGNANCY_MODEL_NAME,
         states=[not_pregnant, pregnant, parturition, postpartum],
         get_data_functions={"cause_specific_mortality_rate": lambda *_: 0.0},
