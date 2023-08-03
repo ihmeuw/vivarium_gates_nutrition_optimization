@@ -305,7 +305,7 @@ class Anemia:
         choice_index = (hemoglobin_level.values[np.newaxis].T < thresholds).sum(axis=1)
 
         return pd.Series(
-            np.array(["none", "mild", "moderate", "severe"])[choice_index],
+            np.array(["not_anemic", "mild", "moderate", "severe"])[choice_index],
             index=index,
             name="anemia_levels",
         )
@@ -331,7 +331,7 @@ class Anemia:
         return disability_weight
 
     def on_initialize_simulants(self, pop_data: SimulantData) -> None:
-        pop_update = pd.DataFrame({"anemia_status_at_birth": "none"}, index=pop_data.index)
+        pop_update = pd.DataFrame({"anemia_status_at_birth": "invalid"}, index=pop_data.index)
         self.population_view.update(pop_update)
 
     def on_time_step(self, event: Event):

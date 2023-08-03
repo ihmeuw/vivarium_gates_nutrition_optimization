@@ -39,7 +39,7 @@ class ResultsStratifier(ResultsStratifier_):
             builder,
             name="anemia_status_at_birth",
             sources=[Source("anemia_status_at_birth", SourceType.COLUMN)],
-            categories=data_values.ANEMIA_DISABILITY_WEIGHTS.keys(),
+            categories=data_values.ANEMIA_STATUS_AT_BIRTH_CATEGORIES,
         )
 
 
