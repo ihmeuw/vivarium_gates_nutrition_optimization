@@ -76,29 +76,23 @@ ANEMIA_THRESHOLD_DATA = pd.DataFrame(
 
 # MATERNAL_BMI_ANEMIA_THRESHOLD = 100.0  # g/L, units of hemoglobin exposure distribution
 
-# SEVERE_ANEMIA_AMONG_PREGNANT_WOMEN_THRESHOLD = 70.0  # g/L
+SEVERE_ANEMIA_AMONG_PREGNANT_WOMEN_THRESHOLD = 70.0  # g/L
 
 
-# # Risk Effects
-# RR_MATERNAL_HEMORRHAGE_ATTRIBUTABLE_TO_HEMOGLOBIN = (
-#     3.54,
-#     1.2,
-#     10.4,
-# )  # (median, lower, upper) 95% CI
-# HEMOGLOBIN_SCALE_FACTOR_MODERATE_HEMORRHAGE = 0.9
-# HEMOGLOBIN_SCALE_FACTOR_SEVERE_HEMORRHAGE = 0.833
+# Risk Effects
+RR_MATERNAL_HEMORRHAGE_ATTRIBUTABLE_TO_HEMOGLOBIN = (
+    3.54,
+    1.2,
+    10.4,
+)  # (median, lower, upper) 95% CI
+HEMOGLOBIN_SCALE_FACTOR_MODERATE_HEMORRHAGE = 0.9
+HEMOGLOBIN_SCALE_FACTOR_SEVERE_HEMORRHAGE = 0.833
 
-# TMREL_HEMOGLOBIN_ON_MATERNAL_DISORDERS = 120.0
-# RR_SCALAR = (
-#     10.0  # Conversion factor between hemoglobin units (g/L) and relative risk units (g/dL)
-# )
+TMREL_HEMOGLOBIN_ON_MATERNAL_DISORDERS = 120.0
+RR_SCALAR = (
+    10.0  # Conversion factor between hemoglobin units (g/L) and relative risk units (g/dL)
+)
 
-# RR_STILLBIRTH_PROBABILITY_ATTRIBUTABLE_TO_HEMOGLOBIN = (
-#     3.87,
-#     1.88,
-#     8.06,
-# )  # (median, lower, upper) 95% CI
-## mean, lower, upper to go into distribution
 PREGNANCY_CORRECTION_FACTORS = {
     data_keys.HEMOGLOBIN.MEAN: (0.919325, 0.86, 0.98),
     data_keys.HEMOGLOBIN.STANDARD_DEVIATION: (1.032920188, 1.032920188, 1.032920188),
