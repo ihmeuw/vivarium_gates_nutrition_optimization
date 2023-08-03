@@ -35,6 +35,13 @@ class ResultsStratifier(ResultsStratifier_):
             categories=models.PREGNANCY_MODEL_STATES,
         )
 
+        self.setup_stratification(
+            builder,
+            name="anemia_status_at_birth",
+            sources=[Source("anemia_status_at_birth", SourceType.COLUMN)],
+            categories=data_values.ANEMIA_DISABILITY_WEIGHTS.keys(),
+        )
+
 
 class PregnancyObserver(DiseaseObserver):
     def __init__(self):
