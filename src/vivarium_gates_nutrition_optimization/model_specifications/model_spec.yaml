@@ -58,6 +58,8 @@ configuration:
             include:
             - 'pregnancy'
         maternal_disorders:
-            include: 'anemia_status_at_birth'
+            include: 
+            - 'anemia_status_at_birth'
         maternal_hemorrhage:
-            include: 'anemia_status_at_birth'
+            include: 
+            - 'anemia_status_at_birth'
