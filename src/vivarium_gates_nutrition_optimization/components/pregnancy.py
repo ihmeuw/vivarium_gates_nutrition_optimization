@@ -123,8 +123,8 @@ class PregnantState(DiseaseState):
             index=pop_data.index,
         )
 
-class PregnancyModel(DiseaseModel):
 
+class PregnancyModel(DiseaseModel):
     def setup(self, builder: Builder):
         """Perform this component's setup."""
         super(DiseaseModel, self).setup(builder)
@@ -155,6 +155,7 @@ class PregnancyModel(DiseaseModel):
 
         builder.event.register_listener("time_step", self.on_time_step, priority=3)
         builder.event.register_listener("time_step__cleanup", self.on_time_step_cleanup)
+
 
 def Pregnancy():
     not_pregnant = NotPregnantState(models.PREGNANT_STATE_NAME)
