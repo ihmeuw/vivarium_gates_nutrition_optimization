@@ -38,9 +38,15 @@ class _HemoglobinDistributionParameters(NamedTuple):
 
 
 HEMOGLOBIN_DISTRIBUTION_PARAMETERS = _HemoglobinDistributionParameters()
-
+ANEMIA_STATUS_AT_BIRTH_CATEGORIES = (
+    "invalid",  ## Check on anemia_status that hasn't been properly assigned
+    "not_anemic",
+    "mild",
+    "moderate",
+    "severe",
+)
 ANEMIA_DISABILITY_WEIGHTS = {
-    "none": 0.0,
+    "not_anemic": 0.0,
     "mild": 0.004,
     "moderate": 0.052,
     "severe": 0.149,

@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import scipy.stats
 from vivarium.framework.engine import Builder
+from vivarium.framework.event import Event
 from vivarium.framework.population import SimulantData
 from vivarium.framework.randomness import RESIDUAL_CHOICE
 
@@ -259,6 +260,10 @@ class Anemia:
     def name(self):
         return "anemia"
 
+    @property
+    def columns_created(self):
+        return ["anemia_status_at_birth"]
+
     def setup(self, builder: Builder):
         self.hemoglobin = builder.value.get_value("hemoglobin.exposure")
 
@@ -284,7 +289,15 @@ class Anemia:
             self.disability_weight,
         )
 
-        self.population_view = builder.population.get_view(["alive", "pregnancy"])
+        self.population_view = builder.population.get_view(
+            ["alive", "pregnancy"] + self.columns_created
+        )
+
+        builder.population.initializes_simulants(
+            self.on_initialize_simulants,
+            creates_columns=self.columns_created,
+        )
+        builder.event.register_listener("time_step", self.on_time_step, priority=4)
 
     def anemia_source(self, index: pd.Index) -> pd.Series:
         hemoglobin_level = self.hemoglobin(index)
@@ -292,7 +305,7 @@ class Anemia:
         choice_index = (hemoglobin_level.values[np.newaxis].T < thresholds).sum(axis=1)
 
         return pd.Series(
-            np.array(["none", "mild", "moderate", "severe"])[choice_index],
+            np.array(["not_anemic", "mild", "moderate", "severe"])[choice_index],
             index=index,
             name="anemia_levels",
         )
@@ -316,3 +329,14 @@ class Anemia:
             disability_weight[in_state] = dw.loc[in_state]
 
         return disability_weight
+
+    def on_initialize_simulants(self, pop_data: SimulantData) -> None:
+        pop_update = pd.DataFrame({"anemia_status_at_birth": "invalid"}, index=pop_data.index)
+        self.population_view.update(pop_update)
+
+    def on_time_step(self, event: Event):
+        pop_update = self.population_view.get(
+            event.index, query=("alive == 'alive' & pregnancy == 'parturition'")
+        )
+        pop_update["anemia_status_at_birth"] = self.anemia_levels(pop_update.index)
+        self.population_view.update(pop_update)

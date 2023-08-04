@@ -57,9 +57,9 @@ configuration:
         anemia:
             include:
             - 'pregnancy'
-        # disability:
-        #     include:
-        #     exclude:
-        # mortality:
-        #     include:
-        #     exclude:
+        maternal_disorders:
+            include:
+            - 'anemia_status_at_birth'
+        maternal_hemorrhage:
+            include:
+            - 'anemia_status_at_birth'
