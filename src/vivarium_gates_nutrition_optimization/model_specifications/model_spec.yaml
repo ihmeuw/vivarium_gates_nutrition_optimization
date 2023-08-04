@@ -5,6 +5,7 @@ components:
         metrics:
             - DiseaseObserver("maternal_disorders")
             - DiseaseObserver("maternal_hemorrhage")
+
     vivarium_gates_nutrition_optimization:
         components:
             - Pregnancy()
@@ -19,7 +20,7 @@ components:
             - BirthRecorder()
             - MaternalMortalityObserver()
             - DisabilityObserver()
-            - AnemiaObserver()
+            # - AnemiaObserver()
 
 configuration:
     input_data:
@@ -48,18 +49,18 @@ configuration:
         age_end: 54
         include_sex: "Female"
 
-    observers:
+    stratification:
         default:
-            - 'age'
-        pregnancy:
-            include:
-            - 'pregnancy_outcome'
-        anemia:
-            include:
-            - 'pregnancy'
-        maternal_disorders:
-            include:
-            - 'anemia_status_at_birth'
-        maternal_hemorrhage:
-            include:
-            - 'anemia_status_at_birth'
+            - 'age_group'
+        # pregnancy:
+        #     include:
+        #     - 'pregnancy_outcome'
+        # anemia:
+        #     include:
+        #     - 'pregnancy'
+        # maternal_disorders:
+        #     include:
+        #     - 'anemia_status_at_birth'
+        # maternal_hemorrhage:
+        #     include:
+        #     - 'anemia_status_at_birth'
