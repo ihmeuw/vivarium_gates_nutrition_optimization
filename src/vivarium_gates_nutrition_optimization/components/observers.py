@@ -113,7 +113,8 @@ class AnemiaObserver:
 
     def aggregate_state_person_time(self, x: pd.DataFrame) -> float:
         return len(x) * to_years(self.step_size())
-    
+
+
 class DisabilityObserver(DisabilityObserver_):
     def setup(self, builder: Builder) -> None:
         super().setup(builder)
