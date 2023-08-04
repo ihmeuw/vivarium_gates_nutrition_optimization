@@ -102,10 +102,10 @@ class AnemiaObserver:
         for anemia_category in data_values.ANEMIA_DISABILITY_WEIGHTS.keys():
             builder.results.register_observation(
                 name=f"anemia_{anemia_category}_person_time",
-                pop_filter=f'alive == "alive" and anemia == {anemia_category} and tracked==True',
+                pop_filter=f'alive == "alive" and anemia_levels == "{anemia_category}" and tracked==True',
                 aggregator=self.aggregate_state_person_time,
                 requires_columns=["alive"],
-                requires_values=["anemia"],
+                requires_values=["anemia_levels"],
                 additional_stratifications=self.config.include,
                 excluded_stratifications=self.config.exclude,
                 when="time_step__prepare",
