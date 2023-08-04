@@ -20,7 +20,7 @@ components:
             - BirthRecorder()
             - MaternalMortalityObserver()
             - DisabilityObserver()
-            # - AnemiaObserver()
+            - AnemiaObserver()
 
 configuration:
     input_data:
