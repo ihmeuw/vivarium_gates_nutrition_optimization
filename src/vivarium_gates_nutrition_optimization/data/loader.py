@@ -81,6 +81,8 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
         data_keys.HEMOGLOBIN.MEAN: get_hemoglobin_data,
         data_keys.HEMOGLOBIN.STANDARD_DEVIATION: get_hemoglobin_data,
         data_keys.HEMOGLOBIN.PREGNANT_PROPORTION_WITH_HEMOGLOBIN_BELOW_70: get_hemoglobin_csv_data,
+        data_keys.MATERNAL_BMI.PREVALENCE_LOW_BMI_ANEMIC: load_bmi_prevalence,
+        data_keys.MATERNAL_BMI.PREVALENCE_LOW_BMI_NON_ANEMIC: load_bmi_prevalence,
     }
     return mapping[lookup_key](lookup_key, location)
 
@@ -411,6 +413,34 @@ def get_hemoglobin_csv_data(key: str, location: str):
     )
     return data
 
+################
+# Maternal BMI #
+################
+
+def load_bmi_prevalence(key: str, location: str):
+    location_id = utility_data.get_location_id(location)
+    demography = get_data(data_keys.POPULATION.DEMOGRAPHY, location)
+
+    path = {
+        data_keys.MATERNAL_BMI.PREVALENCE_LOW_BMI_ANEMIC: paths.PREVALENCE_LOW_BMI_ANEMIC_CSV,
+        data_keys.MATERNAL_BMI.PREVALENCE_LOW_BMI_NON_ANEMIC: paths.PREVALENCE_LOW_BMI_NON_ANEMIC_CSV,
+    }[key]
+    data = pd.read_csv(path)
+
+    data = (data
+            .set_index(['location_id', 'age_group_id', 'draw'])
+            .loc[location_id]
+            .value
+            .unstack())
+    data = vi_utils.scrub_gbd_conventions(data, location)
+    data = vi_utils.split_interval(data, interval_column='age', split_column_prefix='age')
+    data.index = data.index.droplevel(['location', 'age_end'])
+    data = data.reindex(demography.index, level='age_start').fillna(0.)
+
+    data = vi_utils.sort_hierarchical_data(data)
+    data.index = data.index.droplevel("location")
+
+    return data
 
 ##############
 #   Helpers  #
