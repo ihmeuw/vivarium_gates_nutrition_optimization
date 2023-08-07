@@ -67,13 +67,13 @@ class Hemoglobin:
         distribution_parameters = pd.concat([mean, stddev], axis=1).reset_index()
 
         self.hemorrhage_rr = builder.lookup.build_table(
-            builder.data.load(data_keys.MATERNAL_DISORDERS.RR_ATTRIBUTABLE_TO_HEMOGLOBIN),
+            builder.data.load(data_keys.MATERNAL_HEMORRHAGE.RR_ATTRIBUTABLE_TO_HEMOGLOBIN),
             key_columns=["sex"],
             parameter_columns=["age", "year"],
         )
 
         self.hemorrhage_paf = builder.lookup.build_table(
-            builder.data.load(data_keys.MATERNAL_DISORDERS.PAF_ATTRIBUTABLE_TO_HEMOGLOBIN),
+            builder.data.load(data_keys.MATERNAL_HEMORRHAGE.PAF_ATTRIBUTABLE_TO_HEMOGLOBIN),
             key_columns=["sex"],
             parameter_columns=["age", "year"],
         )
@@ -83,6 +83,13 @@ class Hemoglobin:
             key_columns=["sex"],
             parameter_columns=["age", "year"],
         )
+
+        self.maternal_disorder_paf = builder.lookup.build_table(
+            builder.data.load(data_keys.MATERNAL_DISORDERS.PAF_ATTRIBUTABLE_TO_HEMOGLOBIN),
+            key_columns=["sex"],
+            parameter_columns=["age", "year"],
+        )
+
         self.moderate_hemorrhage_probability = builder.data.load(
             data_keys.MATERNAL_HEMORRHAGE.MODERATE_HEMORRHAGE_PROBABILITY
         ).value.values[0]
@@ -104,11 +111,6 @@ class Hemoglobin:
             requires_streams=[self.name],
         )
 
-        self.maternal_disorder_paf = builder.lookup.build_table(
-            builder.data.load(data_keys.MATERNAL_DISORDERS.PAF_ATTRIBUTABLE_TO_HEMOGLOBIN),
-            key_columns=["sex"],
-            parameter_columns=["age", "year"],
-        )
         builder.value.register_value_modifier(
             "maternal_disorders.transition_proportion",
             self.adjust_maternal_disorder_proportion,
