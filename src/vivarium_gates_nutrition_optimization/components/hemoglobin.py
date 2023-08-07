@@ -233,14 +233,14 @@ class Hemoglobin:
 
     def adjust_maternal_hemorrhage_proportion(self, index, maternal_hemorrhage_probability):
         paf = self.hemorrhage_paf(index)["value"]
-        rr = self.hemorrhage_rr(index)
+        rr = self.hemorrhage_rr(index)["value"]
         hemoglobin = self.hemoglobin(index)
         maternal_hemorrhage_probability *= 1 - paf
         # Dichotomous risk based on severe anemia
         maternal_hemorrhage_probability.loc[
             hemoglobin <= SEVERE_ANEMIA_AMONG_PREGNANT_WOMEN_THRESHOLD
         ] *= rr
-        return maternal_hemorrhage_probability
+        return maternal_hemorrhage_probability.map(lambda value: 1 if value > 1 else value)
 
     def adjust_hemoglobin_exposure(
         self, index: pd.Index, hemoglobin_exposure: pd.DataFrame
