@@ -44,17 +44,8 @@ class MaternalBMIExposure:
         )
 
     def on_initialize_simulants(self, pop_data: SimulantData):
-        propensity = self.randomness.get_draw(pop_data.index)
-        maternal_bmi = self.sample_bmi(propensity)
-
-        pop_update = pd.concat([
-            propensity.rename('maternal_bmi_propensity'),
-            maternal_bmi.rename('maternal_bmi_anemia_category'),
-        ], axis=1)
-        self.population_view.update(pop_update)
-
-    def sample_bmi(self, propensity: pd.Series) -> pd.Series:
-        index = propensity.index
+        index = pop_data.index
+        propensity = self.randomness.get_draw(index)
         p_low_anemic = self.probability_low_given_anemic(index)
         p_low_non_anemic = self.probability_low_given_non_anemic(index)
         hemoglobin = self.hemoglobin(index)
@@ -71,4 +62,10 @@ class MaternalBMIExposure:
             propensity.loc[non_anemic] < p_low_non_anemic.loc[non_anemic],
             models.LOW_BMI_NON_ANEMIC, models.NORMAL_BMI_NON_ANEMIC,
         )
-        return bmi
+
+        pop_update = pd.concat([
+            propensity.rename('maternal_bmi_propensity'),
+            bmi.rename('maternal_bmi_anemia_category'),
+        ], axis=1)
+
+        self.population_view.update(pop_update)
