@@ -302,6 +302,7 @@ class Anemia:
     def anemia_source(self, index: pd.Index) -> pd.Series:
         hemoglobin_level = self.hemoglobin(index)
         thresholds = self.thresholds(index)
+
         choice_index = (hemoglobin_level.values[np.newaxis].T < thresholds).sum(axis=1)
 
         return pd.Series(
