@@ -136,7 +136,6 @@ class _Hemoglobin(NamedTuple):
 
 HEMOGLOBIN = _Hemoglobin()
 
-
 class __MaternalBMI(NamedTuple):
     PREVALENCE_LOW_BMI_ANEMIC: str = "maternal_bmi.prevalance_low_bmi_anemic"
     PREVALENCE_LOW_BMI_NON_ANEMIC: str = "maternal_bmi.prevalence_low_bmi_non_anemic"
