@@ -25,7 +25,7 @@ components:
 configuration:
     input_data:
         input_draw_number: 0
-        artifact_path: '/mnt/team/simulation_science/costeffectiveness/artifacts/vivarium_gates_nutrition_optimization/model4.0/ethiopia.hdf'
+        artifact_path: '/mnt/team/simulation_science/costeffectiveness/artifacts/vivarium_gates_nutrition_optimization/model4.1/ethiopia.hdf'
     interpolation:
         order: 0
         extrapolate: True
@@ -52,15 +52,15 @@ configuration:
     stratification:
         default:
             - 'age_group'
-        # pregnancy:
-        #     include:
-        #     - 'pregnancy_outcome'
-        # anemia:
-        #     include:
-        #     - 'pregnancy'
-        # maternal_disorders:
-        #     include:
-        #     - 'anemia_status_at_birth'
-        # maternal_hemorrhage:
-        #     include:
-        #     - 'anemia_status_at_birth'
+        pregnancy:
+            include:
+            - 'pregnancy_outcome'
+        anemia:
+            include:
+            - 'pregnancy'
+        maternal_disorders:
+            include:
+            - 'anemia_status_at_birth'
+        maternal_hemorrhage:
+            include:
+            - 'anemia_status_at_birth'
