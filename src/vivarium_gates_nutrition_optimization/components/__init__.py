@@ -1,5 +1,6 @@
 from .children import BirthRecorder
 from .hemoglobin import Anemia, Hemoglobin
+from .maternal_bmi import MaternalBMIExposure
 from .maternal_disorders import MaternalDisorders, MaternalHemorrhage
 from .mortality import MaternalMortality
 from .observers import (
@@ -10,4 +11,3 @@ from .observers import (
     ResultsStratifier,
 )
 from .pregnancy import Pregnancy, UntrackNotPregnant
-from .maternal_bmi import MaternalBMIExposure

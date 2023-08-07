@@ -413,9 +413,11 @@ def get_hemoglobin_csv_data(key: str, location: str):
     )
     return data
 
+
 ################
 # Maternal BMI #
 ################
+
 
 def load_bmi_prevalence(key: str, location: str):
     location_id = utility_data.get_location_id(location)
@@ -427,20 +429,21 @@ def load_bmi_prevalence(key: str, location: str):
     }[key]
     data = pd.read_csv(path)
 
-    data = (data
-            .set_index(['location_id', 'age_group_id', 'draw'])
-            .loc[location_id]
-            .value
-            .unstack())
+    data = (
+        data.set_index(["location_id", "age_group_id", "draw"])
+        .loc[location_id]
+        .value.unstack()
+    )
     data = vi_utils.scrub_gbd_conventions(data, location)
-    data = vi_utils.split_interval(data, interval_column='age', split_column_prefix='age')
-    data.index = data.index.droplevel(['location', 'age_end'])
-    data = data.reindex(demography.index, level='age_start').fillna(0.)
+    data = vi_utils.split_interval(data, interval_column="age", split_column_prefix="age")
+    data.index = data.index.droplevel(["location", "age_end"])
+    data = data.reindex(demography.index, level="age_start").fillna(0.0)
 
     data = vi_utils.sort_hierarchical_data(data)
     data.index = data.index.droplevel("location")
 
     return data
+
 
 ##############
 #   Helpers  #
