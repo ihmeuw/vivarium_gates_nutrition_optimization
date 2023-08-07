@@ -10,3 +10,4 @@ from .observers import (
     ResultsStratifier,
 )
 from .pregnancy import Pregnancy, UntrackNotPregnant
+from .maternal_bmi import MaternalBMIExposure

@@ -33,8 +33,6 @@ class MaternalBMIExposure:
             parameter_columns=['age', 'year']
         )
         self.population_view = builder.population.get_view([
-            'pregnancy_status',
-            'pregnancy_state_change_date',
             'maternal_bmi_propensity',
             'maternal_bmi_anemia_category',
         ])
@@ -45,8 +43,6 @@ class MaternalBMIExposure:
             creates_columns=['maternal_bmi_propensity', 'maternal_bmi_anemia_category'],
         )
 
-        builder.event.register_listener('time_step__cleanup', self.on_time_step_cleanup)
-
     def on_initialize_simulants(self, pop_data: SimulantData):
         propensity = self.randomness.get_draw(pop_data.index)
         maternal_bmi = self.sample_bmi(propensity)
@@ -56,24 +52,6 @@ class MaternalBMIExposure:
             maternal_bmi.rename('maternal_bmi_anemia_category'),
         ], axis=1)
         self.population_view.update(pop_update)
-
-    def on_time_step_cleanup(self, event: Event):
-        # do this after pregnancy state has been set so hemoglobin
-        # reflects the pregnancy adjustment.
-        pop = self.population_view.get(event.index, query='alive == "alive"')
-        pop = pop.loc[pop['pregnancy_state_change_date'] == event.time]
-
-        bmi = pop['maternal_bmi_anemia_category'].copy()
-
-        newly_pregnant = pop.loc[pop['pregnancy_status'] == models.PREGNANT_STATE_NAME].index
-        bmi.loc[newly_pregnant] = self.sample_bmi(
-            pop.loc[newly_pregnant, 'maternal_bmi_propensity']
-        )
-
-        newly_not_pregnant = pop[pop['pregnancy_status'] == models.NOT_PREGNANT_STATE_NAME].index
-        bmi.loc[newly_not_pregnant] = models.INVALID_BMI_ANEMIA
-
-        self.population_view.update(bmi.rename('maternal_bmi_anemia_category'))
 
     def sample_bmi(self, propensity: pd.Series) -> pd.Series:
         index = propensity.index

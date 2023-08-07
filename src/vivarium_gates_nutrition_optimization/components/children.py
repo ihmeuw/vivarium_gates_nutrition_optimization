@@ -159,7 +159,7 @@ class BirthRecorder:
         required_columns = [
             "pregnancy_outcome",
             "pregnancy_duration",
-            "sex_of_child"
+            "sex_of_child",
             "birth_weight",
             "pregnancy",
             "previous_pregnancy",
