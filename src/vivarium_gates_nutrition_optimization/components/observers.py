@@ -50,7 +50,7 @@ class MaternalMortalityObserver(MortalityObserver):
 
         builder.results.register_observation(
             name=f"death_due_to_{cause_of_death}",
-            pop_filter=f'alive == "dead" and cause_of_death == "{cause_of_death}"',
+            pop_filter=f'alive == "dead" and cause_of_death == "{cause_of_death}" and tracked == True',
             aggregator=self.count_cause_specific_deaths,
             requires_columns=["alive", "cause_of_death", "exit_time"],
             additional_stratifications=self.config.include,
@@ -59,7 +59,7 @@ class MaternalMortalityObserver(MortalityObserver):
         )
         builder.results.register_observation(
             name=f"ylls_due_to_{cause_of_death}",
-            pop_filter=f'alive == "dead" and cause_of_death == "{cause_of_death}"',
+            pop_filter=f'alive == "dead" and cause_of_death == "{cause_of_death}" and tracked == True',
             aggregator=self.calculate_cause_specific_ylls,
             requires_columns=[
                 "alive",
@@ -102,7 +102,7 @@ class AnemiaObserver:
         for anemia_category in data_values.ANEMIA_DISABILITY_WEIGHTS.keys():
             builder.results.register_observation(
                 name=f"anemia_{anemia_category}_person_time",
-                pop_filter=f'alive == "alive" and anemia_levels == "{anemia_category}" and tracked==True',
+                pop_filter=f'alive == "alive" and anemia_levels == "{anemia_category}" and tracked == True',
                 aggregator=self.aggregate_state_person_time,
                 requires_columns=["alive"],
                 requires_values=["anemia_levels"],
