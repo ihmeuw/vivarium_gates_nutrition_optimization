@@ -136,6 +136,21 @@ class _Hemoglobin(NamedTuple):
 
 HEMOGLOBIN = _Hemoglobin()
 
+class __MaternalBMI(NamedTuple):
+    PREVALENCE_LOW_BMI_ANEMIC: str = "maternal_bmi.prevalance_low_bmi_anemic"
+    PREVALENCE_LOW_BMI_NON_ANEMIC: str = "maternal_bmi.prevalence_low_bmi_non_anemic"
+
+    @property
+    def name(self):
+        return "maternal_bmi"
+
+    @property
+    def log_name(self):
+        return "Maternal BMI"
+
+
+MATERNAL_BMI = __MaternalBMI()
+
 MAKE_ARTIFACT_KEY_GROUPS = [
     POPULATION,
     PREGNANCY,
@@ -143,4 +158,5 @@ MAKE_ARTIFACT_KEY_GROUPS = [
     MATERNAL_DISORDERS,
     MATERNAL_HEMORRHAGE,
     HEMOGLOBIN,
+    MATERNAL_BMI,
 ]
