@@ -292,7 +292,7 @@ class Anemia:
         #FIXME Include tracked here as a bandaid, given new RMS essentially requires
         # pipelines used in observation to return untracked simulants
         self.population_view = builder.population.get_view(
-            ["alive", "pregnancy"] + self.columns_created
+            ["alive", "pregnancy", "tracked"] + self.columns_created
         )
 
         builder.population.initializes_simulants(
