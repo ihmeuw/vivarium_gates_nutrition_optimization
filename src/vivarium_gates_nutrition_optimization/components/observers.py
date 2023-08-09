@@ -1,13 +1,5 @@
-import functools
-import itertools
-import time
-from collections import Counter
-from typing import Dict
-
 import pandas as pd
 from vivarium.framework.engine import Builder
-from vivarium.framework.event import Event
-from vivarium.framework.population import PopulationView
 from vivarium_public_health.metrics import DisabilityObserver as DisabilityObserver_
 from vivarium_public_health.metrics import DiseaseObserver, MortalityObserver
 from vivarium_public_health.metrics import ResultsStratifier as ResultsStratifier_
