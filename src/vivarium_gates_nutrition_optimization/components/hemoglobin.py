@@ -131,8 +131,8 @@ class Hemoglobin:
             creates_columns=self.columns_created,
             requires_streams=[self.name],
         )
-        #FIXME Include tracked here as a bandaid, given new RMS essentially requires
-        # pipelines used in observation to return untracked simulants
+        #TODO We include tracked here as a bandaid, given new RMS essentially requires
+        # pipelines used in observation to return untracked simulants. Consider changing this!
         self.population_view = builder.population.get_view(
             self.columns_created + ["tracked", "alive", "maternal_hemorrhage"]
         )
@@ -289,8 +289,8 @@ class Anemia:
             "disability_weight",
             self.disability_weight,
         )
-        #FIXME Include tracked here as a bandaid, given new RMS essentially requires
-        # pipelines used in observation to return untracked simulants
+        #TODO We include tracked here as a bandaid, given new RMS essentially requires
+        # pipelines used in observation to return untracked simulants. Consider changing this!
         self.population_view = builder.population.get_view(
             ["alive", "pregnancy", "tracked"] + self.columns_created
         )
