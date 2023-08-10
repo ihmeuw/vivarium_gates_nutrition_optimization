@@ -9,5 +9,6 @@ from .observers import (
     MaternalMortalityObserver,
     PregnancyObserver,
     ResultsStratifier,
+    MaternalBMIObserver,
 )
 from .pregnancy import Pregnancy, UntrackNotPregnant
