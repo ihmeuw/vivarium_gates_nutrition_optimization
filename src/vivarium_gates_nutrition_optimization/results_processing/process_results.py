@@ -48,6 +48,9 @@ def make_measure_data(data):
         anemia_state_person_time=get_state_person_time_measure_data(
             data, "anemia_state_person_time"
         ),
+        maternal_bmi_state_person_time=get_state_person_time_measure_data(
+            data, "maternal_bmi_state_person_time"
+        ),
     )
     return measure_data
 
