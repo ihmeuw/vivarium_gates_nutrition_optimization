@@ -14,6 +14,11 @@ CSV_RAW_DATA_ROOT = BASE_DIR / "data" / "raw_data"
 PREGNANT_PROPORTION_WITH_HEMOGLOBIN_BELOW_70_CSV = (
     CSV_RAW_DATA_ROOT / "pregnant_proportion_with_hgb_below_70_age_specific.csv"
 )
+
+HEMOGLOBIN_PREGNANCY_ADJUSTMENT_FACTORS_CSV = (
+    CSV_RAW_DATA_ROOT / "hemoglobin_pregnancy_adjustment_factors.csv"
+)
+
 HEMOGLOBIN_MATERNAL_DISORDERS_PAF_CSV = (
     CSV_RAW_DATA_ROOT / "hemoglobin_and_maternal_disorders_pafs.csv"
 )

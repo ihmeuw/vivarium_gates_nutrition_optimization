@@ -34,6 +34,7 @@ from vivarium_gates_nutrition_optimization.constants import (
 )
 from vivarium_gates_nutrition_optimization.data import extra_gbd, sampling
 from vivarium_gates_nutrition_optimization.data.utilities import get_entity
+from vivarium_gates_nutrition_optimization.utilities import get_random_variable_draws
 
 
 def get_data(lookup_key: str, location: str) -> pd.DataFrame:
@@ -381,20 +382,11 @@ def get_hemoglobin_data(key: str, location: str) -> pd.DataFrame:
         data_keys.HEMOGLOBIN.MEAN: 10487,
         data_keys.HEMOGLOBIN.STANDARD_DEVIATION: 10488,
     }[key]
-
+    correction_factors = data_values.PREGNANCY_CORRECTION_FACTORS[key]
+    
     location_id = utility_data.get_location_id(location)
     hemoglobin_data = gbd.get_modelable_entity_draws(me_id=me_id, location_id=location_id)
     hemoglobin_data = reshape_to_vivarium_format(hemoglobin_data, location)
-    # Add correction factors for pregnancies
-    correction_params = data_values.PREGNANCY_CORRECTION_FACTORS[key]
-    dist = sampling.get_norm_from_quantiles(*correction_params)
-    # random seed
-    rng = np.random.default_rng(get_hash(f"{key}_{location}"))
-    correction_factors = pd.DataFrame(
-        np.tile(dist.rvs(size=1000, random_state=rng), (len(hemoglobin_data), 1)),
-        columns=vi_globals.DRAW_COLUMNS,
-        index=hemoglobin_data.index,
-    )
 
     return hemoglobin_data * correction_factors
 
