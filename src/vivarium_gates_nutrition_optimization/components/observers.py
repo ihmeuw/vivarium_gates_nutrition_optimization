@@ -1,3 +1,4 @@
+from functools import partial
 import pandas as pd
 from vivarium.framework.engine import Builder
 from vivarium_public_health.metrics import DisabilityObserver as DisabilityObserver_
@@ -95,7 +96,7 @@ class AnemiaObserver:
             builder.results.register_observation(
                 name=f"anemia_{anemia_category}_person_time",
                 pop_filter=f'alive == "alive" and anemia_levels == "{anemia_category}" and tracked == True',
-                aggregator=lambda df: len(df) * to_years(self.step_size()),
+                aggregator=partial(aggregate_state_person_time, self.step_size()),
                 requires_columns=["alive"],
                 requires_values=["anemia_levels"],
                 additional_stratifications=self.config.include,
@@ -134,7 +135,7 @@ class MaternalBMIObserver:
             builder.results.register_observation(
                 name=f"maternal_bmi_anemia_{bmi_category}_person_time",
                 pop_filter=f'alive == "alive" and maternal_bmi_anemia_category == "{bmi_category}" and tracked == True',
-                aggregator=lambda df: len(df) * to_years(self.step_size()),
+                aggregator=partial(aggregate_state_person_time, self.step_size()),
                 requires_columns=["alive", "maternal_bmi_anemia_category"],
                 additional_stratifications=self.config.include,
                 excluded_stratifications=self.config.exclude,
@@ -156,3 +157,6 @@ class DisabilityObserver(DisabilityObserver_):
             excluded_stratifications=self.config.exclude,
             when="time_step__prepare",
         )
+
+def aggregate_state_person_time(step_size, df: pd.DataFrame) -> float:
+    return len(df) * to_years(step_size)
