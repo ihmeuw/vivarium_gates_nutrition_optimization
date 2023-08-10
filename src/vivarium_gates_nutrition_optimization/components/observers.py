@@ -1,4 +1,5 @@
 from functools import partial
+
 import pandas as pd
 from vivarium.framework.engine import Builder
 from vivarium_public_health.metrics import DisabilityObserver as DisabilityObserver_
@@ -157,6 +158,7 @@ class DisabilityObserver(DisabilityObserver_):
             excluded_stratifications=self.config.exclude,
             when="time_step__prepare",
         )
+
 
 def aggregate_state_person_time(step_size, df: pd.DataFrame) -> float:
     return len(df) * to_years(step_size)
