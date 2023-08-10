@@ -105,7 +105,7 @@ class PregnantState(DiseaseState):
         child_status["pregnancy_duration"] = pd.to_timedelta(
             7 * child_status["gestational_age"], unit="days"
         )
-        return child_status.drop(columns=["gestational_age"])
+        return child_status
 
     def get_dwell_time_pipeline(self, builder: Builder) -> Pipeline:
         return builder.value.register_value_producer(
