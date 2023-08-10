@@ -133,9 +133,10 @@ class Hemoglobin:
             creates_columns=self.columns_created,
             requires_streams=[self.name],
         )
-
+        #TODO MIC-4366: We include tracked here as a bandaid, given new RMS essentially requires
+        # pipelines used in observation to return untracked simulants. Consider changing this!
         self.population_view = builder.population.get_view(
-            self.columns_created + ["alive", "maternal_hemorrhage"]
+            self.columns_created + ["tracked", "alive", "maternal_hemorrhage"]
         )
 
     def on_initialize_simulants(self, pop_data: SimulantData) -> None:
@@ -290,9 +291,10 @@ class Anemia:
             "disability_weight",
             self.disability_weight,
         )
-
+        #TODO MIC-4366: We include tracked here as a bandaid, given new RMS essentially requires
+        # pipelines used in observation to return untracked simulants. Consider changing this!
         self.population_view = builder.population.get_view(
-            ["alive", "pregnancy"] + self.columns_created
+            ["alive", "pregnancy", "tracked"] + self.columns_created
         )
 
         builder.population.initializes_simulants(
@@ -304,6 +306,7 @@ class Anemia:
     def anemia_source(self, index: pd.Index) -> pd.Series:
         hemoglobin_level = self.hemoglobin(index)
         thresholds = self.thresholds(index)
+
         choice_index = (hemoglobin_level.values[np.newaxis].T < thresholds).sum(axis=1)
 
         return pd.Series(
