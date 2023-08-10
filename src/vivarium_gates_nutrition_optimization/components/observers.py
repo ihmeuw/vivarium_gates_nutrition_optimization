@@ -132,7 +132,7 @@ class MaternalBMIObserver:
 
         for bmi_category in models.BMI_ANEMIA_CATEGORIES:
             builder.results.register_observation(
-                name=f"maternal_bmi_anemia_category_{bmi_category}_person_time",
+                name=f"maternal_bmi_anemia_{bmi_category}_person_time",
                 pop_filter=f'alive == "alive" and maternal_bmi_anemia_category == "{bmi_category}" and tracked == True',
                 aggregator=lambda df: len(df) * to_years(self.step_size()),
                 requires_columns=["alive", "maternal_bmi_anemia_category"],
