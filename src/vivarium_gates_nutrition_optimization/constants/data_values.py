@@ -100,8 +100,12 @@ RR_SCALAR = (
 )
 
 PREGNANCY_CORRECTION_FACTORS = {
-    data_keys.HEMOGLOBIN.MEAN: pd.read_csv(paths.HEMOGLOBIN_PREGNANCY_ADJUSTMENT_FACTORS_CSV,index_col = 0).squeeze(),
-    data_keys.HEMOGLOBIN.STANDARD_DEVIATION: pd.Series(np.repeat(1.032920188,1000),[f"draw_{i}" for i in range(1000)])
+    data_keys.HEMOGLOBIN.MEAN: pd.read_csv(
+        paths.HEMOGLOBIN_PREGNANCY_ADJUSTMENT_FACTORS_CSV, index_col=0
+    ).squeeze(),
+    data_keys.HEMOGLOBIN.STANDARD_DEVIATION: pd.Series(
+        np.repeat(1.032920188, 1000), [f"draw_{i}" for i in range(1000)]
+    ),
 }
 PROBABILITY_MODERATE_MATERNAL_HEMORRHAGE = (0.85, 0.81, 0.89)
 
