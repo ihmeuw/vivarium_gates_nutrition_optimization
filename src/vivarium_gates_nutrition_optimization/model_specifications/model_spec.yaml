@@ -28,6 +28,8 @@ configuration:
     interpolation:
         order: 0
         extrapolate: True
+    intervention:
+        scenario: "baseline"
     randomness:
         map_size: 1_000_000
         key_columns: ['entrance_time', 'age']
