@@ -434,7 +434,6 @@ def load_bmi_prevalence(key: str, location: str):
 
     return data
 
-
 ##############
 #   Helpers  #
 ##############
