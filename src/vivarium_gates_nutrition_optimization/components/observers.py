@@ -95,7 +95,7 @@ class AnemiaObserver:
             builder.results.register_observation(
                 name=f"anemia_{anemia_category}_person_time",
                 pop_filter=f'alive == "alive" and anemia_levels == "{anemia_category}" and tracked == True',
-                aggregator=aggregate_state_person_time,
+                aggregator=lambda x:  len(x) * to_years(self.step_size()),
                 requires_columns=["alive"],
                 requires_values=["anemia_levels"],
                 additional_stratifications=self.config.include,
@@ -133,9 +133,8 @@ class MaternalBMIObserver:
             builder.results.register_observation(
                 name=f"maternal_bmi_anemia_category_{bmi_category}_person_time",
                 pop_filter=f'alive == "alive" and maternal_bmi_anemia_category == "{bmi_category}" and tracked == True',
-                aggregator=aggregate_state_person_time,
-                requires_columns=["alive"],
-                requires_values=["maternal_bmi_anemia_category"],
+                aggregator=lambda x:  len(x) * to_years(self.step_size()),
+                requires_columns=["alive","maternal_bmi_anemia_category"],
                 additional_stratifications=self.config.include,
                 excluded_stratifications=self.config.exclude,
                 when="time_step__prepare",
@@ -155,6 +154,3 @@ class DisabilityObserver(DisabilityObserver_):
             excluded_stratifications=self.config.exclude,
             when="time_step__prepare",
         )
-
-def aggregate_state_person_time(self, x: pd.DataFrame) -> float:
-    return len(x) * to_years(self.step_size())
