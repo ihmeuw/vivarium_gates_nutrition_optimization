@@ -3,6 +3,8 @@ from typing import Tuple
 
 import numpy as np
 import pandas as pd
+from datetime import datetime
+
 from vivarium.framework.engine import Builder
 from vivarium.framework.event import Event
 from vivarium_cluster_tools.utilities import mkdir
@@ -157,11 +159,12 @@ class BirthRecorder:
         self.births = []
 
         required_columns = [
+            "pregnancy",
+            "previous_pregnancy",
             "pregnancy_outcome",
             "pregnancy_duration",
             "birth_weight",
-            "pregnancy",
-            "previous_pregnancy",
+            "sex_of_child"
         ]
         self.population_view = builder.population.get_view(required_columns)
 
@@ -179,11 +182,16 @@ class BirthRecorder:
             & (pop["previous_pregnancy"] == models.PREGNANT_STATE_NAME)
             & (pop["pregnancy"] == models.PARTURITION_STATE_NAME)
         )
+        birth_cols = {
+            'sex_of_child': 'sex',
+            'birth_weight': 'birth_weight',
+            'pregnancy_duration': 'gestational_age',
+        }
 
-        new_births = pop.loc[new_birth_mask, ["pregnancy_duration", "birth_weight"]].rename(
-            columns={"pregnancy_duration": "gestational_age"}
-        )
-
+        new_births = pop.loc[new_birth_mask, list(birth_cols)].rename(columns=birth_cols)
+        new_births['birth_date'] = datetime(2018, 12, 30)
+        # Convert gestational_age to weeks
+        new_births['gestational_age'] = new_births['gestational_age'].dt.total_seconds() / (7 * 24 * 60 * 60)
         self.births.append(new_births)
 
     # noinspection PyUnusedLocal
