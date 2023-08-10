@@ -37,4 +37,4 @@ class __Scenarios(NamedTuple):
     targeted_bep_mms: str
 
 
-SCENARIOS = SCENARIOS = __Scenarios(*__Scenarios._fields)
+SCENARIOS = __Scenarios(*__Scenarios._fields)
