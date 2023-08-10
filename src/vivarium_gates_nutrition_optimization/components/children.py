@@ -1,10 +1,9 @@
+from datetime import datetime
 from pathlib import Path
 from typing import Tuple
 
 import numpy as np
 import pandas as pd
-from datetime import datetime
-
 from vivarium.framework.engine import Builder
 from vivarium.framework.event import Event
 from vivarium_cluster_tools.utilities import mkdir
@@ -30,7 +29,7 @@ class NewChildren:
 
     @property
     def columns_created(self):
-        return ["sex_of_child", "birth_weight","gestational_age"]
+        return ["sex_of_child", "birth_weight", "gestational_age"]
 
     def setup(self, builder: Builder):
         self.randomness = builder.randomness.get_stream(self.name)
@@ -165,7 +164,7 @@ class BirthRecorder:
             "pregnancy_outcome",
             "gestational_age",
             "birth_weight",
-            "sex_of_child"
+            "sex_of_child",
         ]
         self.population_view = builder.population.get_view(required_columns)
 
@@ -184,13 +183,13 @@ class BirthRecorder:
             & (pop["pregnancy"] == models.PARTURITION_STATE_NAME)
         )
         birth_cols = {
-            'sex_of_child': 'sex',
-            'birth_weight': 'birth_weight',
-            'gestational_age': 'gestational_age',
+            "sex_of_child": "sex",
+            "birth_weight": "birth_weight",
+            "gestational_age": "gestational_age",
         }
 
         new_births = pop.loc[new_birth_mask, list(birth_cols)].rename(columns=birth_cols)
-        new_births['birth_date'] = datetime(2018, 12, 30).strftime('%Y-%m-%d T%H:%M.%f')
+        new_births["birth_date"] = datetime(2018, 12, 30).strftime("%Y-%m-%d T%H:%M.%f")
         self.births.append(new_births)
 
     # noinspection PyUnusedLocal
@@ -213,6 +212,6 @@ class BirthRecorder:
         input_draw = builder.configuration.input_data.input_draw_number
         seed = builder.configuration.randomness.random_seed
         scenario = builder.configuration.intervention.scenario
-        output_path = output_root / f'scenario_{scenario}_draw_{input_draw}_seed_{seed}'
+        output_path = output_root / f"scenario_{scenario}_draw_{input_draw}_seed_{seed}"
 
         return output_path
