@@ -1,17 +1,8 @@
-import functools
-import itertools
-import time
-from collections import Counter
-from typing import Dict
-
 import pandas as pd
 from vivarium.framework.engine import Builder
-from vivarium.framework.event import Event
-from vivarium.framework.population import PopulationView
 from vivarium_public_health.metrics import DisabilityObserver as DisabilityObserver_
 from vivarium_public_health.metrics import DiseaseObserver, MortalityObserver
 from vivarium_public_health.metrics import ResultsStratifier as ResultsStratifier_
-from vivarium_public_health.metrics.stratification import Source, SourceType
 from vivarium_public_health.utilities import to_years
 
 from vivarium_gates_nutrition_optimization.constants import data_values, models
@@ -21,25 +12,20 @@ class ResultsStratifier(ResultsStratifier_):
     def register_stratifications(self, builder: Builder) -> None:
         super().register_stratifications(builder)
 
-        self.setup_stratification(
-            builder,
-            name="pregnancy_outcome",
-            sources=[Source("pregnancy_outcome", SourceType.COLUMN)],
-            categories=models.PREGNANCY_OUTCOMES,
+        builder.results.register_stratification(
+            "pregnancy_outcome",
+            models.PREGNANCY_OUTCOMES,
+            requires_columns=["pregnancy_outcome"],
         )
 
-        self.setup_stratification(
-            builder,
-            name="pregnancy",
-            sources=[Source("pregnancy", SourceType.COLUMN)],
-            categories=models.PREGNANCY_MODEL_STATES,
+        builder.results.register_stratification(
+            "pregnancy", models.PREGNANCY_MODEL_STATES, requires_columns=["pregnancy"]
         )
 
-        self.setup_stratification(
-            builder,
-            name="anemia_status_at_birth",
-            sources=[Source("anemia_status_at_birth", SourceType.COLUMN)],
-            categories=data_values.ANEMIA_STATUS_AT_BIRTH_CATEGORIES,
+        builder.results.register_stratification(
+            "anemia_status_at_birth",
+            data_values.ANEMIA_STATUS_AT_BIRTH_CATEGORIES,
+            requires_columns=["anemia_status_at_birth"],
         )
 
 
@@ -47,23 +33,41 @@ class PregnancyObserver(DiseaseObserver):
     def __init__(self):
         super().__init__("pregnancy")
 
-    def _get_population_view(self, builder: Builder) -> PopulationView:
-        columns_required = [
-            self.current_state_column_name,
-            self.previous_state_column_name,
-            "pregnancy_outcome",
-        ]
-        return builder.population.get_view(columns_required)
-
 
 class MaternalMortalityObserver(MortalityObserver):
-    def on_post_setup(self, event: Event) -> None:
-        self.causes_of_death += ["maternal_disorders"]
+    def setup(self, builder: Builder):
+        super().setup(builder)
+        cause_of_death = models.MATERNAL_DISORDERS_MODEL_NAME
+        self.causes_of_death += cause_of_death
+
+        builder.results.register_observation(
+            name=f"death_due_to_{cause_of_death}",
+            pop_filter=f'alive == "dead" and cause_of_death == "{cause_of_death}" and tracked == True',
+            aggregator=self.count_cause_specific_deaths,
+            requires_columns=["alive", "cause_of_death", "exit_time"],
+            additional_stratifications=self.config.include,
+            excluded_stratifications=self.config.exclude,
+            when="collect_metrics",
+        )
+        builder.results.register_observation(
+            name=f"ylls_due_to_{cause_of_death}",
+            pop_filter=f'alive == "dead" and cause_of_death == "{cause_of_death}" and tracked == True',
+            aggregator=self.calculate_cause_specific_ylls,
+            requires_columns=[
+                "alive",
+                "cause_of_death",
+                "exit_time",
+                "years_of_life_lost",
+            ],
+            additional_stratifications=self.config.include,
+            excluded_stratifications=self.config.exclude,
+            when="collect_metrics",
+        )
 
 
 class AnemiaObserver:
     configuration_defaults = {
-        "observers": {
+        "stratification": {
             "anemia": {
                 "exclude": [],
                 "include": [],
@@ -84,48 +88,36 @@ class AnemiaObserver:
 
     # noinspection PyAttributeOutsideInit
     def setup(self, builder: Builder) -> None:
-        self.config = builder.configuration.observers.anemia
-        self.stratifier = builder.components.get_component(ResultsStratifier.name)
+        self.step_size = builder.time.step_size()
+        self.config = builder.configuration.stratification.anemia
 
-        self.person_time = Counter()
+        for anemia_category in data_values.ANEMIA_DISABILITY_WEIGHTS.keys():
+            builder.results.register_observation(
+                name=f"anemia_{anemia_category}_person_time",
+                pop_filter=f'alive == "alive" and anemia_levels == "{anemia_category}" and tracked == True',
+                aggregator=self.aggregate_state_person_time,
+                requires_columns=["alive"],
+                requires_values=["anemia_levels"],
+                additional_stratifications=self.config.include,
+                excluded_stratifications=self.config.exclude,
+                when="time_step__prepare",
+            )
 
-        self.anemia_levels = builder.value.get_value("anemia_levels")
-        self.hemoglobin = builder.value.get_value("hemoglobin.exposure")
-
-        columns_required = [
-            "alive",
-            "pregnancy",
-        ]
-        self.population_view = builder.population.get_view(columns_required)
-
-        builder.event.register_listener("time_step__prepare", self.on_time_step_prepare)
-        builder.value.register_value_modifier("metrics", self.metrics)
-
-    def on_time_step_prepare(self, event: Event):
-        pop = self.population_view.get(event.index, query='alive == "alive"')
-        pop["anemia_level"] = self.anemia_levels(pop.index)
-        step_size = to_years(event.step_size)
-
-        anemia_levels = data_values.ANEMIA_DISABILITY_WEIGHTS.keys()
-
-        new_person_time = {}
-        groups = self.stratifier.group(pop.index, self.config.include, self.config.exclude)
-        for label, group_mask in groups:
-            for anemia_level in anemia_levels:
-                key = f"{anemia_level}_anemia_{label}"
-                group = pop[group_mask & (pop["anemia_level"] == anemia_level)]
-                new_person_time[key] = len(group) * step_size
-
-        self.person_time.update(new_person_time)
-
-    def metrics(self, index: pd.Index, metrics: Dict) -> Dict:
-        metrics.update(self.person_time)
-        return metrics
+    def aggregate_state_person_time(self, x: pd.DataFrame) -> float:
+        return len(x) * to_years(self.step_size())
 
 
 class DisabilityObserver(DisabilityObserver_):
     def setup(self, builder: Builder) -> None:
         super().setup(builder)
-        self.disability_pipelines["anemia"] = builder.value.get_value(
-            "anemia.disability_weight"
+        builder.results.register_observation(
+            name=f"ylds_due_to_anemia",
+            pop_filter='tracked == True and alive == "alive"',
+            aggregator_sources=["anemia.disability_weight"],
+            aggregator=self._disability_weight_aggregator,
+            requires_columns=["alive"],
+            requires_values=["anemia.disability_weight"],
+            additional_stratifications=self.config.include,
+            excluded_stratifications=self.config.exclude,
+            when="time_step__prepare",
         )

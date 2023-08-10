@@ -1,3 +1,4 @@
+from datetime import datetime
 from pathlib import Path
 from typing import Tuple
 
@@ -28,7 +29,7 @@ class NewChildren:
 
     @property
     def columns_created(self):
-        return ["sex_of_child", "birth_weight"]
+        return ["sex_of_child", "birth_weight", "gestational_age"]
 
     def setup(self, builder: Builder):
         self.randomness = builder.randomness.get_stream(self.name)
@@ -41,6 +42,7 @@ class NewChildren:
             {
                 "sex_of_child": models.INVALID_OUTCOME,
                 "birth_weight": np.nan,
+                "gestational_age": np.nan,
             },
             index=index,
         )
@@ -157,12 +159,12 @@ class BirthRecorder:
         self.births = []
 
         required_columns = [
-            "pregnancy_outcome",
-            "pregnancy_duration",
-            "sex_of_child",
-            "birth_weight",
             "pregnancy",
             "previous_pregnancy",
+            "pregnancy_outcome",
+            "gestational_age",
+            "birth_weight",
+            "sex_of_child",
             "maternal_bmi_anemia_category",
         ]
         self.population_view = builder.population.get_view(required_columns)
@@ -184,10 +186,12 @@ class BirthRecorder:
         birth_cols = {
             "sex_of_child": "sex",
             "birth_weight": "birth_weight",
-            "pregnancy_duration": "gestational_age",
             "maternal_bmi_anemia_category": "joint_bmi_anemia_category",
+            "gestational_age": "gestational_age",
         }
+
         new_births = pop.loc[new_birth_mask, list(birth_cols)].rename(columns=birth_cols)
+        new_births["birth_date"] = datetime(2018, 12, 30).strftime("%Y-%m-%d T%H:%M.%f")
 
         new_births["joint_bmi_anemia_category"] = new_births["joint_bmi_anemia_category"].map(
             {
@@ -197,7 +201,6 @@ class BirthRecorder:
                 "normal_bmi_non_anemic": "cat4",
             }
         )
-
         self.births.append(new_births)
 
     # noinspection PyUnusedLocal
@@ -220,6 +223,6 @@ class BirthRecorder:
         input_draw = builder.configuration.input_data.input_draw_number
         seed = builder.configuration.randomness.random_seed
         scenario = builder.configuration.intervention.scenario
-        output_path = output_root / f'scenario_{scenario}_draw_{input_draw}_seed_{seed}'
+        output_path = output_root / f"scenario_{scenario}_draw_{input_draw}_seed_{seed}"
 
         return output_path
