@@ -165,6 +165,7 @@ class BirthRecorder:
             "gestational_age",
             "birth_weight",
             "sex_of_child",
+            "maternal_bmi_anemia_category",
         ]
         self.population_view = builder.population.get_view(required_columns)
 
@@ -185,11 +186,21 @@ class BirthRecorder:
         birth_cols = {
             "sex_of_child": "sex",
             "birth_weight": "birth_weight",
+            "maternal_bmi_anemia_category": "joint_bmi_anemia_category",
             "gestational_age": "gestational_age",
         }
 
         new_births = pop.loc[new_birth_mask, list(birth_cols)].rename(columns=birth_cols)
         new_births["birth_date"] = datetime(2018, 12, 30).strftime("%Y-%m-%d T%H:%M.%f")
+
+        new_births["joint_bmi_anemia_category"] = new_births["joint_bmi_anemia_category"].map(
+            {
+                "low_bmi_anemic": "cat1",
+                "normal_bmi_anemic": "cat2",
+                "low_bmi_non_anemic": "cat3",
+                "normal_bmi_non_anemic": "cat4",
+            }
+        )
         self.births.append(new_births)
 
     # noinspection PyUnusedLocal

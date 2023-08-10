@@ -15,6 +15,7 @@ components:
             - MaternalMortality()
             - Hemoglobin()
             - Anemia()
+            - MaternalBMIExposure()
             - ResultsStratifier()
             - PregnancyObserver()
             - BirthRecorder()
@@ -25,7 +26,7 @@ components:
 configuration:
     input_data:
         input_draw_number: 0
-        artifact_path: '/mnt/team/simulation_science/costeffectiveness/artifacts/vivarium_gates_nutrition_optimization/model4.1/ethiopia.hdf'
+        artifact_path: '/mnt/team/simulation_science/costeffectiveness/artifacts/vivarium_gates_nutrition_optimization/model5.0/ethiopia.hdf'
     interpolation:
         order: 0
         extrapolate: True
