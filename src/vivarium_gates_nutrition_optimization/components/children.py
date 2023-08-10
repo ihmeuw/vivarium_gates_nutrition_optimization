@@ -219,6 +219,7 @@ class BirthRecorder:
 
         input_draw = builder.configuration.input_data.input_draw_number
         seed = builder.configuration.randomness.random_seed
-        output_path = output_root / f"draw_{input_draw}_seed_{seed}"
+        scenario = builder.configuration.intervention.scenario
+        output_path = output_root / f'scenario_{scenario}_draw_{input_draw}_seed_{seed}'
 
         return output_path
