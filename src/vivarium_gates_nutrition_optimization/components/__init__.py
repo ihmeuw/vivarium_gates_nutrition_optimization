@@ -6,6 +6,7 @@ from .mortality import MaternalMortality
 from .observers import (
     AnemiaObserver,
     DisabilityObserver,
+    MaternalBMIObserver,
     MaternalMortalityObserver,
     PregnancyObserver,
     ResultsStratifier,
