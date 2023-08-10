@@ -30,7 +30,7 @@ class NewChildren:
 
     @property
     def columns_created(self):
-        return ["sex_of_child", "birth_weight"]
+        return ["sex_of_child", "birth_weight","gestational_age"]
 
     def setup(self, builder: Builder):
         self.randomness = builder.randomness.get_stream(self.name)
@@ -43,6 +43,7 @@ class NewChildren:
             {
                 "sex_of_child": models.INVALID_OUTCOME,
                 "birth_weight": np.nan,
+                "gestational_age": np.nan,
             },
             index=index,
         )
@@ -162,7 +163,7 @@ class BirthRecorder:
             "pregnancy",
             "previous_pregnancy",
             "pregnancy_outcome",
-            "pregnancy_duration",
+            "gestational_age",
             "birth_weight",
             "sex_of_child"
         ]
@@ -185,13 +186,11 @@ class BirthRecorder:
         birth_cols = {
             'sex_of_child': 'sex',
             'birth_weight': 'birth_weight',
-            'pregnancy_duration': 'gestational_age',
+            'gestational_age': 'gestational_age',
         }
 
         new_births = pop.loc[new_birth_mask, list(birth_cols)].rename(columns=birth_cols)
-        new_births['birth_date'] = datetime(2018, 12, 30)
-        # Convert gestational_age to weeks
-        new_births['gestational_age'] = new_births['gestational_age'].dt.total_seconds() / (7 * 24 * 60 * 60)
+        new_births['birth_date'] = datetime(2018, 12, 30).strftime('%Y-%m-%d T%H:%M.%f')
         self.births.append(new_births)
 
     # noinspection PyUnusedLocal
@@ -213,6 +212,7 @@ class BirthRecorder:
 
         input_draw = builder.configuration.input_data.input_draw_number
         seed = builder.configuration.randomness.random_seed
-        output_path = output_root / f"draw_{input_draw}_seed_{seed}"
+        scenario = builder.configuration.intervention.scenario
+        output_path = output_root / f'scenario_{scenario}_draw_{input_draw}_seed_{seed}'
 
         return output_path
