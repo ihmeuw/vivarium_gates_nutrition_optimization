@@ -149,7 +149,7 @@ class MaternalInterventions:
             pop, event.time, sampling_map,
         )
         intervention_over = (
-            (pop['pregnancy_status'] == models.NOT_PREGNANT_STATE)
+            (pop['pregnancy_status'] == models.NOT_PREGNANT_STATE_NAME)
             & (pop['pregnancy_state_change_date'] == event.time)
         )
         for intervention in ['baseline_ifa',
@@ -243,11 +243,10 @@ class MaternalInterventions:
     ):
         cols = ['pregnancy_status', 'pregnancy_state_change_date']
         pop = self.population_view.subview(cols).get(index)
-        pregnant = pop['pregnancy_status'] == models.PREGNANT_STATE
+        pregnant = pop['pregnancy_status'] == models.PREGNANT_STATE_NAME
         postpartum = pop['pregnancy_status'].isin([
-            models.MATERNAL_DISORDER_STATE,
-            models.NO_MATERNAL_DISORDER_STATE,
-            models.POSTPARTUM_STATE,
+            models.PARTURITION_STATE_NAME,
+            models.POSTPARTUM_STATE_NAME,
         ])
         days_since_event = (time - pop['pregnancy_state_change_date']).dt.days
 
