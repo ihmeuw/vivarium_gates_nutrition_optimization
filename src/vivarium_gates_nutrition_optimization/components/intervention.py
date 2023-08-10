@@ -40,8 +40,6 @@ class MaternalInterventions:
             self.update_exposure,
             requires_columns=[
                 'maternal_supplementation',
-                'antenatal_iv_iron',
-                'postpartum_iv_iron',
             ],
         )
 
@@ -56,10 +54,6 @@ class MaternalInterventions:
             'baseline_ifa_date',
             'maternal_supplementation',
             'maternal_supplementation_date',
-            'antenatal_iv_iron',
-            'antenatal_iv_iron_date',
-            'postpartum_iv_iron',
-            'postpartum_iv_iron_date',
 
         ]
         self.population_view = builder.population.get_view(
@@ -97,16 +91,6 @@ class MaternalInterventions:
                 'ifa',
                 self._sample_baseline_oral_iron_status
             ),
-            'antenatal_iv_iron': (
-                anemic & ((pregnant & in_treatment_window(7 * 15)) | postpartum),
-                'antenatal_iv_iron',
-                self._sample_iv_iron_status
-            ),
-            'postpartum_iv_iron': (
-                anemic & postpartum,
-                'postpartum_iv_iron',
-                self._sample_iv_iron_status
-            ),
         }
         pop_update = pd.DataFrame({
             'treatment_propensity': propensity,
@@ -134,15 +118,6 @@ class MaternalInterventions:
                 'ifa',
                 self._sample_baseline_oral_iron_status
             ),
-            'antenatal_iv_iron': (
-                anemic & pregnant & in_treatment_window(7 * 15),
-                'antenatal_iv_iron',
-                self._sample_iv_iron_status
-            ),
-            'postpartum_iv_iron': (
-                anemic & postpartum & in_treatment_window(7),
-                'postpartum_iv_iron',
-                self._sample_iv_iron_status),
         }
 
         pop_update = self._sample_intervention_status(
@@ -153,9 +128,7 @@ class MaternalInterventions:
             & (pop['pregnancy_state_change_date'] == event.time)
         )
         for intervention in ['baseline_ifa',
-                             'maternal_supplementation',
-                             'antenatal_iv_iron',
-                             'postpartum_iv_iron']:
+                             'maternal_supplementation']:
             pop_update.loc[intervention_over, intervention] = models.INVALID_TREATMENT
             pop_update.loc[intervention_over, f'{intervention}_date'] = pd.NaT
 
@@ -223,16 +196,6 @@ class MaternalInterventions:
         return pd.Series(
             np.where(propensity < coverage, models.TREATMENT, models.NO_TREATMENT),
             index=propensity.index,
-        )
-
-    def _sample_iv_iron_status(
-        self,
-        propensity: pd.Series,
-        coverage: float,
-    ) -> pd.Series:
-        return pd.Series(
-            np.where(propensity < coverage, models.TREATMENT, models.NO_TREATMENT),
-            index=propensity.index
         )
 
     def _get_indicators(
@@ -311,13 +274,7 @@ class MaternalInterventions:
         supp_rvs = self.randomness.get_draw(index, 'maternal_supplementation_effect')
         maternal_supplementation = scipy.stats.norm.ppf(supp_rvs, loc=loc, scale=scale)
 
-        loc, scale = data_values.IV_IRON_EFFECT_SIZE
-        iv_rvs = self.randomness.get_draw(index, 'iv_iron_effect')
-        iv_iron = scipy.stats.norm.ppf(iv_rvs, loc=loc, scale=scale)
-        iv_iron[iv_iron < 0] = 0
         return pd.DataFrame({
             'maternal_supplementation': maternal_supplementation,
-            'antenatal_iv_iron': iv_iron,
-            'postpartum_iv_iron': iv_iron,
         }, index=index)
 
