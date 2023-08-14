@@ -36,7 +36,6 @@ class MaternalInterventions:
 
         self.scenario = builder.configuration.intervention.scenario
         self.ifa_coverage = builder.data.load(data_keys.MATERNAL_INTERVENTIONS.IFA_COVERAGE).value[0]
-        self.hemoglobin = builder.value.get_value('hemoglobin.exposure')
 
         builder.value.register_value_modifier(
             'hemoglobin.exposure',
