@@ -84,6 +84,7 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
         data_keys.HEMOGLOBIN.PREGNANT_PROPORTION_WITH_HEMOGLOBIN_BELOW_70: get_hemoglobin_csv_data,
         data_keys.MATERNAL_BMI.PREVALENCE_LOW_BMI_ANEMIC: load_bmi_prevalence,
         data_keys.MATERNAL_BMI.PREVALENCE_LOW_BMI_NON_ANEMIC: load_bmi_prevalence,
+        data_keys.MATERNAL_INTERVENTIONS.COVERAGE: load_intervention_coverage,
     }
     return mapping[lookup_key](lookup_key, location)
 
@@ -433,6 +434,27 @@ def load_bmi_prevalence(key: str, location: str):
     data.index = data.index.droplevel("location")
 
     return data
+
+##########################
+# Maternal interventions #
+##########################
+
+def load_intervention_coverage(key: str, location: str) -> pd.DataFrame:
+    location_id = utility_data.get_location_id(location)
+
+    df = pd.read_csv(paths.MATERNAL_INTERVENTION_COVERAGE_CSV)
+    df = df.drop(columns=['Unnamed: 0', 'scale_up'])
+    df = df.set_index(['location_id', 'year', 'intervention', 'draw']).loc[location_id]
+
+    dfs = []
+    for scenario in metadata.SCENARIOS:
+        data = df[df[f'{scenario}_scenario'] == 1].value.unstack()
+        data.columns.name = None
+        data['scenario'] = scenario
+        data = data.reset_index().set_index(['scenario', 'year', 'intervention'])
+        dfs.append(data)
+    df = pd.concat(dfs).sort_index()
+    return df
 
 ##############
 #   Helpers  #

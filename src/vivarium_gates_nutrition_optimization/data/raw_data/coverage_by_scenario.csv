@@ -1,0 +1,6 @@
+scenario,targeted,ifa,mms,bep
+baseline,FALSE,1,0,0
+mms,FALSE,0,1,0
+universal_bep,FALSE,0,0,1
+targeted_bep_no_mms,TRUE,1,0,1
+targeted_bep_mms,TRUE,0,1,1
