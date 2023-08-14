@@ -16,7 +16,7 @@ class _Durations(NamedTuple):
     PARTURITION = 1 * 7
     DETECTION = 6 * 7
     PARTIAL_TERM = 24 * 7
-    INTERVENTION_DELAY = 8 * 7 
+    INTERVENTION_DELAY = 8 * 7
 
 
 DURATIONS = _Durations()
@@ -102,8 +102,12 @@ RR_SCALAR = (
 )
 
 PREGNANCY_CORRECTION_FACTORS = {
-    data_keys.HEMOGLOBIN.MEAN: pd.read_csv(paths.HEMOGLOBIN_PREGNANCY_ADJUSTMENT_FACTORS_CSV,index_col = 0).squeeze(),
-    data_keys.HEMOGLOBIN.STANDARD_DEVIATION: pd.Series(np.repeat(1.032920188,1000),[f"draw_{i}" for i in range(1000)])
+    data_keys.HEMOGLOBIN.MEAN: pd.read_csv(
+        paths.HEMOGLOBIN_PREGNANCY_ADJUSTMENT_FACTORS_CSV, index_col=0
+    ).squeeze(),
+    data_keys.HEMOGLOBIN.STANDARD_DEVIATION: pd.Series(
+        np.repeat(1.032920188, 1000), [f"draw_{i}" for i in range(1000)]
+    ),
 }
 PROBABILITY_MODERATE_MATERNAL_HEMORRHAGE = (0.85, 0.81, 0.89)
 
@@ -113,11 +117,11 @@ RR_MATERNAL_HEMORRHAGE_ATTRIBUTABLE_TO_HEMOGLOBIN = (
     10.4,
 )  # (median, lower, upper) 95% CI
 
-INTERVENTION_SCENARIO_COVERAGE = pd.read_csv(paths.INTERVENTION_COVERAGE_BY_SCENARIO_CSV).set_index('scenario')
+INTERVENTION_SCENARIO_COVERAGE = pd.read_csv(
+    paths.INTERVENTION_COVERAGE_BY_SCENARIO_CSV
+).set_index("scenario")
 
 _IFA_EFFECT_SIZE_LOWER = 4.08
 _IFA_EFFECT_SIZE_UPPER = 11.52
-_IFA_EFFECT_SIZE_SD = (_IFA_EFFECT_SIZE_UPPER - _IFA_EFFECT_SIZE_LOWER) / (
-    2 * 1.96
-)  # 95% CI
+_IFA_EFFECT_SIZE_SD = (_IFA_EFFECT_SIZE_UPPER - _IFA_EFFECT_SIZE_LOWER) / (2 * 1.96)  # 95% CI
 IFA_EFFECT_SIZE = (7.8, _IFA_EFFECT_SIZE_SD)  # (mean, sd) g/L

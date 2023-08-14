@@ -384,7 +384,7 @@ def get_hemoglobin_data(key: str, location: str) -> pd.DataFrame:
         data_keys.HEMOGLOBIN.STANDARD_DEVIATION: 10488,
     }[key]
     correction_factors = data_values.PREGNANCY_CORRECTION_FACTORS[key]
-    
+
     location_id = utility_data.get_location_id(location)
     hemoglobin_data = gbd.get_modelable_entity_draws(me_id=me_id, location_id=location_id)
     hemoglobin_data = reshape_to_vivarium_format(hemoglobin_data, location)
@@ -406,9 +406,11 @@ def get_hemoglobin_csv_data(key: str, location: str):
     )
     return data
 
+
 ################
 # Maternal BMI #
 ################
+
 
 def load_bmi_prevalence(key: str, location: str):
     location_id = utility_data.get_location_id(location)
@@ -420,29 +422,34 @@ def load_bmi_prevalence(key: str, location: str):
     }[key]
     data = pd.read_csv(path)
 
-    data = (data
-            .set_index(['location_id', 'age_group_id', 'draw'])
-            .loc[location_id]
-            .value
-            .unstack())
+    data = (
+        data.set_index(["location_id", "age_group_id", "draw"])
+        .loc[location_id]
+        .value.unstack()
+    )
     data = vi_utils.scrub_gbd_conventions(data, location)
-    data = vi_utils.split_interval(data, interval_column='age', split_column_prefix='age')
-    data.index = data.index.droplevel(['location', 'age_end'])
-    data = data.reindex(demography.index, level='age_start').fillna(0.)
+    data = vi_utils.split_interval(data, interval_column="age", split_column_prefix="age")
+    data.index = data.index.droplevel(["location", "age_end"])
+    data = data.reindex(demography.index, level="age_start").fillna(0.0)
 
     data = vi_utils.sort_hierarchical_data(data)
     data.index = data.index.droplevel("location")
 
     return data
 
+
 ##########################
 # Maternal interventions #
 ##########################
 
+
 def load_ifa_coverage(key: str, location: str) -> pd.DataFrame:
-    df = pd.read_csv(paths.CSV_RAW_DATA_ROOT / 'baseline_ifa_coverage' / (location + '.csv'),index_col=0)
-    df = df.drop(columns=['location_id','location_name']).set_index(['draw']).T
+    df = pd.read_csv(
+        paths.CSV_RAW_DATA_ROOT / "baseline_ifa_coverage" / (location + ".csv"), index_col=0
+    )
+    df = df.drop(columns=["location_id", "location_name"]).set_index(["draw"]).T
     return df
+
 
 ##############
 #   Helpers  #
