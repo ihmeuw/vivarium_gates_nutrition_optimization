@@ -28,6 +28,6 @@ PREVALENCE_LOW_BMI_ANEMIC_CSV = (
 PREVALENCE_LOW_BMI_NON_ANEMIC_CSV = (
     CSV_RAW_DATA_ROOT / "prevalence_of_low_bmi_given_hemoglobin_above_10.csv"
 )
-MATERNAL_INTERVENTION_COVERAGE_CSV = (
-    CSV_RAW_DATA_ROOT / "simulation_intervention_coverage.csv"
+INTERVENTION_COVERAGE_BY_SCENARIO_CSV = (
+    CSV_RAW_DATA_ROOT / "coverage_by_scenario.csv"
 )

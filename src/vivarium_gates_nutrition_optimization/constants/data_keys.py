@@ -152,7 +152,7 @@ class __MaternalBMI(NamedTuple):
 MATERNAL_BMI = __MaternalBMI()
 
 class __MaternalInterventions(NamedTuple):
-    COVERAGE: str = "maternal_interventions.coverage"
+    IFA_COVERAGE: str = "maternal_interventions.ifa_coverage"
 
     @property
     def name(self):
