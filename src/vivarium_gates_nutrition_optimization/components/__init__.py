@@ -8,8 +8,8 @@ from .observers import (
     AnemiaObserver,
     DisabilityObserver,
     MaternalBMIObserver,
-    MaternalMortalityObserver,
     MaternalInterventionObserver,
+    MaternalMortalityObserver,
     PregnancyObserver,
     ResultsStratifier,
 )

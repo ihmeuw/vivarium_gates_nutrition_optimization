@@ -143,6 +143,7 @@ class MaternalBMIObserver:
                 when="time_step__prepare",
             )
 
+
 class MaternalInterventionObserver:
     configuration_defaults = {
         "stratification": {
@@ -173,10 +174,11 @@ class MaternalInterventionObserver:
             builder.results.register_observation(
                 name=f"intervention_{intervention}_count",
                 pop_filter=f'alive == "alive" and intervention == "{intervention}" and tracked == True',
-                requires_columns=["alive","intervention"],
+                requires_columns=["alive", "intervention"],
                 additional_stratifications=self.config.include,
                 excluded_stratifications=self.config.exclude,
             )
+
 
 class DisabilityObserver(DisabilityObserver_):
     def setup(self, builder: Builder) -> None:
