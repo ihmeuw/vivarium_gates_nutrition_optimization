@@ -152,6 +152,21 @@ class __MaternalBMI(NamedTuple):
 
 MATERNAL_BMI = __MaternalBMI()
 
+
+class __MaternalInterventions(NamedTuple):
+    IFA_COVERAGE: str = "maternal_interventions.ifa_coverage"
+
+    @property
+    def name(self):
+        return "maternal_interventions"
+
+    @property
+    def log_name(self):
+        return "maternal interventions"
+
+
+MATERNAL_INTERVENTIONS = __MaternalInterventions()
+
 MAKE_ARTIFACT_KEY_GROUPS = [
     POPULATION,
     PREGNANCY,
@@ -160,4 +175,5 @@ MAKE_ARTIFACT_KEY_GROUPS = [
     MATERNAL_HEMORRHAGE,
     HEMOGLOBIN,
     MATERNAL_BMI,
+    MATERNAL_INTERVENTIONS,
 ]

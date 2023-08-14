@@ -84,6 +84,7 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
         data_keys.HEMOGLOBIN.PREGNANT_PROPORTION_WITH_HEMOGLOBIN_BELOW_70: get_hemoglobin_csv_data,
         data_keys.MATERNAL_BMI.PREVALENCE_LOW_BMI_ANEMIC: load_bmi_prevalence,
         data_keys.MATERNAL_BMI.PREVALENCE_LOW_BMI_NON_ANEMIC: load_bmi_prevalence,
+        data_keys.MATERNAL_INTERVENTIONS.IFA_COVERAGE: load_ifa_coverage,
     }
     return mapping[lookup_key](lookup_key, location)
 
@@ -435,6 +436,19 @@ def load_bmi_prevalence(key: str, location: str):
     data.index = data.index.droplevel("location")
 
     return data
+
+
+##########################
+# Maternal interventions #
+##########################
+
+
+def load_ifa_coverage(key: str, location: str) -> pd.DataFrame:
+    df = pd.read_csv(
+        paths.CSV_RAW_DATA_ROOT / "baseline_ifa_coverage" / (location + ".csv"), index_col=0
+    )
+    df = df.drop(columns=["location_id", "location_name"]).set_index(["draw"]).T
+    return df
 
 
 ##############
