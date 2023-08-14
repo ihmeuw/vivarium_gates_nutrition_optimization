@@ -65,21 +65,22 @@ class MaternalInterventions:
         )
 
     def on_initialize_simulants(self, pop_data: SimulantData) -> None:
-        pop_update = pd.DataFrame({'intervention': models.INVALID_TREATMENT, 'hemoglobin_effect_size': np.nan},index=pop_data.index)
-        low_bmi = pop_data['maternal_bmi_anemia_category'].isin([models.LOW_BMI_NON_ANEMIC,models.LOW_BMI_ANEMIC])
-        coverage = data_values.INTERVENTION_SCENARIO_COVERAGE.loc['scenario']
+        pop = self.population_view.subview(['maternal_bmi_anemia_category']).get(pop_data.index)
+        pop_update = pd.DataFrame({'intervention': models.INVALID_TREATMENT, 'hemoglobin_effect_size': np.nan},index=pop.index)
+        low_bmi = pop['maternal_bmi_anemia_category'].isin([models.LOW_BMI_NON_ANEMIC,models.LOW_BMI_ANEMIC])
+        coverage = data_values.INTERVENTION_SCENARIO_COVERAGE.loc[self.scenario]
         pop_update['intervention'] = np.where(low_bmi, coverage['low_bmi'], coverage['normal_bmi'])
 
-        unsampled_ifa = pop_data['intervention'] == 'maybe_ifa'
+        unsampled_ifa = pop_update['intervention'] == 'maybe_ifa'
         pop_update.loc[unsampled_ifa, 'intervention'] = self.randomness.choice(
-                    unsampled_ifa,
+                    pop_update[unsampled_ifa].index,
                     choices=[
                         models.IFA_SUPPLEMENTATION,
                         models.NO_TREATMENT
                     ],
                     p=[self.ifa_coverage, RESIDUAL_CHOICE],
                     additional_key="ifa_coverage",
-                ),
+                )
 
         hemoglobin_shift_propensity = self.randomness.get_draw(pop_data.index, 'hemoglobin_shift_propensity')
         loc, scale = data_values.IFA_EFFECT_SIZE
@@ -91,6 +92,6 @@ class MaternalInterventions:
         if self.clock() - self.start_date >= timedelta(days=data_values.DURATIONS.INTERVENTION_DELAY):
             pop = self.population_view.get(index)
             on_treatment = pop['intervention'] != models.NO_TREATMENT
-            exposure.loc[on_treatment] *=  pop[on_treatment, 'hemoglobin_effect_size']
+            exposure.loc[on_treatment] +=  pop.loc[on_treatment, 'hemoglobin_effect_size']
 
         return exposure

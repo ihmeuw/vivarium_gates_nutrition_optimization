@@ -1,6 +1,6 @@
 scenario,normal_bmi,low_bmi
-baseline,'maybe_ifa','ifa'
-mms,'mms','mms'
-universal_bep,'bep','bep'
-targeted_bep_no_mms,'maybe_ifa','bep'
-targeted_bep_mms,'mms','bep'
+baseline,maybe_ifa,maybe_ifa
+mms,mms,mms
+universal_bep,bep,bep
+targeted_bep_no_mms,maybe_ifa,bep
+targeted_bep_mms,mms,bep
