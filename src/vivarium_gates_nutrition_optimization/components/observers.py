@@ -1,3 +1,5 @@
+from functools import partial
+
 import pandas as pd
 from vivarium.framework.engine import Builder
 from vivarium_public_health.metrics import DisabilityObserver as DisabilityObserver_
@@ -95,7 +97,7 @@ class AnemiaObserver:
             builder.results.register_observation(
                 name=f"anemia_{anemia_category}_person_time",
                 pop_filter=f'alive == "alive" and anemia_levels == "{anemia_category}" and tracked == True',
-                aggregator=self.aggregate_state_person_time,
+                aggregator=partial(aggregate_state_person_time, self.step_size()),
                 requires_columns=["alive"],
                 requires_values=["anemia_levels"],
                 additional_stratifications=self.config.include,
@@ -103,8 +105,43 @@ class AnemiaObserver:
                 when="time_step__prepare",
             )
 
-    def aggregate_state_person_time(self, x: pd.DataFrame) -> float:
-        return len(x) * to_years(self.step_size())
+
+class MaternalBMIObserver:
+    configuration_defaults = {
+        "stratification": {
+            "maternal_bmi": {
+                "exclude": [],
+                "include": [],
+            }
+        }
+    }
+
+    def __repr__(self):
+        return "MaternalBMIObserver()"
+
+    @property
+    def name(self):
+        return "maternal_bmi_observer"
+
+    #################
+    # Setup methods #
+    #################
+
+    # noinspection PyAttributeOutsideInit
+    def setup(self, builder: Builder) -> None:
+        self.step_size = builder.time.step_size()
+        self.config = builder.configuration.stratification.maternal_bmi
+
+        for bmi_category in models.BMI_ANEMIA_CATEGORIES:
+            builder.results.register_observation(
+                name=f"maternal_bmi_anemia_{bmi_category}_person_time",
+                pop_filter=f'alive == "alive" and maternal_bmi_anemia_category == "{bmi_category}" and tracked == True',
+                aggregator=partial(aggregate_state_person_time, self.step_size()),
+                requires_columns=["alive", "maternal_bmi_anemia_category"],
+                additional_stratifications=self.config.include,
+                excluded_stratifications=self.config.exclude,
+                when="time_step__prepare",
+            )
 
 
 class DisabilityObserver(DisabilityObserver_):
@@ -121,3 +158,7 @@ class DisabilityObserver(DisabilityObserver_):
             excluded_stratifications=self.config.exclude,
             when="time_step__prepare",
         )
+
+
+def aggregate_state_person_time(step_size, df: pd.DataFrame) -> float:
+    return len(df) * to_years(step_size)

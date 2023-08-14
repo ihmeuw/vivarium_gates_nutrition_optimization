@@ -23,6 +23,7 @@ components:
             - MaternalMortalityObserver()
             - DisabilityObserver()
             - AnemiaObserver()
+            - MaternalBMIObserver()
 
 configuration:
     input_data:
@@ -68,3 +69,6 @@ configuration:
         maternal_hemorrhage:
             include:
             - 'anemia_status_at_birth'
+        maternal_bmi:
+            include:
+            - 'pregnancy'
