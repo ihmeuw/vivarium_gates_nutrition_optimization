@@ -35,7 +35,7 @@ class MaternalInterventions:
         self.randomness = builder.randomness.get_stream(self.name)
 
         self.scenario = builder.configuration.intervention.scenario
-        self.ifa_coverage = builder.data.load(data_keys.MATERNAL_INTERVENTIONS.IFA_COVERAGE)
+        self.ifa_coverage = builder.data.load(data_keys.MATERNAL_INTERVENTIONS.IFA_COVERAGE).value[0]
         self.hemoglobin = builder.value.get_value('hemoglobin.exposure')
 
         builder.value.register_value_modifier(
