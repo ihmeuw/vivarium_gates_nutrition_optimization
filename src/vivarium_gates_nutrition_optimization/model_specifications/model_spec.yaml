@@ -63,7 +63,6 @@ configuration:
         anemia:
             include:
             - 'pregnancy'
-            - 'maternal_intervention'
         maternal_disorders:
             include:
             - 'anemia_status_at_birth'

@@ -166,6 +166,7 @@ class BirthRecorder:
             "birth_weight",
             "sex_of_child",
             "maternal_bmi_anemia_category",
+            "intervention"
         ]
         self.population_view = builder.population.get_view(required_columns)
 
@@ -189,6 +190,7 @@ class BirthRecorder:
             "maternal_bmi_anemia_category": "joint_bmi_anemia_category",
             "gestational_age": "gestational_age",
             "pregnancy_outcome":"pregnancy_outcome",
+            "intervention":"maternal_intervention"
         }
 
         new_births = pop.loc[new_birth_mask, list(birth_cols)].rename(columns=birth_cols)

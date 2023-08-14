@@ -30,12 +30,6 @@ class ResultsStratifier(ResultsStratifier_):
             requires_columns=["anemia_status_at_birth"],
         )
 
-        builder.results.register_stratification(
-            "maternal_intervention",
-            models.SUPPLEMENTATION_CATEGORIES,
-            requires_columns=["intervention"],
-        )
-
 
 class PregnancyObserver(DiseaseObserver):
     def __init__(self):
