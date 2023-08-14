@@ -188,6 +188,7 @@ class BirthRecorder:
             "birth_weight": "birth_weight",
             "maternal_bmi_anemia_category": "joint_bmi_anemia_category",
             "gestational_age": "gestational_age",
+            "pregnancy_outcome":"pregnancy_outcome",
         }
 
         new_births = pop.loc[new_birth_mask, list(birth_cols)].rename(columns=birth_cols)
