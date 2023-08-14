@@ -40,7 +40,7 @@ class MaternalBMIExposure:
         builder.population.initializes_simulants(
             self.on_initialize_simulants,
             requires_streams=[self.name],
-            requires_values=["hemoglobin.exposure"],
+            requires_values=["raw_hemoglobin.exposure"],
             creates_columns=["maternal_bmi_propensity", "maternal_bmi_anemia_category"],
         )
 
