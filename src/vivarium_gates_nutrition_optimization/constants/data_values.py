@@ -20,6 +20,9 @@ class _Durations(NamedTuple):
 
 DURATIONS = _Durations()
 
+INTERVENTION_EFFECT_START = 8 * 7 
+
+
 INFANT_MALE_PERCENTAGES = {
     "Ethiopia": 0.514271,
     "Nigeria": 0.511785,
