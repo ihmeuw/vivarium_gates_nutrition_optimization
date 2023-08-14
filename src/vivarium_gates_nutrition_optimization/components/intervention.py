@@ -54,7 +54,7 @@ class MaternalInterventions:
             "hemoglobin_effect_size",
         ]
         self.population_view = builder.population.get_view(
-            self.columns_required + self.columns_created
+            self.columns_required + self.columns_created + ["tracked"]
         )
         builder.population.initializes_simulants(
             self.on_initialize_simulants,
