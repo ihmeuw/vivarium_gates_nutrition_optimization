@@ -30,17 +30,10 @@ ARTIFACT_COLUMNS = pd.Index([f"draw_{i}" for i in range(DRAW_COUNT)])
 
 
 class __Scenarios(NamedTuple):
-    # baseline: str
-    # mms: str
-    # universal_bep: str
-    # targeted_bep_no_mms: str
-    # targeted_bep_mms: str
-
     baseline: str
-    oral_iron: str
-    antenatal_iv_iron: str
-    postpartum_iv_iron: str
-    antenatal_and_postpartum_iv_iron: str
-
+    mms: str
+    universal_bep: str
+    targeted_bep_no_mms: str
+    targeted_bep_mms: str
 
 SCENARIOS = __Scenarios(*__Scenarios._fields)
