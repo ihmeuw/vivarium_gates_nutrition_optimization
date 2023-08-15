@@ -10,15 +10,16 @@ from vivarium_gates_nutrition_optimization.constants import data_keys, models, p
 # Disease Model Parameters #
 ############################
 class _Durations(NamedTuple):
-    ## Days
-    FULL_TERM = 40 * 7
-    POSTPARTUM = 6 * 7
-    PARTURITION = 1 * 7
-    DETECTION = 6 * 7
-    PARTIAL_TERM = 24 * 7
+    FULL_TERM_DAYS = 40 * 7
+    POSTPARTUM_DAYS = 6 * 7
+    PARTURITION_DAYS = 1 * 7
+    DETECTION_DAYS = 6 * 7
+    PARTIAL_TERM_DAYS = 24 * 7
+    INTERVENTION_DELAY_DAYS = 8 * 7
 
 
 DURATIONS = _Durations()
+
 
 INFANT_MALE_PERCENTAGES = {
     "Ethiopia": 0.514271,
@@ -114,3 +115,12 @@ RR_MATERNAL_HEMORRHAGE_ATTRIBUTABLE_TO_HEMOGLOBIN = (
     1.2,
     10.4,
 )  # (median, lower, upper) 95% CI
+
+INTERVENTION_SCENARIO_COVERAGE = pd.read_csv(
+    paths.INTERVENTION_COVERAGE_BY_SCENARIO_CSV
+).set_index("scenario")
+
+_IFA_EFFECT_SIZE_LOWER = 4.08
+_IFA_EFFECT_SIZE_UPPER = 11.52
+_IFA_EFFECT_SIZE_SD = (_IFA_EFFECT_SIZE_UPPER - _IFA_EFFECT_SIZE_LOWER) / (2 * 1.96)  # 95% CI
+IFA_EFFECT_SIZE = (7.8, _IFA_EFFECT_SIZE_SD)  # (mean, sd) g/L

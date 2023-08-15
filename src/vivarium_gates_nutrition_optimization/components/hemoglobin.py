@@ -104,11 +104,17 @@ class Hemoglobin:
             requires_columns=["age", "sex"],
         )
 
-        self.hemoglobin = builder.value.register_value_producer(
-            "hemoglobin.exposure",
+        # Fix resource dependency cycle
+        self.raw_hemoglobin = builder.value.register_value_producer(
+            "raw_hemoglobin.exposure",
             source=self.hemoglobin_source,
             requires_values=["hemoglobin.exposure_parameters"],
             requires_streams=[self.name],
+        )
+
+        self.hemoglobin = builder.value.register_value_producer(
+            "hemoglobin.exposure",
+            source=self.raw_hemoglobin,
         )
 
         builder.value.register_value_modifier(

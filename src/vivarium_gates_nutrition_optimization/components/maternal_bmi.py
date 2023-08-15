@@ -18,7 +18,7 @@ class MaternalBMIExposure:
 
     def setup(self, builder: Builder):
         self.randomness = builder.randomness.get_stream(self.name)
-        self.hemoglobin = builder.value.get_value("hemoglobin.exposure")
+        self.hemoglobin = builder.value.get_value("raw_hemoglobin.exposure")
         self.threshold = data_values.MATERNAL_BMI_ANEMIA_THRESHOLD
 
         self.probability_low_given_anemic = builder.lookup.build_table(
@@ -40,7 +40,7 @@ class MaternalBMIExposure:
         builder.population.initializes_simulants(
             self.on_initialize_simulants,
             requires_streams=[self.name],
-            requires_values=["hemoglobin.exposure"],
+            requires_values=["raw_hemoglobin.exposure"],
             creates_columns=["maternal_bmi_propensity", "maternal_bmi_anemia_category"],
         )
 
