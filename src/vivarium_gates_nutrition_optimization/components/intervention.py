@@ -8,6 +8,7 @@ from vivarium.framework.engine import Builder
 from vivarium.framework.event import Event
 from vivarium.framework.population import SimulantData
 from vivarium.framework.randomness import RESIDUAL_CHOICE
+from vivarium.framework.time import get_time_stamp
 
 from vivarium_gates_nutrition_optimization.constants import (
     data_keys,
@@ -30,8 +31,7 @@ class MaternalInterventions:
     # noinspection PyAttributeOutsideInit
     def setup(self, builder: Builder) -> None:
         self.clock = builder.time.clock()
-        start_date = builder.configuration.time.start
-        self.start_date = datetime(start_date.year, start_date.month, start_date.day)
+        self.start_date = get_time_stamp(builder.configuration.time.start)
         self.randomness = builder.randomness.get_stream(self.name)
 
         self.scenario = builder.configuration.intervention.scenario
@@ -68,7 +68,7 @@ class MaternalInterventions:
             pop_data.index
         )
         pop_update = pd.DataFrame(
-            {"intervention": models.INVALID_TREATMENT, "hemoglobin_effect_size": np.nan},
+            {"intervention": None, "hemoglobin_effect_size": np.nan},
             index=pop.index,
         )
         low_bmi = pop["maternal_bmi_anemia_category"].isin(
