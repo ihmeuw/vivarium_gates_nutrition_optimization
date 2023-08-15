@@ -99,7 +99,7 @@ class MaternalInterventions:
 
     def update_exposure(self, index, exposure):
         if self.clock() - self.start_date >= timedelta(
-            days=data_values.DURATIONS.INTERVENTION_DELAY
+            days=data_values.DURATIONS.INTERVENTION_DELAY_DAYS
         ):
             pop = self.population_view.get(index)
             on_treatment = pop["intervention"] != models.NO_TREATMENT
