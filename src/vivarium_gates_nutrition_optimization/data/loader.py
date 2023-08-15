@@ -85,6 +85,8 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
         data_keys.MATERNAL_BMI.PREVALENCE_LOW_BMI_ANEMIC: load_bmi_prevalence,
         data_keys.MATERNAL_BMI.PREVALENCE_LOW_BMI_NON_ANEMIC: load_bmi_prevalence,
         data_keys.MATERNAL_INTERVENTIONS.IFA_COVERAGE: load_ifa_coverage,
+        data_keys.MATERNAL_INTERVENTIONS.MMS_STILLBIRTH_RR: load_supplementation_stillbirth_rr,
+        data_keys.MATERNAL_INTERVENTIONS.BEP_STILLBIRTH_RR: load_supplementation_stillbirth_rr,
     }
     return mapping[lookup_key](lookup_key, location)
 
@@ -450,6 +452,22 @@ def load_ifa_coverage(key: str, location: str) -> pd.DataFrame:
     df = df.drop(columns=["location_id", "location_name"]).set_index(["draw"]).T
     return df
 
+def load_supplementation_stillbirth_rr(key: str, location: str) -> pd.DataFrame:
+    try:
+        distribution = data_values.INTERVENTION_STILLBIRTH_RRS[key]
+    except KeyError:
+        raise ValueError(f'Unrecognized key {key}')
+
+    dist = sampling.get_lognorm_from_quantiles(*distribution)
+    # Don't hash on key because we want simulants to have the same percentile
+    # for MMS RR as for BEP
+    rng = np.random.default_rng(get_hash(f"stillbirth_rr_{location}"))
+    stillbirth_rr = pd.DataFrame(
+        [dist.rvs(size=1000, random_state=rng)],
+        columns=vi_globals.DRAW_COLUMNS,
+        index=["relative_risk"],
+    )
+    return stillbirth_rr
 
 ##############
 #   Helpers  #
