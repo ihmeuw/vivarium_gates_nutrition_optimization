@@ -91,7 +91,7 @@ class PregnantState(DiseaseState):
 
     def sample_partial_term_durations(self, partial_term_pop: pd.Index) -> pd.DataFrame:
         child_status = self.new_children.empty(partial_term_pop)
-        low, high = DURATIONS.DETECTION, DURATIONS.PARTIAL_TERM
+        low, high = DURATIONS.DETECTION_DAYS, DURATIONS.PARTIAL_TERM_DAYS
         draw = self.randomness.get_draw(
             partial_term_pop, additional_key="partial_term_pregnancy_duration"
         )
@@ -182,7 +182,7 @@ def Pregnancy():
             "prevalence": lambda *_: 0.0,
             "disability_weight": lambda *_: 0.0,
             "excess_mortality_rate": lambda *_: 0.0,
-            "dwell_time": lambda *_: pd.Timedelta(days=DURATIONS.POSTPARTUM),
+            "dwell_time": lambda *_: pd.Timedelta(days=DURATIONS.POSTPARTUM_DAYS),
         },
     )
     pregnant.allow_self_transitions()
