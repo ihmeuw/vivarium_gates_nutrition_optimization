@@ -144,6 +144,42 @@ class MaternalBMIObserver:
             )
 
 
+class MaternalInterventionObserver:
+    configuration_defaults = {
+        "stratification": {
+            "maternal_interventions": {
+                "exclude": [],
+                "include": [],
+            }
+        }
+    }
+
+    def __repr__(self):
+        return "MaternalInterventionObserver()"
+
+    @property
+    def name(self):
+        return "maternal_intervention_observer"
+
+    #################
+    # Setup methods #
+    #################
+
+    # noinspection PyAttributeOutsideInit
+    def setup(self, builder: Builder) -> None:
+        self.step_size = builder.time.step_size()
+        self.config = builder.configuration.stratification.maternal_interventions
+
+        for intervention in models.SUPPLEMENTATION_CATEGORIES:
+            builder.results.register_observation(
+                name=f"intervention_{intervention}_count",
+                pop_filter=f'alive == "alive" and intervention == "{intervention}" and tracked == True',
+                requires_columns=["alive", "intervention"],
+                additional_stratifications=self.config.include,
+                excluded_stratifications=self.config.exclude,
+            )
+
+
 class DisabilityObserver(DisabilityObserver_):
     def setup(self, builder: Builder) -> None:
         super().setup(builder)
