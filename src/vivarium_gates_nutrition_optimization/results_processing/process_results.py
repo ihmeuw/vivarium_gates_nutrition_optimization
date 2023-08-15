@@ -51,6 +51,7 @@ def make_measure_data(data):
         maternal_bmi_anemia_person_time=get_state_person_time_measure_data(
             data, "maternal_bmi_anemia_person_time"
         ),
+        intervention_count=get_measure_data(data,"intervention_count")
     )
     return measure_data
 
@@ -67,6 +68,7 @@ class MeasureData(NamedTuple):
     maternal_hemorrhage_transition_count: pd.DataFrame
     anemia_state_person_time: pd.DataFrame
     maternal_bmi_anemia_person_time: pd.DataFrame
+    intervention_count: pd.DataFrame
 
     def dump(self, output_dir: Path):
         for key, df in self._asdict().items():
