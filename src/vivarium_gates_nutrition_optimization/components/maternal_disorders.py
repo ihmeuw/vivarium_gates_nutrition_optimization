@@ -1,9 +1,7 @@
-import pandas as pd
 from vivarium.framework.engine import Builder
 from vivarium_public_health.disease import (
     DiseaseModel,
     RecoveredState,
-    SusceptibleState,
 )
 from vivarium_public_health.utilities import to_years
 
@@ -12,7 +10,6 @@ from vivarium_gates_nutrition_optimization.components.disease import (
     ParturitionSelectionState,
 )
 from vivarium_gates_nutrition_optimization.constants import data_keys, models
-from vivarium_gates_nutrition_optimization.constants.data_values import DURATIONS
 from vivarium_gates_nutrition_optimization.constants.metadata import (
     ARTIFACT_INDEX_COLUMNS,
 )

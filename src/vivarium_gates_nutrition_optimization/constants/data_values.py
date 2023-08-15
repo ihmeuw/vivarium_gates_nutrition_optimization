@@ -10,12 +10,12 @@ from vivarium_gates_nutrition_optimization.constants import data_keys, models, p
 # Disease Model Parameters #
 ############################
 class _Durations(NamedTuple):
-    FULL_TERM = 40 * 7  ## Days
-    POSTPARTUM = 6 * 7  ## Days
-    PARTURITION = 1 * 7  ## Days
-    DETECTION = 6 * 7  ## Days
-    PARTIAL_TERM = 24 * 7  ## Days
-    INTERVENTION_DELAY = 8 * 7  ## Days
+    FULL_TERM_DAYS = 40 * 7
+    POSTPARTUM_DAYS = 6 * 7
+    PARTURITION_DAYS = 1 * 7
+    DETECTION_DAYS = 6 * 7
+    PARTIAL_TERM_DAYS = 24 * 7
+    INTERVENTION_DELAY_DAYS = 8 * 7
 
 
 DURATIONS = _Durations()
