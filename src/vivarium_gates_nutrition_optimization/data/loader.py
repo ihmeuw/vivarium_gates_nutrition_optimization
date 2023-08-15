@@ -452,11 +452,12 @@ def load_ifa_coverage(key: str, location: str) -> pd.DataFrame:
     df = df.drop(columns=["location_id", "location_name"]).set_index(["draw"]).T
     return df
 
+
 def load_supplementation_stillbirth_rr(key: str, location: str) -> pd.DataFrame:
     try:
         distribution = data_values.INTERVENTION_STILLBIRTH_RRS[key]
     except KeyError:
-        raise ValueError(f'Unrecognized key {key}')
+        raise ValueError(f"Unrecognized key {key}")
 
     dist = sampling.get_lognorm_from_quantiles(*distribution)
     # Don't hash on key because we want simulants to have the same percentile
@@ -468,6 +469,7 @@ def load_supplementation_stillbirth_rr(key: str, location: str) -> pd.DataFrame:
         index=["relative_risk"],
     )
     return stillbirth_rr
+
 
 def load_supplementation_stillbirth_rr(key: str, location: str) -> pd.DataFrame:
     try:

@@ -51,7 +51,7 @@ def make_measure_data(data):
         maternal_bmi_anemia_person_time=get_state_person_time_measure_data(
             data, "maternal_bmi_anemia_person_time"
         ),
-        intervention_count=get_measure_data(data,"intervention_count")
+        intervention_count=get_measure_data(data, "intervention_count"),
     )
     return measure_data
 

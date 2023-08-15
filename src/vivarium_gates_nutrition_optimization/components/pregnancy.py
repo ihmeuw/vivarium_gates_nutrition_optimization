@@ -3,7 +3,11 @@ from vivarium.framework.engine import Builder
 from vivarium.framework.event import Event
 from vivarium.framework.population import SimulantData
 from vivarium.framework.values import Pipeline
-from vivarium_public_health.disease import DiseaseModel, SusceptibleState,  BaseDiseaseState
+from vivarium_public_health.disease import (
+    BaseDiseaseState,
+    DiseaseModel,
+    SusceptibleState,
+)
 
 from vivarium_gates_nutrition_optimization.components.children import NewChildren
 from vivarium_gates_nutrition_optimization.components.disease import DiseaseState
