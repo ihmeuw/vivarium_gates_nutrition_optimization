@@ -1,8 +1,5 @@
 from vivarium.framework.engine import Builder
-from vivarium_public_health.disease import (
-    DiseaseModel,
-    RecoveredState,
-)
+from vivarium_public_health.disease import DiseaseModel, RecoveredState
 from vivarium_public_health.utilities import to_years
 
 from vivarium_gates_nutrition_optimization.components.disease import (
