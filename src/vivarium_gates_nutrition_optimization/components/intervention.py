@@ -45,23 +45,6 @@ class MaternalInterventions:
             data_keys.MATERNAL_INTERVENTIONS.BEP_STILLBIRTH_RR
         ).value[0]
 
-        builder.value.register_value_modifier(
-            "hemoglobin.exposure",
-            self.update_exposure,
-            requires_columns=[
-                "intervention",
-                "hemoglobin_effect_size",
-            ],
-        )
-
-        builder.value.register_value_modifier(
-            "birth_outcome_probabilities",
-            self.adjust_stillbirth_probability,
-            requires_columns=[
-                "intervention",
-            ],
-        )
-
         self.columns_required = ["maternal_bmi_anemia_category"]
         self.columns_created = [
             "intervention",
@@ -75,6 +58,18 @@ class MaternalInterventions:
             creates_columns=self.columns_created,
             requires_columns=self.columns_required,
             requires_streams=[self.name],
+        )
+
+        builder.value.register_value_modifier(
+            "hemoglobin.exposure",
+            self.update_exposure,
+            requires_columns=self.columns_created,
+        )
+
+        builder.value.register_value_modifier(
+            "birth_outcome_probabilities",
+            self.adjust_stillbirth_probability,
+            requires_columns=self.columns_created,
         )
 
     def on_initialize_simulants(self, pop_data: SimulantData) -> None:
