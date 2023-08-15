@@ -48,6 +48,14 @@ class MaternalInterventions:
             ],
         )
 
+        builder.value.register_value_modifier(
+            "birth_outcome_probabilities",
+            self.adjust_stillbirth_probability,
+            requires_columns=[
+                "intervention",
+            ],
+        )
+
         self.columns_required = ["maternal_bmi_anemia_category"]
         self.columns_created = [
             "intervention",
@@ -105,4 +113,15 @@ class MaternalInterventions:
             on_treatment = pop["intervention"] != models.NO_TREATMENT
             exposure.loc[on_treatment] += pop.loc[on_treatment, "hemoglobin_effect_size"]
 
+        return exposure
+    
+    def adjust_stillbirth_probability(self, index, birth_outcome_probabilities):
+        pop = self.population_view.get(index)
+        rrs = {
+            models.MMS_SUPPLEMENTATION: self.mms_rr,
+            models.BEP_SUPPLEMENTATION: self.bep_rr,
+        }
+        for intervention, rr in rrs.items():
+            birth_outcome_probabilities.loc[pop['intervention'] == intervention] *= rr
+        
         return exposure
