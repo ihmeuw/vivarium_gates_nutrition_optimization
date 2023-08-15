@@ -67,7 +67,7 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
         data_keys.LBWSG.CATEGORIES: load_metadata,
         data_keys.LBWSG.EXPOSURE: load_lbwsg_exposure,
         data_keys.MATERNAL_DISORDERS.RAW_INCIDENCE_RATE: load_raw_incidence_data,
-        data_keys.MATERNAL_DISORDERS.CSMR: load_standard_data,
+        data_keys.MATERNAL_DISORDERS.CSMR: load_maternal_csmr,
         data_keys.MATERNAL_DISORDERS.MORTALITY_PROBABILITY: load_maternal_disorders_mortality_probability,
         data_keys.MATERNAL_DISORDERS.INCIDENT_PROBABILITY: load_pregnant_maternal_disorders_incidence,
         data_keys.MATERNAL_DISORDERS.YLDS: load_maternal_disorders_ylds,
@@ -246,6 +246,13 @@ def load_lbwsg_exposure(key: str, location: str) -> pd.DataFrame:
 # Maternal Disorders Data #
 ###########################
 
+def load_maternal_csmr(key: str, location: str) -> pd.DataFrame:
+    key = EntityKey(key)
+    entity = get_entity(key)
+    entity.restrictions.yll_age_group_id_end = 15
+    return interface.get_measure(entity, key.measure, location).droplevel("location")
+
+
 
 def load_maternal_disorders_ylds(key: str, location: str) -> pd.DataFrame:
     groupby_cols = ["age_group_id", "sex_id", "year_id"]
@@ -259,7 +266,7 @@ def load_maternal_disorders_ylds(key: str, location: str) -> pd.DataFrame:
     anemia_ylds = anemia_ylds.groupby(groupby_cols)[draw_cols].sum().reset_index()
     anemia_ylds = reshape_to_vivarium_format(anemia_ylds, location)
 
-    csmr = load_standard_data(data_keys.MATERNAL_DISORDERS.CSMR, location)
+    csmr = get_data(data_keys.MATERNAL_DISORDERS.CSMR, location)
     incidence = load_raw_incidence_data(
         data_keys.MATERNAL_DISORDERS.RAW_INCIDENCE_RATE, location
     )
