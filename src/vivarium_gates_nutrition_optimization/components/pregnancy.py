@@ -3,7 +3,7 @@ from vivarium.framework.engine import Builder
 from vivarium.framework.event import Event
 from vivarium.framework.population import SimulantData
 from vivarium.framework.values import Pipeline
-from vivarium_public_health.disease import DiseaseModel, SusceptibleState
+from vivarium_public_health.disease import DiseaseModel, SusceptibleState,  BaseDiseaseState
 
 from vivarium_gates_nutrition_optimization.components.children import NewChildren
 from vivarium_gates_nutrition_optimization.components.disease import DiseaseState
@@ -35,7 +35,34 @@ class PregnantState(DiseaseState):
         ] + self.new_children.columns_created
 
     def setup(self, builder: Builder):
-        super().setup(builder)
+        super(BaseDiseaseState, self).setup(builder)
+
+        self.clock = builder.time.clock()
+
+        view_columns = self.columns_created + [self._model, "alive"]
+        self.population_view = builder.population.get_view(view_columns)
+        builder.population.initializes_simulants(
+            self.on_initialize_simulants,
+            creates_columns=self.columns_created,
+            requires_columns=[self._model] + ["intervention"],
+        )
+        self.prevalence = self.get_prevalence_table(builder)
+        self.birth_prevalence = self.get_birth_prevalence_table(builder)
+        self.dwell_time = self.get_dwell_time_pipeline(builder)
+        self.has_disability, self.base_disability_weight = self.get_disability_weight_table(
+            builder
+        )
+        self.disability_weight = self.get_disability_weight_pipeline(builder)
+        self.register_disability_weight_modifier(builder)
+        (
+            self.has_excess_mortality,
+            self.base_excess_mortality_rate,
+        ) = self.get_excess_mortality_rate_table(builder)
+        self.excess_mortality_rate = self.get_excess_mortality_rate_pipeline(builder)
+        self.joint_paf = self.get_joint_paf_pipeline(builder)
+        self.register_mortality_rate_modifier(builder)
+        self.randomness_prevalence = self.get_prevalence_random_stream(builder)
+
         self.time_step = builder.time.step_size()
         self.randomness = builder.randomness.get_stream(self.name)
 
