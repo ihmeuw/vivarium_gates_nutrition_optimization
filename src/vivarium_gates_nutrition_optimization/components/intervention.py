@@ -120,7 +120,7 @@ class MaternalInterventions:
             exposure.loc[on_treatment] += pop.loc[on_treatment, "hemoglobin_effect_size"]
 
         return exposure
-    
+
     def adjust_stillbirth_probability(self, index, birth_outcome_probabilities):
         pop = self.population_view.get(index)
         rrs = {
@@ -128,11 +128,15 @@ class MaternalInterventions:
             models.BEP_SUPPLEMENTATION: self.bep_stillbirth_rr,
         }
         for intervention, rr in rrs.items():
-            on_treatment = pop['intervention'] == intervention
+            on_treatment = pop["intervention"] == intervention
             # Add spare probability onto live births first
-            birth_outcome_probabilities.loc[on_treatment, models.LIVE_BIRTH_OUTCOME] += (birth_outcome_probabilities.loc[on_treatment, models.STILLBIRTH_OUTCOME] * (1 - rr))
+            birth_outcome_probabilities.loc[
+                on_treatment, models.LIVE_BIRTH_OUTCOME
+            ] += birth_outcome_probabilities.loc[on_treatment, models.STILLBIRTH_OUTCOME] * (
+                1 - rr
+            )
             # Then re-scale stillbirth probability
             birth_outcome_probabilities.loc[on_treatment, models.STILLBIRTH_OUTCOME] *= rr
-            #This preserves normalization by construction
-        
+            # This preserves normalization by construction
+
         return birth_outcome_probabilities
