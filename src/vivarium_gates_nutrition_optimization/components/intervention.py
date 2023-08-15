@@ -40,10 +40,10 @@ class MaternalInterventions:
         ).value[0]
         self.mms_stillbirth_rr = builder.data.load(
             data_keys.MATERNAL_INTERVENTIONS.MMS_STILLBIRTH_RR
-        ).relative_risk[0]
+        ).value[0]
         self.bep_stillbirth_rr = builder.data.load(
             data_keys.MATERNAL_INTERVENTIONS.BEP_STILLBIRTH_RR
-        ).relative_risk[0]
+        ).value[0]
 
         builder.value.register_value_modifier(
             "hemoglobin.exposure",
@@ -122,7 +122,7 @@ class MaternalInterventions:
         return exposure
 
     def adjust_stillbirth_probability(self, index, birth_outcome_probabilities):
-        pop = self.population_view.get(index)
+        pop = self.population_view.subview(["intervention"]).get(index)
         rrs = {
             models.MMS_SUPPLEMENTATION: self.mms_stillbirth_rr,
             models.BEP_SUPPLEMENTATION: self.bep_stillbirth_rr,
