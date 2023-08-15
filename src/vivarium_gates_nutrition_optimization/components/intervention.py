@@ -38,6 +38,12 @@ class MaternalInterventions:
         self.ifa_coverage = builder.data.load(
             data_keys.MATERNAL_INTERVENTIONS.IFA_COVERAGE
         ).value[0]
+        self.mms_stillbirth_rr = builder.data.load(
+            data_keys.MATERNAL_INTERVENTIONS.MMS_STILLBIRTH_RR
+        ).relative_risk[0]
+        self.bep_stillbirth_rr = builder.data.load(
+            data_keys.MATERNAL_INTERVENTIONS.BEP_STILLBIRTH_RR
+        ).relative_risk[0]
 
         builder.value.register_value_modifier(
             "hemoglobin.exposure",
@@ -118,10 +124,15 @@ class MaternalInterventions:
     def adjust_stillbirth_probability(self, index, birth_outcome_probabilities):
         pop = self.population_view.get(index)
         rrs = {
-            models.MMS_SUPPLEMENTATION: self.mms_rr,
-            models.BEP_SUPPLEMENTATION: self.bep_rr,
+            models.MMS_SUPPLEMENTATION: self.mms_stillbirth_rr,
+            models.BEP_SUPPLEMENTATION: self.bep_stillbirth_rr,
         }
         for intervention, rr in rrs.items():
-            birth_outcome_probabilities.loc[pop['intervention'] == intervention] *= rr
+            on_treatment = pop['intervention'] == intervention
+            # Add spare probability onto live births first
+            birth_outcome_probabilities.loc[on_treatment, models.LIVE_BIRTH_OUTCOME] += (birth_outcome_probabilities.loc[on_treatment, models.STILLBIRTH_OUTCOME] * (1 - rr))
+            # Then re-scale stillbirth probability
+            birth_outcome_probabilities.loc[on_treatment, models.STILLBIRTH_OUTCOME] *= rr
+            #This preserves normalization by construction
         
-        return exposure
+        return birth_outcome_probabilities
