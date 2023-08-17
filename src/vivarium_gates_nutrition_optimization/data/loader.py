@@ -477,25 +477,6 @@ def load_supplementation_stillbirth_rr(key: str, location: str) -> pd.DataFrame:
     )
     return stillbirth_rr
 
-
-def load_supplementation_stillbirth_rr(key: str, location: str) -> pd.DataFrame:
-    try:
-        distribution = data_values.INTERVENTION_STILLBIRTH_RRS[key]
-    except KeyError:
-        raise ValueError(f"Unrecognized key {key}")
-
-    dist = sampling.get_lognorm_from_quantiles(*distribution)
-    # Don't hash on key because we want simulants to have the same percentile
-    # for MMS RR as for BEP
-    rng = np.random.default_rng(get_hash(f"stillbirth_rr_{location}"))
-    stillbirth_rr = pd.DataFrame(
-        [dist.rvs(size=1000, random_state=rng)],
-        columns=vi_globals.DRAW_COLUMNS,
-        index=["relative_risk"],
-    )
-    return stillbirth_rr
-
-
 ##############
 #   Helpers  #
 ##############
