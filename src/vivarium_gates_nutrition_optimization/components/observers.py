@@ -257,7 +257,7 @@ class DisabilityObserver(DisabilityObserver_):
                 else base_query + ' and pregnancy != "parturition"',
                 aggregator_sources=[cause_disability_weight_pipeline_name],
                 aggregator=self._disability_weight_aggregator,
-                requires_columns=["alive"],
+                requires_columns=["alive","pregnancy"],
                 requires_values=[cause_disability_weight_pipeline_name],
                 additional_stratifications=self.config.include,
                 excluded_stratifications=self.config.exclude,
