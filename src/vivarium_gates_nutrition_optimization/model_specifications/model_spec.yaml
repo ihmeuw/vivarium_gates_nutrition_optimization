@@ -19,6 +19,7 @@ components:
             - MaternalInterventions()
             - ResultsStratifier()
             - PregnancyObserver()
+            - PregnancyOutcomeObserver()
             - BirthRecorder()
             - MaternalMortalityObserver()
             - DisabilityObserver()
@@ -73,3 +74,6 @@ configuration:
         maternal_bmi:
             include:
             - 'pregnancy'
+        pregnancy_outcomes:
+            include:
+            - 'intervention'

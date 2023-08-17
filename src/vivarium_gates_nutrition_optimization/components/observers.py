@@ -30,6 +30,12 @@ class ResultsStratifier(ResultsStratifier_):
             requires_columns=["anemia_status_at_birth"],
         )
 
+        builder.results.register_stratification(
+            "intervention",
+            models.SUPPLEMENTATION_CATEGORIES,
+            requires_columns=["intervention"],
+        )
+
 
 class PregnancyObserver(DiseaseObserver):
     def __init__(self):
@@ -179,6 +185,40 @@ class MaternalInterventionObserver:
                 excluded_stratifications=self.config.exclude,
             )
 
+class PregnancyOutcomeObserver:
+    configuration_defaults = {
+        "stratification": {
+            "pregnancy_outcomes": {
+                "exclude": [],
+                "include": [],
+            }
+        }
+    }
+
+    def __repr__(self):
+        return "PregnancyOutcomeObserver()"
+
+    @property
+    def name(self):
+        return "pregnancy_outcome_observer"
+
+    #################
+    # Setup methods #
+    #################
+
+    # noinspection PyAttributeOutsideInit
+    def setup(self, builder: Builder) -> None:
+        self.step_size = builder.time.step_size()
+        self.config = builder.configuration.stratification.pregnancy_outcomes
+
+        for outcome in models.PREGNANCY_OUTCOMES:
+            builder.results.register_observation(
+                name=f"pregnancy_outcome_{outcome}_count",
+                pop_filter=f'alive == "alive" and pregnancy_outcome == "{outcome}" and tracked == True',
+                requires_columns=["alive", "pregnancy_outcome"],
+                additional_stratifications=self.config.include,
+                excluded_stratifications=self.config.exclude,
+            )
 
 class DisabilityObserver(DisabilityObserver_):
     def setup(self, builder: Builder) -> None:
