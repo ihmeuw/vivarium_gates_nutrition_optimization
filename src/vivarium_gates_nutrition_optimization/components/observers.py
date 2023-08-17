@@ -2,6 +2,7 @@ from functools import partial
 
 import pandas as pd
 from vivarium.framework.engine import Builder
+from vivarium.framework.state_machine import State
 from vivarium_public_health.metrics import DisabilityObserver as DisabilityObserver_
 from vivarium_public_health.metrics import DiseaseObserver, MortalityObserver
 from vivarium_public_health.metrics import ResultsStratifier as ResultsStratifier_
@@ -225,7 +226,8 @@ class DisabilityObserver(DisabilityObserver_):
         self.config = builder.configuration.stratification.disability
         self.step_size = pd.Timedelta(days=builder.configuration.time.step_size)
         self.disability_weight = self.get_disability_weight_pipeline(builder)
-        cause_states = builder.components.get_components_by_type(tuple(self.disease_classes)) + [AnemiaCause()]
+        #Hack in Anemia
+        cause_states = builder.components.get_components_by_type(tuple(self.disease_classes)) + [State("anemia")]
         base_query = 'tracked == True and alive == "alive"'
 
         builder.results.register_observation(
@@ -259,9 +261,3 @@ class DisabilityObserver(DisabilityObserver_):
 
 def aggregate_state_person_time(step_size, df: pd.DataFrame) -> float:
     return len(df) * to_years(step_size)
-
-class AnemiaCause:
-
-    @property
-    def state_id(self):
-        return 'anemia'
