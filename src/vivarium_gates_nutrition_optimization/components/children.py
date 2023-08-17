@@ -194,7 +194,7 @@ class BirthRecorder:
         }
 
         new_births = pop.loc[new_birth_mask, list(birth_cols)].rename(columns=birth_cols)
-        new_births["birth_date"] = datetime(2018, 12, 30).strftime("%Y-%m-%d T%H:%M.%f")
+        new_births["birth_date"] = datetime(2024, 12, 30).strftime("%Y-%m-%d T%H:%M.%f")
 
         new_births["joint_bmi_anemia_category"] = new_births["joint_bmi_anemia_category"].map(
             {
