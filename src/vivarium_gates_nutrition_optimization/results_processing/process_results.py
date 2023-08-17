@@ -52,7 +52,7 @@ def make_measure_data(data):
             data, "maternal_bmi_anemia_person_time"
         ),
         intervention_count=get_measure_data(data, "intervention_count"),
-        pregnancy_outcome_count=get_measure_data(data, "pregnancy_outcome_count")
+        pregnancy_outcome_count=get_measure_data(data, "pregnancy_outcome_count"),
     )
     return measure_data
 

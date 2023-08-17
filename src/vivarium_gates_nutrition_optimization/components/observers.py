@@ -185,6 +185,7 @@ class MaternalInterventionObserver:
                 excluded_stratifications=self.config.exclude,
             )
 
+
 class PregnancyOutcomeObserver:
     configuration_defaults = {
         "stratification": {
@@ -219,6 +220,7 @@ class PregnancyOutcomeObserver:
                 additional_stratifications=self.config.include,
                 excluded_stratifications=self.config.exclude,
             )
+
 
 class DisabilityObserver(DisabilityObserver_):
     def setup(self, builder: Builder) -> None:
