@@ -87,6 +87,7 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
         data_keys.MATERNAL_INTERVENTIONS.IFA_COVERAGE: load_ifa_coverage,
         data_keys.MATERNAL_INTERVENTIONS.MMS_STILLBIRTH_RR: load_supplementation_stillbirth_rr,
         data_keys.MATERNAL_INTERVENTIONS.BEP_STILLBIRTH_RR: load_supplementation_stillbirth_rr,
+        data_keys.POPULATION.BACKGROUND_MORBIDITY: load_background_morbidity,
     }
     return mapping[lookup_key](lookup_key, location)
 
@@ -380,6 +381,29 @@ def get_moderate_hemorrhage_probability(key: str, location: str) -> pd.DataFrame
     )
 
     return moderate_hemorrhage_probability
+
+###########################
+# Background Morbidity    #
+###########################
+
+def load_background_morbidity(key: str, location: str) -> pd.DataFrame:
+    all_cause_yld_rate = extra_gbd.get_all_cause_yld_rate(location)
+    all_md_yld_rate = extra_gbd.get_maternal_disorder_ylds(location, metric_id=3)
+    all_anemia_yld_rate = extra_gbd.get_anemia_yld_rate(location)
+
+    all_md_ylds = extra_gbd.get_maternal_disorder_ylds(location)
+    all_md_ylds = all_md_ylds[vi_globals.DEMOGRAPHIC_COLUMNS + vi_globals.DRAW_COLUMNS]
+    all_md_ylds = reshape_to_vivarium_format(all_md_ylds, location)
+
+    anemia_sequelae_ylds = extra_gbd.get_anemia_ylds(location)
+    anemia_sequelae_ylds = anemia_sequelae_ylds.groupby(vi_globals.DEMOGRAPHIC_COLUMNS)[vi_globals.DRAW_COLUMNS].sum().reset_index()
+    anemia_sequelae_ylds = reshape_to_vivarium_format(anemia_sequelae_ylds, location)
+
+    preg_incidence = get_pregnancy_end_incidence(location)
+
+    maternal_yld_rate = (all_md_ylds - anemia_sequelae_ylds) / preg_incidence
+
+    return all_cause_yld_rate - all_anemia_yld_rate - all_md_yld_rate + maternal_yld_rate
 
 
 ###########################

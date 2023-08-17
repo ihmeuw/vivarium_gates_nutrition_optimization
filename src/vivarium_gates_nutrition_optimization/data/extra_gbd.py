@@ -29,9 +29,24 @@ def load_lbwsg_exposure(location: str):
     data = data[data["year_id"] == 2019].drop(columns="year_id")
     return data
 
+@gbd.memory.cache
+def get_all_cause_yld_rate(location: str):
+    entity = utilities.get_entity("cause.all_causes.ylds")
+    location_id = utility_data.get_location_id(location)
+    data = vi_utils.get_draws(
+        "cause_id",
+        entity.gbd_id,
+        source=gbd_constants.SOURCES.COMO,
+        location_id=location_id,
+        decomp_step=gbd_constants.DECOMP_STEP.STEP_5,
+        gbd_round_id=gbd_constants.ROUND_IDS.GBD_2019,
+        measure_id=vi_globals.MEASURES["YLDs"],
+        metric_id=3 #rate
+    )
+    return data
 
 @gbd.memory.cache
-def get_maternal_disorder_ylds(location: str):
+def get_maternal_disorder_ylds(location: str, metric_id=None):
     entity = utilities.get_entity(data_keys.MATERNAL_DISORDERS.YLDS)
     location_id = utility_data.get_location_id(location)
     data = vi_utils.get_draws(
@@ -42,6 +57,7 @@ def get_maternal_disorder_ylds(location: str):
         decomp_step=gbd_constants.DECOMP_STEP.STEP_5,
         gbd_round_id=gbd_constants.ROUND_IDS.GBD_2019,
         measure_id=vi_globals.MEASURES["YLDs"],
+        metric_id=metric_id,
     )
     return data
 
@@ -66,6 +82,20 @@ def get_anemia_ylds(location: str):
     )
     return data
 
+@gbd.memory.cache
+def get_anemia_yld_rate(location: str):
+    location_id = utility_data.get_location_id(location)
+    data = vi_utils.get_draws(
+        'rei_id',
+        [205,206,207],
+        source=gbd_constants.SOURCES.COMO,
+        location_id=location_id,
+        decomp_step=gbd_constants.DECOMP_STEP.STEP_5,
+        gbd_round_id=gbd_constants.ROUND_IDS.GBD_2019,
+        measure_id=vi_globals.MEASURES["YLDs"],
+        metric_id=3,
+    )
+    return data
 
 @gbd.memory.cache
 def get_hemoglobin_maternal_disorders_rr():
