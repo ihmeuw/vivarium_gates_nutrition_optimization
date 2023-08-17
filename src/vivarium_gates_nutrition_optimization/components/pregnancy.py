@@ -49,7 +49,7 @@ class PregnantState(DiseaseState):
             self.on_initialize_simulants,
             creates_columns=self.columns_created,
             requires_columns=[self._model],
-            requires_values=['birth_outcome_probabilities']
+            requires_values=["birth_outcome_probabilities"],
         )
         self.prevalence = self.get_prevalence_table(builder)
         self.birth_prevalence = self.get_birth_prevalence_table(builder)

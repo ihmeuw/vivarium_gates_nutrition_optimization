@@ -186,6 +186,7 @@ class MaternalInterventionObserver:
                 excluded_stratifications=self.config.exclude,
             )
 
+
 class PregnancyOutcomeObserver:
     configuration_defaults = {
         "stratification": {
@@ -221,13 +222,16 @@ class PregnancyOutcomeObserver:
                 excluded_stratifications=self.config.exclude,
             )
 
+
 class DisabilityObserver(DisabilityObserver_):
     def setup(self, builder: Builder) -> None:
         self.config = builder.configuration.stratification.disability
         self.step_size = pd.Timedelta(days=builder.configuration.time.step_size)
         self.disability_weight = self.get_disability_weight_pipeline(builder)
-        #Hack in Anemia
-        cause_states = builder.components.get_components_by_type(tuple(self.disease_classes)) + [State("anemia")]
+        # Hack in Anemia
+        cause_states = builder.components.get_components_by_type(
+            tuple(self.disease_classes)
+        ) + [State("anemia")]
         base_query = 'tracked == True and alive == "alive"'
 
         builder.results.register_observation(
@@ -248,7 +252,9 @@ class DisabilityObserver(DisabilityObserver_):
             )
             builder.results.register_observation(
                 name=f"ylds_due_to_{cause_state.state_id}",
-                pop_filter=base_query if cause_state.state_id == 'maternal_disorders' else base_query + ' and pregnancy != "parturition"',
+                pop_filter=base_query
+                if cause_state.state_id == "maternal_disorders"
+                else base_query + ' and pregnancy != "parturition"',
                 aggregator_sources=[cause_disability_weight_pipeline_name],
                 aggregator=self._disability_weight_aggregator,
                 requires_columns=["alive"],
