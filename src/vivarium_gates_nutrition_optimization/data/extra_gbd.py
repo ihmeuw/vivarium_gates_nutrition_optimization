@@ -63,7 +63,7 @@ def get_maternal_disorder_ylds(location: str, metric_id=None):
 
 
 @gbd.memory.cache
-def get_anemia_ylds(location: str):
+def get_anemia_ylds(location: str,metric_id=None):
     anemia_sequelae = [
         sequelae.mild_anemia_due_to_maternal_hemorrhage,
         sequelae.moderate_anemia_due_to_maternal_hemorrhage,
@@ -79,6 +79,7 @@ def get_anemia_ylds(location: str):
         decomp_step=gbd_constants.DECOMP_STEP.STEP_5,
         gbd_round_id=gbd_constants.ROUND_IDS.GBD_2019,
         measure_id=vi_globals.MEASURES["YLDs"],
+        metric_id=metric_id,
     )
     return data
 
@@ -87,7 +88,7 @@ def get_anemia_yld_rate(location: str):
     location_id = utility_data.get_location_id(location)
     data = vi_utils.get_draws(
         'rei_id',
-        [205,206,207],
+        192,
         source=gbd_constants.SOURCES.COMO,
         location_id=location_id,
         decomp_step=gbd_constants.DECOMP_STEP.STEP_5,
