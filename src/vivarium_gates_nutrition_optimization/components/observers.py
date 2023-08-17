@@ -228,9 +228,9 @@ class DisabilityObserver(DisabilityObserver_):
         self.config = builder.configuration.stratification.disability
         self.step_size = pd.Timedelta(days=builder.configuration.time.step_size)
         self.disability_weight = self.get_disability_weight_pipeline(builder)
-        # Hack in Anemia
         cause_states = builder.components.get_components_by_type(
             tuple(self.disease_classes)
+            # Hack in Anemia
         ) + [State("anemia")]
         base_query = 'tracked == True and alive == "alive"'
 
