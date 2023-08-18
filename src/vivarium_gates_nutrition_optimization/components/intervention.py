@@ -97,8 +97,7 @@ class MaternalInterventions:
         )
 
         unsampled_ifa = pop_update["intervention"] == "maybe_ifa"
-        pop_update.loc[unsampled_ifa, "intervention"] = baseline_ifa.loc[
-            unsampled_ifa]
+        pop_update.loc[unsampled_ifa, "intervention"] = baseline_ifa.loc[unsampled_ifa]
         self.population_view.update(pop_update)
 
     def update_exposure(self, index, exposure):

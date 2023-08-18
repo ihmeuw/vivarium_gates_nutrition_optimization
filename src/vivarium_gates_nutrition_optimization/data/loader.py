@@ -15,8 +15,8 @@ for an example.
 
 import numpy as np
 import pandas as pd
-from scipy import stats
 import vivarium_inputs.validation.sim as validation
+from scipy import stats
 from vivarium.framework.artifact import EntityKey
 from vivarium.framework.randomness import get_hash
 from vivarium_gbd_access import gbd
