@@ -247,12 +247,12 @@ def load_lbwsg_exposure(key: str, location: str) -> pd.DataFrame:
 # Maternal Disorders Data #
 ###########################
 
+
 def load_maternal_csmr(key: str, location: str) -> pd.DataFrame:
     key = EntityKey(key)
     entity = get_entity(key)
     entity.restrictions.yll_age_group_id_end = 15
     return interface.get_measure(entity, key.measure, location).droplevel("location")
-
 
 
 def load_maternal_disorders_ylds(key: str, location: str) -> pd.DataFrame:
