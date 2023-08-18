@@ -15,6 +15,7 @@ for an example.
 
 import numpy as np
 import pandas as pd
+import scipy.stats
 import vivarium_inputs.validation.sim as validation
 from vivarium.framework.artifact import EntityKey
 from vivarium.framework.randomness import get_hash
@@ -246,12 +247,12 @@ def load_lbwsg_exposure(key: str, location: str) -> pd.DataFrame:
 # Maternal Disorders Data #
 ###########################
 
+
 def load_maternal_csmr(key: str, location: str) -> pd.DataFrame:
     key = EntityKey(key)
     entity = get_entity(key)
     entity.restrictions.yll_age_group_id_end = 15
     return interface.get_measure(entity, key.measure, location).droplevel("location")
-
 
 
 def load_maternal_disorders_ylds(key: str, location: str) -> pd.DataFrame:
@@ -458,6 +459,18 @@ def load_ifa_coverage(key: str, location: str) -> pd.DataFrame:
     )
     df = df.drop(columns=["location_id", "location_name"]).set_index(["draw"]).T
     return df
+
+
+def load_ifa_effect_size(key: str, location: str) -> pd.DataFrame:
+    loc, scale = data_values.IFA_EFFECT_SIZE
+    dist = stats.norm(loc, scale)
+    rng = np.random.default_rng(get_hash(f"ifa_effect_size_{location}"))
+    ifa_effect_size = pd.DataFrame(
+        [dist.rvs(size=1000, random_state=rng)],
+        columns=vi_globals.DRAW_COLUMNS,
+        index=["value"],
+    )
+    return ifa_effect_size
 
 
 def load_supplementation_stillbirth_rr(key: str, location: str) -> pd.DataFrame:

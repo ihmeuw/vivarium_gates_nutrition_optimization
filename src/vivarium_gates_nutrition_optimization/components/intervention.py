@@ -44,6 +44,9 @@ class MaternalInterventions:
         self.bep_stillbirth_rr = builder.data.load(
             data_keys.MATERNAL_INTERVENTIONS.BEP_STILLBIRTH_RR
         ).value[0]
+        self.ifa_effect_size = builder.data.load(
+            data_keys.MATERNAL_INTERVENTIONS.IFA_EFFECT_SIZE
+        ).value[0]
 
         self.columns_required = ["maternal_bmi_anemia_category"]
         self.columns_created = [
@@ -77,8 +80,14 @@ class MaternalInterventions:
             pop_data.index
         )
         pop_update = pd.DataFrame(
-            {"intervention": None, "hemoglobin_effect_size": np.nan},
+            {"baseline_intervention": None, "intervention": None},
             index=pop.index,
+        )
+        pop_update["baseline_intervention"] = self.randomness.choice(
+            pop_update[unsampled_ifa].index,
+            choices=[models.IFA_SUPPLEMENTATION, models.NO_TREATMENT],
+            p=[self.ifa_coverage, RESIDUAL_CHOICE],
+            additional_key="ifa_coverage",
         )
         low_bmi = pop["maternal_bmi_anemia_category"].isin(
             [models.LOW_BMI_NON_ANEMIC, models.LOW_BMI_ANEMIC]
@@ -89,21 +98,9 @@ class MaternalInterventions:
         )
 
         unsampled_ifa = pop_update["intervention"] == "maybe_ifa"
-        pop_update.loc[unsampled_ifa, "intervention"] = self.randomness.choice(
-            pop_update[unsampled_ifa].index,
-            choices=[models.IFA_SUPPLEMENTATION, models.NO_TREATMENT],
-            p=[self.ifa_coverage, RESIDUAL_CHOICE],
-            additional_key="ifa_coverage",
-        )
-
-        hemoglobin_shift_propensity = self.randomness.get_draw(
-            pop_data.index, "hemoglobin_shift_propensity"
-        )
-        loc, scale = data_values.IFA_EFFECT_SIZE
-        pop_update["hemoglobin_effect_size"] = scipy.stats.norm.ppf(
-            hemoglobin_shift_propensity, loc=loc, scale=scale
-        )
-
+        pop_update.loc[unsampled_ifa, "intervention"] = pop_update.loc[
+            unsampled_ifa, "baseline_intervention"
+        ]
         self.population_view.update(pop_update)
 
     def update_exposure(self, index, exposure):
@@ -111,8 +108,18 @@ class MaternalInterventions:
             days=data_values.DURATIONS.INTERVENTION_DELAY_DAYS
         ):
             pop = self.population_view.get(index)
-            on_treatment = pop["intervention"] != models.NO_TREATMENT
-            exposure.loc[on_treatment] += pop.loc[on_treatment, "hemoglobin_effect_size"]
+            exposure.loc[pop["baseline_intervention"] == models.NO_TREATMENT] -= (
+                self.ifa_coverage * self.ifa_effect_size
+            )
+            exposure.loc[pop["baseline_intervention"] == models.IFA_SUPPLEMENTATION] += (
+                1 - self.ifa_coverage
+            ) * self.ifa_effect_size
+            alt_treatment = (
+                pop["intervention"].isin(
+                    [models.MMS_SUPPLEMENTATION, models.BEP_SUPPLEMENTATION]
+                )
+            ) & (pop["baseline_intervention"] == models.NO_TREATMENT)
+            exposure.loc[alt_treatment] += self.ifa_effect_size
 
         return exposure
 
