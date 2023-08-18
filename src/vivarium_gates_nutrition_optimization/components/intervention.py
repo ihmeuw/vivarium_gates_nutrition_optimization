@@ -80,14 +80,14 @@ class MaternalInterventions:
             pop_data.index
         )
         pop_update = pd.DataFrame(
-            {"baseline_intervention": None, "intervention": None},
+            {"intervention": None},
             index=pop.index,
         )
-        pop_update["baseline_intervention"] = self.randomness.choice(
-            pop_update[unsampled_ifa].index,
+        baseline_ifa = self.randomness.choice(
+            pop.index,
             choices=[models.IFA_SUPPLEMENTATION, models.NO_TREATMENT],
             p=[self.ifa_coverage, RESIDUAL_CHOICE],
-            additional_key="ifa_coverage",
+            additional_key="baseline_ifa",
         )
         low_bmi = pop["maternal_bmi_anemia_category"].isin(
             [models.LOW_BMI_NON_ANEMIC, models.LOW_BMI_ANEMIC]
@@ -98,9 +98,8 @@ class MaternalInterventions:
         )
 
         unsampled_ifa = pop_update["intervention"] == "maybe_ifa"
-        pop_update.loc[unsampled_ifa, "intervention"] = pop_update.loc[
-            unsampled_ifa, "baseline_intervention"
-        ]
+        pop_update.loc[unsampled_ifa, "intervention"] = baseline_ifa.loc[
+            unsampled_ifa]
         self.population_view.update(pop_update)
 
     def update_exposure(self, index, exposure):
@@ -108,18 +107,12 @@ class MaternalInterventions:
             days=data_values.DURATIONS.INTERVENTION_DELAY_DAYS
         ):
             pop = self.population_view.get(index)
-            exposure.loc[pop["baseline_intervention"] == models.NO_TREATMENT] -= (
+            exposure.loc[pop["intervention"] == models.NO_TREATMENT] -= (
                 self.ifa_coverage * self.ifa_effect_size
             )
-            exposure.loc[pop["baseline_intervention"] == models.IFA_SUPPLEMENTATION] += (
+            exposure.loc[pop["intervention"] != models.NO_TREATMENT] += (
                 1 - self.ifa_coverage
             ) * self.ifa_effect_size
-            alt_treatment = (
-                pop["intervention"].isin(
-                    [models.MMS_SUPPLEMENTATION, models.BEP_SUPPLEMENTATION]
-                )
-            ) & (pop["baseline_intervention"] == models.NO_TREATMENT)
-            exposure.loc[alt_treatment] += self.ifa_effect_size
 
         return exposure
 
