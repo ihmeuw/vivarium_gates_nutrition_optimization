@@ -15,7 +15,7 @@ for an example.
 
 import numpy as np
 import pandas as pd
-import scipy.stats
+from scipy import stats
 import vivarium_inputs.validation.sim as validation
 from vivarium.framework.artifact import EntityKey
 from vivarium.framework.randomness import get_hash
@@ -86,6 +86,7 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
         data_keys.MATERNAL_BMI.PREVALENCE_LOW_BMI_ANEMIC: load_bmi_prevalence,
         data_keys.MATERNAL_BMI.PREVALENCE_LOW_BMI_NON_ANEMIC: load_bmi_prevalence,
         data_keys.MATERNAL_INTERVENTIONS.IFA_COVERAGE: load_ifa_coverage,
+        data_keys.MATERNAL_INTERVENTIONS.IFA_EFFECT_SIZE: load_ifa_effect_size,
         data_keys.MATERNAL_INTERVENTIONS.MMS_STILLBIRTH_RR: load_supplementation_stillbirth_rr,
         data_keys.MATERNAL_INTERVENTIONS.BEP_STILLBIRTH_RR: load_supplementation_stillbirth_rr,
     }
