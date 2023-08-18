@@ -89,6 +89,7 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
         data_keys.MATERNAL_INTERVENTIONS.IFA_EFFECT_SIZE: load_ifa_effect_size,
         data_keys.MATERNAL_INTERVENTIONS.MMS_STILLBIRTH_RR: load_supplementation_stillbirth_rr,
         data_keys.MATERNAL_INTERVENTIONS.BEP_STILLBIRTH_RR: load_supplementation_stillbirth_rr,
+        data_keys.POPULATION.BACKGROUND_MORBIDITY: load_background_morbidity,
     }
     return mapping[lookup_key](lookup_key, location)
 
@@ -383,6 +384,35 @@ def get_moderate_hemorrhage_probability(key: str, location: str) -> pd.DataFrame
 
     return moderate_hemorrhage_probability
 
+###########################
+# Background Morbidity    #
+###########################
+
+def load_background_morbidity(key: str, location: str) -> pd.DataFrame:
+    all_cause_yld_rate = extra_gbd.get_all_cause_yld_rate(location)
+    all_cause_yld_rate = all_cause_yld_rate[vi_globals.DEMOGRAPHIC_COLUMNS + vi_globals.DRAW_COLUMNS]
+    all_cause_yld_rate = reshape_to_vivarium_format(all_cause_yld_rate, location)
+
+    all_anemia_yld_rate = extra_gbd.get_anemia_yld_rate(location)
+    all_anemia_yld_rate = all_anemia_yld_rate.groupby(vi_globals.DEMOGRAPHIC_COLUMNS)[vi_globals.DRAW_COLUMNS].sum().reset_index()
+    all_anemia_yld_rate = reshape_to_vivarium_format(all_anemia_yld_rate, location)
+
+    all_md_yld_rate = extra_gbd.get_maternal_disorder_ylds(location, metric_id=3)
+    all_md_yld_rate = all_md_yld_rate[vi_globals.DEMOGRAPHIC_COLUMNS + vi_globals.DRAW_COLUMNS]
+    all_md_yld_rate = reshape_to_vivarium_format(all_md_yld_rate, location)
+
+    anemia_sequelae_yld_rate = extra_gbd.get_anemia_ylds(location,metric_id=3)
+    anemia_sequelae_yld_rate = anemia_sequelae_yld_rate.groupby(vi_globals.DEMOGRAPHIC_COLUMNS)[vi_globals.DRAW_COLUMNS].sum().reset_index()
+    anemia_sequelae_yld_rate = reshape_to_vivarium_format(anemia_sequelae_yld_rate, location)
+
+    pop_md_yld_rate = all_md_yld_rate - anemia_sequelae_yld_rate
+
+    preg_incidence = get_pregnancy_end_incidence(location)
+
+    preg_md_yld_rate = pop_md_yld_rate / preg_incidence
+
+    return all_cause_yld_rate - all_anemia_yld_rate - pop_md_yld_rate + preg_md_yld_rate
+
 
 ###########################
 # Hemoglobin Data         #
@@ -490,25 +520,6 @@ def load_supplementation_stillbirth_rr(key: str, location: str) -> pd.DataFrame:
         index=["relative_risk"],
     )
     return stillbirth_rr
-
-
-def load_supplementation_stillbirth_rr(key: str, location: str) -> pd.DataFrame:
-    try:
-        distribution = data_values.INTERVENTION_STILLBIRTH_RRS[key]
-    except KeyError:
-        raise ValueError(f"Unrecognized key {key}")
-
-    dist = sampling.get_lognorm_from_quantiles(*distribution)
-    # Don't hash on key because we want simulants to have the same percentile
-    # for MMS RR as for BEP
-    rng = np.random.default_rng(get_hash(f"stillbirth_rr_{location}"))
-    stillbirth_rr = pd.DataFrame(
-        [dist.rvs(size=1000, random_state=rng)],
-        columns=vi_globals.DRAW_COLUMNS,
-        index=["relative_risk"],
-    )
-    return stillbirth_rr
-
 
 ##############
 #   Helpers  #

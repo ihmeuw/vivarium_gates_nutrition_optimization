@@ -15,6 +15,7 @@ class __Population(NamedTuple):
     AGE_BINS: str = "population.age_bins"
     DEMOGRAPHY: str = "population.demographic_dimensions"
     TMRLE: str = "population.theoretical_minimum_risk_life_expectancy"
+    BACKGROUND_MORBIDITY: str = "cause.other_causes.disability_weight"
 
     @property
     def name(self):
