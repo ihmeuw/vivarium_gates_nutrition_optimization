@@ -102,16 +102,16 @@ class MaternalInterventions:
         self.population_view.update(pop_update)
 
     def update_exposure(self, index, exposure):
-        # if self.clock() - self.start_date >= timedelta(
-        #     days=data_values.DURATIONS.INTERVENTION_DELAY_DAYS
-        # ):
-        #     pop = self.population_view.get(index)
-        #     exposure.loc[pop["intervention"] == models.NO_TREATMENT] -= (
-        #         self.ifa_coverage * self.ifa_effect_size
-        #     )
-        #     exposure.loc[pop["intervention"] != models.NO_TREATMENT] += (
-        #         1 - self.ifa_coverage
-        #     ) * self.ifa_effect_size
+        if self.clock() - self.start_date >= timedelta(
+            days=data_values.DURATIONS.INTERVENTION_DELAY_DAYS
+        ):
+            pop = self.population_view.get(index)
+            exposure.loc[pop["intervention"] == models.NO_TREATMENT] -= (
+                self.ifa_coverage * self.ifa_effect_size
+            )
+            exposure.loc[pop["intervention"] != models.NO_TREATMENT] += (
+                1 - self.ifa_coverage
+            ) * self.ifa_effect_size
 
         return exposure
 
