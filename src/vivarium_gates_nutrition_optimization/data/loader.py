@@ -16,6 +16,7 @@ for an example.
 import numpy as np
 import pandas as pd
 import vivarium_inputs.validation.sim as validation
+from scipy import stats
 from vivarium.framework.artifact import EntityKey
 from vivarium.framework.randomness import get_hash
 from vivarium_gbd_access import gbd
@@ -85,6 +86,7 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
         data_keys.MATERNAL_BMI.PREVALENCE_LOW_BMI_ANEMIC: load_bmi_prevalence,
         data_keys.MATERNAL_BMI.PREVALENCE_LOW_BMI_NON_ANEMIC: load_bmi_prevalence,
         data_keys.MATERNAL_INTERVENTIONS.IFA_COVERAGE: load_ifa_coverage,
+        data_keys.MATERNAL_INTERVENTIONS.IFA_EFFECT_SIZE: load_ifa_effect_size,
         data_keys.MATERNAL_INTERVENTIONS.MMS_STILLBIRTH_RR: load_supplementation_stillbirth_rr,
         data_keys.MATERNAL_INTERVENTIONS.BEP_STILLBIRTH_RR: load_supplementation_stillbirth_rr,
         data_keys.POPULATION.BACKGROUND_MORBIDITY: load_background_morbidity,
@@ -488,6 +490,18 @@ def load_ifa_coverage(key: str, location: str) -> pd.DataFrame:
     )
     df = df.drop(columns=["location_id", "location_name"]).set_index(["draw"]).T
     return df
+
+
+def load_ifa_effect_size(key: str, location: str) -> pd.DataFrame:
+    loc, scale = data_values.IFA_EFFECT_SIZE
+    dist = stats.norm(loc, scale)
+    rng = np.random.default_rng(get_hash(f"ifa_effect_size_{location}"))
+    ifa_effect_size = pd.DataFrame(
+        [dist.rvs(size=1000, random_state=rng)],
+        columns=vi_globals.DRAW_COLUMNS,
+        index=["value"],
+    )
+    return ifa_effect_size
 
 
 def load_supplementation_stillbirth_rr(key: str, location: str) -> pd.DataFrame:
