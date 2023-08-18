@@ -2,6 +2,7 @@ from functools import partial
 
 import pandas as pd
 from vivarium.framework.engine import Builder
+from vivarium.framework.state_machine import State
 from vivarium_public_health.metrics import DisabilityObserver as DisabilityObserver_
 from vivarium_public_health.metrics import DiseaseObserver, MortalityObserver
 from vivarium_public_health.metrics import ResultsStratifier as ResultsStratifier_
@@ -224,18 +225,44 @@ class PregnancyOutcomeObserver:
 
 class DisabilityObserver(DisabilityObserver_):
     def setup(self, builder: Builder) -> None:
-        super().setup(builder)
+        self.config = builder.configuration.stratification.disability
+        self.step_size = pd.Timedelta(days=builder.configuration.time.step_size)
+        self.disability_weight = self.get_disability_weight_pipeline(builder)
+        cause_states = builder.components.get_components_by_type(
+            tuple(self.disease_classes)
+            # Hack in Anemia
+        ) + [State("anemia")]
+        base_query = 'tracked == True and alive == "alive"'
+
         builder.results.register_observation(
-            name=f"ylds_due_to_anemia",
-            pop_filter='tracked == True and alive == "alive"',
-            aggregator_sources=["anemia.disability_weight"],
+            name="ylds_due_to_all_causes",
+            pop_filter=base_query,
+            aggregator_sources=[self.disability_weight_pipeline_name],
             aggregator=self._disability_weight_aggregator,
             requires_columns=["alive"],
-            requires_values=["anemia.disability_weight"],
+            requires_values=["disability_weight"],
             additional_stratifications=self.config.include,
             excluded_stratifications=self.config.exclude,
             when="time_step__prepare",
         )
+
+        for cause_state in cause_states:
+            cause_disability_weight_pipeline_name = (
+                f"{cause_state.state_id}.disability_weight"
+            )
+            builder.results.register_observation(
+                name=f"ylds_due_to_{cause_state.state_id}",
+                pop_filter=base_query
+                if cause_state.state_id == "maternal_disorders"
+                else base_query + ' and pregnancy != "parturition"',
+                aggregator_sources=[cause_disability_weight_pipeline_name],
+                aggregator=self._disability_weight_aggregator,
+                requires_columns=["alive","pregnancy"],
+                requires_values=[cause_disability_weight_pipeline_name],
+                additional_stratifications=self.config.include,
+                excluded_stratifications=self.config.exclude,
+                when="time_step__prepare",
+            )
 
 
 def aggregate_state_person_time(step_size, df: pd.DataFrame) -> float:
