@@ -394,7 +394,7 @@ def load_background_morbidity(key: str, location: str) -> pd.DataFrame:
     all_cause_yld_rate = reshape_to_vivarium_format(all_cause_yld_rate, location)
 
     all_anemia_yld_rate = extra_gbd.get_anemia_yld_rate(location)
-    all_anemia_yld_rate = all_anemia_yld_rate.groupby(vi_globals.DEMOGRAPHIC_COLUMNS)[vi_globals.DRAW_COLUMNS].sum().reset_index()
+    all_anemia_yld_rate = all_anemia_yld_rate.loc[all_anemia_yld_rate.cause_id==294][vi_globals.DEMOGRAPHIC_COLUMNS + vi_globals.DRAW_COLUMNS]
     all_anemia_yld_rate = reshape_to_vivarium_format(all_anemia_yld_rate, location)
 
     all_md_yld_rate = extra_gbd.get_maternal_disorder_ylds(location, metric_id=3)
