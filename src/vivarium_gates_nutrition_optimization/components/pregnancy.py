@@ -266,8 +266,8 @@ def get_birth_outcome_probabilities(builder: Builder) -> pd.DataFrame:
     probabilities = probabilities.pivot(
         columns="pregnancy_outcome", values="value"
     ).reset_index()
-
-    return probabilities
+    # Order the columns so that partial_term isn't in the middle!
+    return probabilities[ARTIFACT_INDEX_COLUMNS + ["partial_term", "stillbirth", "live_birth"]]
 
 
 class UntrackNotPregnant:
