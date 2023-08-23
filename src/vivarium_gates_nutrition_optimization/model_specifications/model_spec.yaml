@@ -78,3 +78,6 @@ configuration:
         pregnancy_outcomes:
             include:
             - 'intervention'
+        disability:
+            include:
+            - 'pregnancy'
