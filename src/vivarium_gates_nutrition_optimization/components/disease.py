@@ -13,7 +13,7 @@ from vivarium_public_health.disease import SusceptibleState
 from vivarium_public_health.disease.transition import ProportionTransition
 from vivarium_public_health.utilities import is_non_zero
 
-from vivarium_gates_nutrition_optimization.constants import data_keys
+from vivarium_gates_nutrition_optimization.constants import data_keys, models
 
 
 class DiseaseState(DiseaseState_):
@@ -452,3 +452,36 @@ class ParturitionSelectionTransition(ProportionTransition):
 
     def _probability(self, index):
         return self.proportion_pipeline(index)
+
+class ParturitionExclusionState(DiseaseState):
+        def setup(self, builder: Builder):
+            super().setup(builder)
+            view_columns = self.columns_created + [self._model, "alive", "pregnancy", "tracked"]
+            self.population_view = builder.population.get_view(view_columns)
+
+        def get_disability_weight_pipeline(self, builder: Builder) -> Pipeline:
+            return builder.value.register_value_producer(
+            f"{self.state_id}.disability_weight",
+            source=self.compute_disability_weight,
+            requires_columns=["age", "sex", "alive", "pregnancy", self._model],
+        )
+        def compute_disability_weight(self, index: pd.Index):
+            disability_weight = raw_disability_weight = pd.Series(0, index=index)
+            with_condition = self.with_condition(index)
+            raw_disability_weight.loc[with_condition] = self.base_disability_weight(with_condition)
+
+            dw_map = {
+                models.NOT_PREGNANT_STATE_NAME: raw_disability_weight,
+                models.PREGNANT_STATE_NAME: raw_disability_weight,
+                ## Pause YLD accumulation during the parturition state
+                models.PARTURITION_STATE_NAME: pd.Series(0, index=index),
+                models.POSTPARTUM_STATE_NAME: raw_disability_weight,
+            }
+
+            pop = self.population_view.get(index)
+            alive = pop["alive"] == "alive"
+            for state, dw in dw_map.items():
+                in_state = alive & (pop["pregnancy"] == state)
+                disability_weight[in_state] = dw.loc[in_state]
+
+            return disability_weight
