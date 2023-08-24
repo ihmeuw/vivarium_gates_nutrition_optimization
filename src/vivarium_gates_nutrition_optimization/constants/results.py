@@ -80,7 +80,7 @@ AGE_GROUPS = (
 )
 
 CAUSES_OF_DEATH = ("maternal_disorders",)
-CAUSES_OF_DISABILITY = ("maternal_disorders", "anemia", "other_causes","all_causes")
+CAUSES_OF_DISABILITY = ("maternal_disorders", "anemia", "other_causes", "all_causes")
 
 TEMPLATE_FIELD_MAP = {
     "AGE_GROUP": AGE_GROUPS,
