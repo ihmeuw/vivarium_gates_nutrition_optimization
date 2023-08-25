@@ -421,11 +421,7 @@ def load_background_morbidity(key: str, location: str) -> pd.DataFrame:
 
     pop_md_yld_rate = all_md_yld_rate - anemia_sequelae_yld_rate
 
-    preg_incidence = get_pregnancy_end_incidence(location)
-
-    preg_md_yld_rate = pop_md_yld_rate / preg_incidence
-
-    return all_cause_yld_rate - all_anemia_yld_rate - pop_md_yld_rate + preg_md_yld_rate
+    return all_cause_yld_rate - all_anemia_yld_rate - pop_md_yld_rate
 
 
 ###########################
