@@ -4,6 +4,7 @@ random_seed_count: 10
 branches:
   - intervention:
       scenario:
+        - 'zero_coverage'
         - 'baseline'
         - 'mms'
         - 'universal_bep'
