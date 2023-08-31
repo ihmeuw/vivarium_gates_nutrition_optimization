@@ -30,6 +30,7 @@ ARTIFACT_COLUMNS = pd.Index([f"draw_{i}" for i in range(DRAW_COUNT)])
 
 
 class __Scenarios(NamedTuple):
+    zero_coverage: str
     baseline: str
     mms: str
     universal_bep: str
