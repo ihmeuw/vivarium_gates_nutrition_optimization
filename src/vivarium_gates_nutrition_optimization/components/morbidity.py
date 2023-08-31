@@ -1,12 +1,14 @@
 from vivarium_public_health.disease import DiseaseModel, SusceptibleState
 
-from vivarium_gates_nutrition_optimization.components.disease import DiseaseState
+from vivarium_gates_nutrition_optimization.components.disease import (
+    ParturitionExclusionState,
+)
 
 
 def BackgroundMorbidity():
     cause = "other_causes"
     susceptible = SusceptibleState(cause)
-    with_condition = DiseaseState(
+    with_condition = ParturitionExclusionState(
         cause,
         get_data_functions={
             "prevalence": lambda *_: 1.0,

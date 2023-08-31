@@ -384,34 +384,44 @@ def get_moderate_hemorrhage_probability(key: str, location: str) -> pd.DataFrame
 
     return moderate_hemorrhage_probability
 
+
 ###########################
 # Background Morbidity    #
 ###########################
 
+
 def load_background_morbidity(key: str, location: str) -> pd.DataFrame:
     all_cause_yld_rate = extra_gbd.get_all_cause_yld_rate(location)
-    all_cause_yld_rate = all_cause_yld_rate[vi_globals.DEMOGRAPHIC_COLUMNS + vi_globals.DRAW_COLUMNS]
+    all_cause_yld_rate = all_cause_yld_rate[
+        vi_globals.DEMOGRAPHIC_COLUMNS + vi_globals.DRAW_COLUMNS
+    ]
     all_cause_yld_rate = reshape_to_vivarium_format(all_cause_yld_rate, location)
 
     all_anemia_yld_rate = extra_gbd.get_anemia_yld_rate(location)
-    all_anemia_yld_rate = all_anemia_yld_rate.groupby(vi_globals.DEMOGRAPHIC_COLUMNS)[vi_globals.DRAW_COLUMNS].sum().reset_index()
+    all_anemia_yld_rate = all_anemia_yld_rate.loc[all_anemia_yld_rate.cause_id == 294][
+        vi_globals.DEMOGRAPHIC_COLUMNS + vi_globals.DRAW_COLUMNS
+    ]
     all_anemia_yld_rate = reshape_to_vivarium_format(all_anemia_yld_rate, location)
 
     all_md_yld_rate = extra_gbd.get_maternal_disorder_ylds(location, metric_id=3)
-    all_md_yld_rate = all_md_yld_rate[vi_globals.DEMOGRAPHIC_COLUMNS + vi_globals.DRAW_COLUMNS]
+    all_md_yld_rate = all_md_yld_rate[
+        vi_globals.DEMOGRAPHIC_COLUMNS + vi_globals.DRAW_COLUMNS
+    ]
     all_md_yld_rate = reshape_to_vivarium_format(all_md_yld_rate, location)
 
-    anemia_sequelae_yld_rate = extra_gbd.get_anemia_ylds(location,metric_id=3)
-    anemia_sequelae_yld_rate = anemia_sequelae_yld_rate.groupby(vi_globals.DEMOGRAPHIC_COLUMNS)[vi_globals.DRAW_COLUMNS].sum().reset_index()
+    anemia_sequelae_yld_rate = extra_gbd.get_anemia_ylds(location, metric_id=3)
+    anemia_sequelae_yld_rate = (
+        anemia_sequelae_yld_rate.groupby(vi_globals.DEMOGRAPHIC_COLUMNS)[
+            vi_globals.DRAW_COLUMNS
+        ]
+        .sum()
+        .reset_index()
+    )
     anemia_sequelae_yld_rate = reshape_to_vivarium_format(anemia_sequelae_yld_rate, location)
 
     pop_md_yld_rate = all_md_yld_rate - anemia_sequelae_yld_rate
 
-    preg_incidence = get_pregnancy_end_incidence(location)
-
-    preg_md_yld_rate = pop_md_yld_rate / preg_incidence
-
-    return all_cause_yld_rate - all_anemia_yld_rate - pop_md_yld_rate + preg_md_yld_rate
+    return all_cause_yld_rate - all_anemia_yld_rate - pop_md_yld_rate
 
 
 ###########################
@@ -520,6 +530,7 @@ def load_supplementation_stillbirth_rr(key: str, location: str) -> pd.DataFrame:
         index=["relative_risk"],
     )
     return stillbirth_rr
+
 
 ##############
 #   Helpers  #

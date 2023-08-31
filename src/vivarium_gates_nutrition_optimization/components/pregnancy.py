@@ -93,7 +93,8 @@ class PregnantState(DiseaseState):
         self.population_view.update(pop_update)
 
     def sample_pregnancy_outcomes_and_durations(self, pop_data: SimulantData) -> pd.DataFrame:
-        outcome_probabilities = self.birth_outcome_probabilities(pop_data.index)
+        # Order the columns so that partial_term isn't in the middle!
+        outcome_probabilities = self.birth_outcome_probabilities(pop_data.index)[["partial_term", "stillbirth", "live_birth"]]
         pregnancy_outcomes = pd.DataFrame(
             {
                 "pregnancy_outcome": self.randomness.choice(
@@ -266,7 +267,6 @@ def get_birth_outcome_probabilities(builder: Builder) -> pd.DataFrame:
     probabilities = probabilities.pivot(
         columns="pregnancy_outcome", values="value"
     ).reset_index()
-
     return probabilities
 
 
