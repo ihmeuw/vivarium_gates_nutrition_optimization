@@ -52,7 +52,7 @@ configuration:
             day: 31
         step_size: 7 # Days
     population:
-        population_size: 10_000
+        population_size: 200_000
         age_start: 10
         age_end: 54
         include_sex: "Female"
