@@ -1,5 +1,5 @@
 input_draw_count: 5
-random_seed_count: 200
+random_seed_count: 100
 
 branches:
   - intervention:
