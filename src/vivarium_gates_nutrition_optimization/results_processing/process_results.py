@@ -8,7 +8,7 @@ from loguru import logger
 from vivarium_gates_nutrition_optimization.constants import results, scenarios
 
 SCENARIO_COLUMN = "scenario"
-GROUPBY_COLUMNS = [results.INPUT_DRAW_COLUMN, SCENARIO_COLUMN]
+GROUPBY_COLUMNS = [results.INPUT_DRAW_COLUMN, results.RANDOM_SEED_COLUMN, SCENARIO_COLUMN]
 OUTPUT_COLUMN_SORT_ORDER = [
     "age_group",
     "risk",
@@ -33,26 +33,26 @@ def make_measure_data(data):
         pregnancy_transition_count=get_transition_count_measure_data(
             data, "pregnancy_transition_count"
         ),
-        maternal_disorders_state_person_time=get_state_person_time_measure_data(
-            data, "maternal_disorders_state_person_time"
-        ),
-        maternal_disorders_transition_count=get_transition_count_measure_data(
-            data, "maternal_disorders_transition_count"
-        ),
-        maternal_hemorrhage_state_person_time=get_state_person_time_measure_data(
-            data, "maternal_hemorrhage_state_person_time"
-        ),
-        maternal_hemorrhage_transition_count=get_transition_count_measure_data(
-            data, "maternal_hemorrhage_transition_count"
-        ),
-        anemia_state_person_time=get_state_person_time_measure_data(
-            data, "anemia_state_person_time"
-        ),
-        maternal_bmi_anemia_person_time=get_state_person_time_measure_data(
-            data, "maternal_bmi_anemia_person_time"
-        ),
+        # maternal_disorders_state_person_time=get_state_person_time_measure_data(
+        #     data, "maternal_disorders_state_person_time"
+        # ),
+        # maternal_disorders_transition_count=get_transition_count_measure_data(
+        #     data, "maternal_disorders_transition_count"
+        # ),
+        # maternal_hemorrhage_state_person_time=get_state_person_time_measure_data(
+        #     data, "maternal_hemorrhage_state_person_time"
+        # ),
+        # maternal_hemorrhage_transition_count=get_transition_count_measure_data(
+        #     data, "maternal_hemorrhage_transition_count"
+        # ),
+        # anemia_state_person_time=get_state_person_time_measure_data(
+        #     data, "anemia_state_person_time"
+        # ),
+        # maternal_bmi_anemia_person_time=get_state_person_time_measure_data(
+        #     data, "maternal_bmi_anemia_person_time"
+        # ),
         intervention_count=get_measure_data(data, "intervention_count"),
-        pregnancy_outcome_count=get_measure_data(data, "pregnancy_outcome_count"),
+        # pregnancy_outcome_count=get_measure_data(data, "pregnancy_outcome_count"),
     )
     return measure_data
 
@@ -63,14 +63,14 @@ class MeasureData(NamedTuple):
     deaths: pd.DataFrame
     pregnancy_state_person_time: pd.DataFrame
     pregnancy_transition_count: pd.DataFrame
-    maternal_disorders_state_person_time: pd.DataFrame
-    maternal_disorders_transition_count: pd.DataFrame
-    maternal_hemorrhage_state_person_time: pd.DataFrame
-    maternal_hemorrhage_transition_count: pd.DataFrame
-    anemia_state_person_time: pd.DataFrame
-    maternal_bmi_anemia_person_time: pd.DataFrame
+    # maternal_disorders_state_person_time: pd.DataFrame
+    # maternal_disorders_transition_count: pd.DataFrame
+    # maternal_hemorrhage_state_person_time: pd.DataFrame
+    # maternal_hemorrhage_transition_count: pd.DataFrame
+    # anemia_state_person_time: pd.DataFrame
+    # maternal_bmi_anemia_person_time: pd.DataFrame
     intervention_count: pd.DataFrame
-    pregnancy_outcome_count: pd.DataFrame
+    # pregnancy_outcome_count: pd.DataFrame
 
     def dump(self, output_dir: Path):
         for key, df in self._asdict().items():
