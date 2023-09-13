@@ -19,7 +19,7 @@ components:
             - MaternalBMIExposure()
             - MaternalInterventions()
             - ResultsStratifier()
-            # - PregnancyObserver()
+            - PregnancyObserver()
             # - PregnancyOutcomeObserver()
             - BirthRecorder()
             - MaternalMortalityObserver()
@@ -56,3 +56,6 @@ configuration:
         age_start: 10
         age_end: 54
         include_sex: "Female"
+    stratification:
+        default:
+            - age_group
