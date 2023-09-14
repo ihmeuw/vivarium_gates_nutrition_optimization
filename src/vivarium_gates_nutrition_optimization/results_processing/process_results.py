@@ -8,7 +8,7 @@ from loguru import logger
 from vivarium_gates_nutrition_optimization.constants import results, scenarios
 
 SCENARIO_COLUMN = "scenario"
-GROUPBY_COLUMNS = [results.INPUT_DRAW_COLUMN, results.RANDOM_SEED_COLUMN, SCENARIO_COLUMN]
+GROUPBY_COLUMNS = [results.INPUT_DRAW_COLUMN, SCENARIO_COLUMN]
 OUTPUT_COLUMN_SORT_ORDER = [
     "age_group",
     "risk",
