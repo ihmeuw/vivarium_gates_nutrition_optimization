@@ -180,8 +180,8 @@ class MaternalInterventionObserver:
         for intervention in models.SUPPLEMENTATION_CATEGORIES:
             builder.results.register_observation(
                 name=f"intervention_{intervention}_count",
-                pop_filter=f'alive == "alive" and intervention == "{intervention}" and tracked == True',
-                requires_columns=["alive", "intervention"],
+                pop_filter=f'alive == "alive" and intervention == "{intervention}" and on_treatment == True and previous_on_treatment == False and tracked == True',
+                requires_columns=["alive", "intervention","on_treatment","previous_on_treatment"],
                 additional_stratifications=self.config.include,
                 excluded_stratifications=self.config.exclude,
             )
