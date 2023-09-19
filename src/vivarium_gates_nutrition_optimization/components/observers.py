@@ -3,6 +3,7 @@ from functools import partial
 import pandas as pd
 from vivarium.framework.engine import Builder
 from vivarium.framework.state_machine import State
+from vivarium.framework.time import get_time_stamp
 from vivarium_public_health.metrics import DisabilityObserver as DisabilityObserver_
 from vivarium_public_health.metrics import DiseaseObserver, MortalityObserver
 from vivarium_public_health.metrics import ResultsStratifier as ResultsStratifier_
@@ -176,12 +177,15 @@ class MaternalInterventionObserver:
     def setup(self, builder: Builder) -> None:
         self.step_size = builder.time.step_size()
         self.config = builder.configuration.stratification.maternal_interventions
+        intervention_date = get_time_stamp(builder.configuration.time.start) + pd.Timedelta(
+            days=data_values.DURATIONS.INTERVENTION_DELAY_DAYS
+        )
 
         for intervention in models.SUPPLEMENTATION_CATEGORIES:
             builder.results.register_observation(
                 name=f"intervention_{intervention}_count",
-                pop_filter=f'alive == "alive" and intervention == "{intervention}" and on_treatment == True and previous_on_treatment == False and tracked == True',
-                requires_columns=["alive", "intervention","on_treatment","previous_on_treatment"],
+                pop_filter=f'alive == "alive" and intervention == "{intervention}" and tracked == True and event_time > "{intervention_date}" and event_time <= "{intervention_date + self.step_size()}"',
+                requires_columns=["alive", "intervention"],
                 additional_stratifications=self.config.include,
                 excluded_stratifications=self.config.exclude,
             )

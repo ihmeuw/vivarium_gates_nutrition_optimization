@@ -51,8 +51,6 @@ class MaternalInterventions:
         self.columns_required = ["maternal_bmi_anemia_category"]
         self.columns_created = [
             "intervention",
-            "previous_on_treatment",
-            "on_treatment",
         ]
         self.population_view = builder.population.get_view(
             self.columns_required + self.columns_created + ["tracked"]
@@ -63,8 +61,6 @@ class MaternalInterventions:
             requires_columns=self.columns_required,
             requires_streams=[self.name],
         )
-        builder.event.register_listener("time_step__prepare", self.on_time_step_prepare)
-        builder.event.register_listener("time_step", self.on_time_step)
         builder.value.register_value_modifier(
             "hemoglobin.exposure",
             self.update_exposure,
@@ -82,9 +78,7 @@ class MaternalInterventions:
             pop_data.index
         )
         pop_update = pd.DataFrame(
-            {"intervention": None, 
-            "previous_on_treatment": False,
-            "on_treatment": False},
+            {"intervention": None},
             index=pop.index,
         )
         baseline_ifa = self.randomness.choice(
@@ -118,19 +112,6 @@ class MaternalInterventions:
             ) * self.ifa_effect_size
 
         return exposure
-    
-    def on_time_step_prepare(self, event):
-        prior_state_pop = self.population_view.get(event.index)
-        prior_state_pop["previous_on_treatment"] = prior_state_pop["on_treatment"]
-        self.population_view.update(prior_state_pop)
-    
-    def on_time_step(self, event):
-        pop = self.population_view.get(event.index)
-        if self.clock() - self.start_date >= timedelta(
-            days=data_values.DURATIONS.INTERVENTION_DELAY_DAYS
-        ):
-            pop["on_treatment"] = True
-            self.population_view.update(pop)
 
     def adjust_stillbirth_probability(self, index, birth_outcome_probabilities):
         pop = self.population_view.subview(["intervention"]).get(index)
