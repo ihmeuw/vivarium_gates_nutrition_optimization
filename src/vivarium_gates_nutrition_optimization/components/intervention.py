@@ -61,6 +61,7 @@ class MaternalInterventions:
             requires_columns=self.columns_required,
             requires_streams=[self.name],
         )
+        
         builder.value.register_value_modifier(
             "hemoglobin.exposure",
             self.update_exposure,
