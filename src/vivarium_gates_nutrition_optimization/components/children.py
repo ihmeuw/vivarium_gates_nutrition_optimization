@@ -67,10 +67,7 @@ class NewChildren(Component):
         )
 
 
-class LBWSGDistribution:
-    @property
-    def name(self):
-        return "lbwsg_distribution"
+class LBWSGDistribution(Component):
 
     def setup(self, builder: Builder):
         self.randomness = builder.randomness.get_stream(self.name)
