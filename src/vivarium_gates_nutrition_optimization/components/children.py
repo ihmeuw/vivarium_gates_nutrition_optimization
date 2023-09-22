@@ -16,10 +16,15 @@ from vivarium_gates_nutrition_optimization.constants import (
 )
 
 
-class NewChildren(Component):
+class NewChildren:
+
     ##############
     # Properties #
     ##############
+
+    @property
+    def name(self) -> str:
+        return "new_children"
 
     @property
     def sub_components(self) -> List[str]:
