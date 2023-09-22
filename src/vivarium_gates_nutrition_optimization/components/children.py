@@ -1,6 +1,6 @@
 from datetime import datetime
 from pathlib import Path
-from typing import List, Tuple
+from typing import Tuple, List
 
 import numpy as np
 import pandas as pd
@@ -25,8 +25,11 @@ class NewChildren(Component):
     def sub_components(self) -> List[str]:
         return [self.lbwsg]
 
+    @property
+    def columns_created(self) -> List[str]:
+        return ["sex_of_child", "birth_weight", "gestational_age"]
+
     def __init__(self):
-        super().__init__()
         self.lbwsg = LBWSGDistribution()
 
     def setup(self, builder: Builder):
