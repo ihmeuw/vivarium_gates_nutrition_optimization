@@ -16,14 +16,10 @@ from vivarium_gates_nutrition_optimization.constants import (
 )
 
 
-class NewChildren:
+class NewChildren(Component):
     ##############
     # Properties #
     ##############
-
-    @property
-    def name(self) -> str:
-        return "new_children"
 
     @property
     def sub_components(self) -> List[str]:
@@ -34,9 +30,11 @@ class NewChildren:
         return ["sex_of_child", "birth_weight", "gestational_age"]
 
     def __init__(self):
+        super().__init__()
         self.lbwsg = LBWSGDistribution()
 
     def setup(self, builder: Builder):
+        super().setup(builder)
         self.randomness = builder.randomness.get_stream(self.name)
         self.male_sex_percentage = data_values.INFANT_MALE_PERCENTAGES[
             builder.data.load(data_keys.POPULATION.LOCATION)
