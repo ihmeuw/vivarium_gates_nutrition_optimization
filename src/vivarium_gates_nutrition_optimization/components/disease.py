@@ -4,11 +4,11 @@ import pandas as pd
 from vivarium.framework.engine import Builder
 from vivarium.framework.state_machine import State, Transition
 from vivarium.framework.values import Pipeline
-from vivarium_public_health.disease import DiseaseState, SusceptibleState
+from vivarium_public_health.disease import DiseaseState 
+from vivarium_public_health.disease import SusceptibleState
 from vivarium_public_health.disease.transition import ProportionTransition
 
 from vivarium_gates_nutrition_optimization.constants import models
-
 
 class ParturitionSelectionState(SusceptibleState):
     def add_transition(
