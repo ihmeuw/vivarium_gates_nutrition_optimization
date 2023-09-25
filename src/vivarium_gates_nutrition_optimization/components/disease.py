@@ -35,9 +35,17 @@ class ParturitionSelectionState(SusceptibleState):
 
 class ParturitionSelectionTransition(ProportionTransition):
 
+    ##############
+    # Properties #
+    ##############
+
     @property
     def columns_required(self) -> List[str]:
         return ["alive", "pregnancy"]
+
+    #####################
+    # Lifecycle methods #
+    #####################
 
     def setup(self, builder: Builder) -> None:
         super().setup(builder)
@@ -48,6 +56,10 @@ class ParturitionSelectionTransition(ProportionTransition):
             requires_columns=["age", "sex", "alive"],
         )
 
+    ###################
+    # Pipeline methods#
+    ###################
+
     def compute_transition_proportion(self, index) -> pd.Series:
         transition_proportion = pd.Series(0.0, index=index)
         sub_pop = self.population_view.get(
@@ -57,16 +69,28 @@ class ParturitionSelectionTransition(ProportionTransition):
         transition_proportion.loc[sub_pop] = self.proportion(sub_pop)
         return transition_proportion
 
+    ####################
+    # Helper methods   #
+    ####################
+
     def _probability(self, index) -> pd.Series:
         return self.proportion_pipeline(index)
 
 
 class ParturitionExclusionState(DiseaseState):
 
+    ##############
+    # Properties #
+    ##############
+
     @property
     def columns_required(self) -> List[str]:
         super().columns_required + ["pregnancy", "tracked"]
     
+    #####################
+    # Lifecycle methods #
+    #####################
+
     def setup(self, builder: Builder) -> None:
         """Performs this component's simulation setup.
 
@@ -134,6 +158,10 @@ class ParturitionExclusionState(DiseaseState):
             modifier=self.adjust_mortality_rate,
             requires_values=[self.excess_mortality_rate_pipeline_name],
         )
+    
+    ##################################
+    # Pipeline sources and modifiers #
+    ##################################
 
     def compute_disability_weight(self, index: pd.Index) -> pd.Series:
         disability_weight = raw_disability_weight = pd.Series(0, index=index)
