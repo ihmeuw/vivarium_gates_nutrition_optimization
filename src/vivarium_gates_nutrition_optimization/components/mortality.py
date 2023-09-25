@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, List
 
 import pandas as pd
 from vivarium.framework.engine import Builder
@@ -7,60 +7,52 @@ from vivarium.framework.lookup import LookupTable
 from vivarium.framework.population import PopulationView, SimulantData
 from vivarium.framework.randomness import RandomnessStream
 from vivarium.framework.values import Pipeline
+from vivarium import Component
 
 from vivarium_gates_nutrition_optimization.constants import data_keys
+from vivarium_public_health.population import Mortality
 
+class MaternalMortality(Mortality):
 
-class MaternalMortality(Component):
+    ##############
+    # Properties #
+    ##############
+
+    @property
+    def columns_required(self) -> List[str]:
+        return super().columns_required + ["maternal_disorders", "pregnancy"]
+    
+    @property
+    def time_step_priority(self) -> int:
+        return 9
+
+    #####################
+    # Lifecycle methods #
+    #####################
+    
     def __init__(self):
         super().__init__()
-        self._randomness_stream_name = "mortality_handler"
-
-        self.cause_of_death_column_name = "cause_of_death"
-        self.years_of_life_lost_column_name = "years_of_life_lost"
-
         self.mortality_probability_pipeline_name = "mortality_probability"
 
     # noinspection PyAttributeOutsideInit
     def setup(self, builder: Builder) -> None:
-        super().setup(builder)
-        self.random = self._get_randomness_stream(builder)
+        self.random = self.get_randomness_stream(builder)
         self.clock = builder.time.clock()
+        self.mortality_probability = self.get_mortality_probability(builder)
+        self.life_expectancy = self.get_life_expectancy(builder)
 
-        self.mortality_probability = self._get_mortality_probability(builder)
+    ###################
+    # Setup Methods   #
+    ###################
 
-        self.life_expectancy = self._get_life_expectancy(builder)
-
-        self.population_view = self._get_population_view(builder)
-
-        self._register_simulant_initializer(builder)
-        self._register_on_timestep_listener(builder)
-
-    def _get_randomness_stream(self, builder: Builder) -> RandomnessStream:
-        return builder.randomness.get_stream(self._randomness_stream_name)
-
-        # noinspection PyMethodMayBeStatic
-
-    def _get_life_expectancy(self, builder: Builder) -> Union[LookupTable, Pipeline]:
+    # noinspection PyMethodMayBeStatic
+    def get_life_expectancy(self, builder: Builder) -> Union[LookupTable, Pipeline]:
         life_expectancy_data = builder.data.load(
             "population.theoretical_minimum_risk_life_expectancy"
         )
         return builder.lookup.build_table(life_expectancy_data, parameter_columns=["age"])
 
-    def _get_population_view(self, builder: Builder) -> PopulationView:
-        return builder.population.get_view(
-            [
-                self.cause_of_death_column_name,
-                self.years_of_life_lost_column_name,
-                "alive",
-                "exit_time",
-                "age",
-                "sex",
-                "pregnancy",
-            ]
-        )
-
-    def _get_mortality_probability(self, builder: Builder):
+    def get_mortality_probability(self, builder: Builder):
         probability_data = builder.data.load(
             data_keys.MATERNAL_DISORDERS.MORTALITY_PROBABILITY
         )
@@ -73,17 +65,9 @@ class MaternalMortality(Component):
             requires_columns=["age", "sex"],
         )
 
-    def _register_simulant_initializer(self, builder: Builder) -> None:
-        builder.population.initializes_simulants(
-            self.on_initialize_simulants,
-            creates_columns=[
-                self.cause_of_death_column_name,
-                self.years_of_life_lost_column_name,
-            ],
-        )
-
-    def _register_on_timestep_listener(self, builder: Builder) -> None:
-        builder.event.register_listener("time_step", self.on_time_step, priority=9)
+    ########################
+    # Event-driven methods #
+    ########################
 
     def on_initialize_simulants(self, pop_data: SimulantData) -> None:
         pop_update = pd.DataFrame(
