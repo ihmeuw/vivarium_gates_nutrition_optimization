@@ -1,4 +1,4 @@
-from typing import Callable, Dict
+from typing import Callable, Dict, List
 
 import pandas as pd
 from vivarium.framework.engine import Builder
@@ -11,6 +11,7 @@ from vivarium_public_health.disease.transition import ProportionTransition
 from vivarium_gates_nutrition_optimization.constants import models
 
 class ParturitionSelectionState(SusceptibleState):
+
     def add_transition(
         self,
         output: State,
@@ -67,7 +68,6 @@ class ParturitionExclusionState(DiseaseState):
         super().columns_required + ["pregnancy", "tracked"]
     
     def setup(self, builder: Builder) -> None:
-        def setup(self, builder: Builder) -> None:
         """Performs this component's simulation setup.
 
         Parameters
