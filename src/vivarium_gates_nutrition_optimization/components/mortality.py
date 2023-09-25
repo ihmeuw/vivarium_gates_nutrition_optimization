@@ -11,8 +11,9 @@ from vivarium.framework.values import Pipeline
 from vivarium_gates_nutrition_optimization.constants import data_keys
 
 
-class MaternalMortality:
+class MaternalMortality(Component):
     def __init__(self):
+        super().__init__()
         self._randomness_stream_name = "mortality_handler"
 
         self.cause_of_death_column_name = "cause_of_death"
@@ -20,16 +21,9 @@ class MaternalMortality:
 
         self.mortality_probability_pipeline_name = "mortality_probability"
 
-    @property
-    def name(self) -> str:
-        return "maternal_mortality"
-
-    def __repr__(self) -> str:
-        return f"MaternalMortality()"
-
-        # noinspection PyAttributeOutsideInit
-
+    # noinspection PyAttributeOutsideInit
     def setup(self, builder: Builder) -> None:
+        super().setup(builder)
         self.random = self._get_randomness_stream(builder)
         self.clock = builder.time.clock()
 
