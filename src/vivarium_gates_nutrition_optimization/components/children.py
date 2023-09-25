@@ -1,6 +1,6 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Tuple, List
+from typing import List, Tuple
 
 import numpy as np
 import pandas as pd
@@ -17,7 +17,6 @@ from vivarium_gates_nutrition_optimization.constants import (
 
 
 class NewChildren:
-
     ##############
     # Properties #
     ##############
@@ -72,7 +71,6 @@ class NewChildren:
 
 
 class LBWSGDistribution(Component):
-
     def setup(self, builder: Builder):
         self.randomness = builder.randomness.get_stream(self.name)
         self.exposure = builder.data.load(data_keys.LBWSG.EXPOSURE).set_index("sex")
@@ -162,7 +160,6 @@ class BirthRecorder(Component):
             "maternal_bmi_anemia_category",
             "intervention",
         ]
-
 
     #################
     # Setup methods #
