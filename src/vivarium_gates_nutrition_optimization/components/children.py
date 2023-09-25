@@ -1,6 +1,6 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Tuple, List
+from typing import List, Tuple
 
 import numpy as np
 import pandas as pd
@@ -17,7 +17,6 @@ from vivarium_gates_nutrition_optimization.constants import (
 
 
 class NewChildren:
-
     ##############
     # Properties #
     ##############

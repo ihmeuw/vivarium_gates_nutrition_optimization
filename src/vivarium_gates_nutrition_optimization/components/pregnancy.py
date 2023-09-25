@@ -1,16 +1,12 @@
 from typing import Dict, List
+
 import pandas as pd
 from vivarium import Component
 from vivarium.framework.engine import Builder
 from vivarium.framework.event import Event
 from vivarium.framework.population import SimulantData
 from vivarium.framework.values import Pipeline, list_combiner, union_post_processor
-
-from vivarium_public_health.disease import (
-    DiseaseState,
-    DiseaseModel,
-    SusceptibleState,
-)
+from vivarium_public_health.disease import DiseaseModel, DiseaseState, SusceptibleState
 from vivarium_public_health.utilities import is_non_zero
 
 from vivarium_gates_nutrition_optimization.components.children import NewChildren
@@ -30,7 +26,7 @@ class PregnantState(DiseaseState):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.new_children = NewChildren()
-    
+
     ##############
     # Properties #
     ##############
@@ -43,7 +39,7 @@ class PregnantState(DiseaseState):
             "pregnancy_outcome",
             "pregnancy_duration",
         ] + self.new_children.columns_created
-    
+
     @property
     def sub_components(self):
         return super().sub_components + [self.new_children]
@@ -55,6 +51,7 @@ class PregnantState(DiseaseState):
             "requires_values": ["birth_outcome_probabilities"],
             "requires_streams": [],
         }
+
     def setup(self, builder: Builder):
         """Performs this component's simulation setup.
 
@@ -212,11 +209,9 @@ class PregnantState(DiseaseState):
 
 
 class PregnancyModel(DiseaseModel):
-    
     @property
     def time_step_priority(self) -> int:
         return 3
-
 
 
 def Pregnancy():
@@ -229,7 +224,7 @@ def Pregnancy():
             "disability_weight": lambda *_: 0.0,
             "excess_mortality_rate": lambda *_: 0.0,
             # Add a dummy dwell time so we can overwrite it later
-            "dwell_time": lambda*_: None,
+            "dwell_time": lambda *_: None,
         },
     )
     parturition = DiseaseState(
@@ -255,9 +250,7 @@ def Pregnancy():
 
     pregnant.add_dwell_time_transition(parturition)
 
-
     parturition.add_dwell_time_transition(postpartum)
-
 
     postpartum.add_dwell_time_transition(not_pregnant)
 
@@ -306,6 +299,7 @@ def get_birth_outcome_probabilities(builder: Builder) -> pd.DataFrame:
 
 class UntrackNotPregnant(Component):
     """Component for untracking not pregnant simulants"""
+
     @property
     def columns_required(self) -> List[str]:
         return ["pregnancy", "exit_time", "tracked"]
