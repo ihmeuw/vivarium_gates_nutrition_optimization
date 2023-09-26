@@ -82,7 +82,7 @@ class ParturitionExclusionState(DiseaseState):
 
     @property
     def columns_required(self) -> List[str]:
-        super().columns_required + ["pregnancy", "tracked"]
+        return super().columns_required + ["pregnancy", "tracked"]
 
     #####################
     # Lifecycle methods #
@@ -154,6 +154,10 @@ class ParturitionExclusionState(DiseaseState):
             "mortality_rate",
             modifier=self.adjust_mortality_rate,
             requires_values=[self.excess_mortality_rate_pipeline_name],
+        )
+
+        self.randomness_prevalence = builder.randomness.get_stream(
+            f"{self.state_id}_prevalent_cases"
         )
 
     ##################################
