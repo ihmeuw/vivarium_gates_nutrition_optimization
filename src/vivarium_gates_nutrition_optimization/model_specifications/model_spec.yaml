@@ -2,9 +2,9 @@ components:
     vivarium_public_health:
         population:
             - BasePopulation()
-        # metrics:
-        #     - DiseaseObserver("maternal_disorders")
-        #     - DiseaseObserver("maternal_hemorrhage")
+        metrics:
+            - DiseaseObserver("maternal_disorders")
+            - DiseaseObserver("maternal_hemorrhage")
 
     vivarium_gates_nutrition_optimization:
         components:
@@ -56,6 +56,6 @@ configuration:
         age_start: 10
         age_end: 54
         include_sex: "Female"
-    stratification:
-        default:
-            - 'age_group'
+    # stratification:
+    #     default:
+    #         - 'age_group'
