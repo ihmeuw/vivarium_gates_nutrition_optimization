@@ -1,5 +1,7 @@
+from typing import Dict, List
 import numpy as np
 import pandas as pd
+from vivarium import Component
 from vivarium.framework.engine import Builder
 from vivarium.framework.event import Event
 from vivarium.framework.population import SimulantData
@@ -11,10 +13,16 @@ from vivarium_gates_nutrition_optimization.constants import (
 )
 
 
-class MaternalBMIExposure:
+class MaternalBMIExposure(Component):
+
     @property
-    def name(self):
-        return "maternal_bmi_exposure"
+    def columns_created(self) -> List[str]:
+        return ["maternal_bmi_propensity", "maternal_bmi_anemia_category"]
+    
+    @property
+    def initialization_requirements(self) -> Dict[str, List[str]]:
+        return {"requires_values": ["raw_hemoglobin.exposure"],
+                "requires_streams": [self.name],}
 
     def setup(self, builder: Builder):
         self.randomness = builder.randomness.get_stream(self.name)
@@ -30,18 +38,6 @@ class MaternalBMIExposure:
             builder.data.load(data_keys.MATERNAL_BMI.PREVALENCE_LOW_BMI_NON_ANEMIC),
             key_columns=["sex"],
             parameter_columns=["age", "year"],
-        )
-        self.population_view = builder.population.get_view(
-            [
-                "maternal_bmi_propensity",
-                "maternal_bmi_anemia_category",
-            ]
-        )
-        builder.population.initializes_simulants(
-            self.on_initialize_simulants,
-            requires_streams=[self.name],
-            requires_values=["raw_hemoglobin.exposure"],
-            creates_columns=["maternal_bmi_propensity", "maternal_bmi_anemia_category"],
         )
 
     def on_initialize_simulants(self, pop_data: SimulantData):
