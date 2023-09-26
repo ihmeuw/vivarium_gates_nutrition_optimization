@@ -158,9 +158,10 @@ class MaternalInterventionObserver(Component):
         self.step_size = builder.time.step_size()
         self.config = builder.configuration.stratification.maternal_interventions
         intervention_date = get_time_stamp(builder.configuration.time.start) + pd.Timedelta(
-            days=data_values.DURATIONS.INTERVENTION_DELAY_DAYS - 2 * 7 
+            days=data_values.DURATIONS.INTERVENTION_DELAY_DAYS
+            - 2 * 7
             ## 2 weeks between administration and effect
-        ) 
+        )
 
         for intervention in models.SUPPLEMENTATION_CATEGORIES:
             builder.results.register_observation(
