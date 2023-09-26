@@ -25,10 +25,6 @@ class NewChildren(Component):
     def sub_components(self) -> List[str]:
         return [self.lbwsg]
 
-    @property
-    def columns_created(self) -> List[str]:
-        return ["sex_of_child", "birth_weight", "gestational_age"]
-
     def __init__(self):
         super().__init__()
         self.lbwsg = LBWSGDistribution()
