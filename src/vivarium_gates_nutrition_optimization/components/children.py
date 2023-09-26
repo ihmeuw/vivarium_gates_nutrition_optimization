@@ -29,11 +29,7 @@ class NewChildren(Component):
         super().__init__()
         self.lbwsg = LBWSGDistribution()
 
-    def __init__(self):
-        self.lbwsg = LBWSGDistribution()
-
     def setup(self, builder: Builder):
-        super().setup(builder)
         self.randomness = builder.randomness.get_stream(self.name)
         self.male_sex_percentage = data_values.INFANT_MALE_PERCENTAGES[
             builder.data.load(data_keys.POPULATION.LOCATION)
