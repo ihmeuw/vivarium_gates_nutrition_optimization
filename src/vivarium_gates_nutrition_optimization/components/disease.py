@@ -10,6 +10,7 @@ from vivarium_public_health.utilities import is_non_zero
 
 from vivarium_gates_nutrition_optimization.constants import models
 
+
 class ParturitionSelectionState(SusceptibleState):
     def add_transition(
         self,
