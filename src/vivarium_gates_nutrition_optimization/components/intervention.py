@@ -32,12 +32,11 @@ class MaternalInterventions(Component):
     @property
     def columns_required(self) -> List[str]:
         return ["maternal_bmi_anemia_category", "tracked"]
-    
+
     @property
     def initialization_requirements(self) -> Dict[str, List[str]]:
-        return {"requires_streams": [self.name],
-                "requires_columns": [self.columns_required]}
-    
+        return {"requires_streams": [self.name], "requires_columns": [self.columns_required]}
+
     # noinspection PyAttributeOutsideInit
     def setup(self, builder: Builder) -> None:
         self.clock = builder.time.clock()
@@ -57,7 +56,6 @@ class MaternalInterventions(Component):
         self.ifa_effect_size = builder.data.load(
             data_keys.MATERNAL_INTERVENTIONS.IFA_EFFECT_SIZE
         ).value[0]
-
 
         builder.value.register_value_modifier(
             "hemoglobin.exposure",

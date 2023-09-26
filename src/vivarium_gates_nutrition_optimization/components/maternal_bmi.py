@@ -1,4 +1,5 @@
 from typing import Dict, List
+
 import numpy as np
 import pandas as pd
 from vivarium import Component
@@ -14,15 +15,16 @@ from vivarium_gates_nutrition_optimization.constants import (
 
 
 class MaternalBMIExposure(Component):
-
     @property
     def columns_created(self) -> List[str]:
         return ["maternal_bmi_propensity", "maternal_bmi_anemia_category"]
-    
+
     @property
     def initialization_requirements(self) -> Dict[str, List[str]]:
-        return {"requires_values": ["raw_hemoglobin.exposure"],
-                "requires_streams": [self.name],}
+        return {
+            "requires_values": ["raw_hemoglobin.exposure"],
+            "requires_streams": [self.name],
+        }
 
     def setup(self, builder: Builder):
         self.randomness = builder.randomness.get_stream(self.name)
