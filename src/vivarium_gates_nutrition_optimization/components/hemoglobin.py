@@ -1,6 +1,8 @@
+from typing import Dict, List, Optional
 import numpy as np
 import pandas as pd
 import scipy.stats
+from vivarium import Component
 from vivarium.framework.engine import Builder
 from vivarium.framework.event import Event
 from vivarium.framework.population import SimulantData
@@ -23,27 +25,32 @@ from vivarium_gates_nutrition_optimization.constants.data_values import (
 )
 
 
-class Hemoglobin:
+class Hemoglobin(Component):
     """
     class for hemoglobin utilities and calculations that in turn will
     be used to find anemia status for simulants.
     """
-
-    def __init__(self):
-        pass
-
     @property
-    def name(self):
-        return "hemoglobin"
-
-    # noinspection PyAttributeOutsideInit
-    def setup(self, builder: Builder):
-        self.randomness = builder.randomness.get_stream(self.name)
-        self.columns_created = [
+    def columns_created(self) -> List[str]:
+        return [
             "hemoglobin_distribution_propensity",
             "hemoglobin_percentile",
             "hemoglobin_scale_factor",
         ]
+    
+    # TODO MIC-4366: We include tracked here as a bandaid, given new RMS essentially requires
+    # pipelines used in observation to return untracked simulants. Consider changing this!
+    @property
+    def columns_required(self) -> List[str]:
+        return ["tracked", "alive", "maternal_hemorrhage"]
+    
+    @property
+    def initialization_requirements(self) -> Dict[str, List[str]]:
+        return {"requires_streams": [self.name]}
+    
+    # noinspection PyAttributeOutsideInit
+    def setup(self, builder: Builder):
+        self.randomness = builder.randomness.get_stream(self.name)
 
         index_columns = [
             "sex",
@@ -132,17 +139,6 @@ class Hemoglobin:
             "hemoglobin.exposure",
             self.adjust_hemoglobin_exposure,
             requires_columns=["maternal_hemorrhage"],
-        )
-
-        builder.population.initializes_simulants(
-            self.on_initialize_simulants,
-            creates_columns=self.columns_created,
-            requires_streams=[self.name],
-        )
-        # TODO MIC-4366: We include tracked here as a bandaid, given new RMS essentially requires
-        # pipelines used in observation to return untracked simulants. Consider changing this!
-        self.population_view = builder.population.get_view(
-            self.columns_created + ["tracked", "alive", "maternal_hemorrhage"]
         )
 
     def on_initialize_simulants(self, pop_data: SimulantData) -> None:
