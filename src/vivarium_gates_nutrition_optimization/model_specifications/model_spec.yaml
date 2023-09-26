@@ -14,19 +14,19 @@ components:
             - MaternalHemorrhage()
             - MaternalMortality()
             - BackgroundMorbidity()
-            # - Hemoglobin()
-            # - Anemia()
-            # - MaternalBMIExposure()
-            # - MaternalInterventions()
-            # - ResultsStratifier()
-            # - PregnancyObserver()
+            - Hemoglobin()
+            - Anemia()
+            - MaternalBMIExposure()
+            - MaternalInterventions()
+            - ResultsStratifier()
+            - PregnancyObserver()
             # - PregnancyOutcomeObserver()
-            # - BirthRecorder()
-            # - MaternalMortalityObserver()
-            # - DisabilityObserver()
+            - BirthRecorder()
+            - MaternalMortalityObserver()
+            - DisabilityObserver()
             # - AnemiaObserver()
             # - MaternalBMIObserver()
-            # - MaternalInterventionObserver()
+            - MaternalInterventionObserver()
 
 configuration:
     input_data:
@@ -56,6 +56,6 @@ configuration:
         age_start: 10
         age_end: 54
         include_sex: "Female"
-    # stratification:
-    #     default:
-    #         - 'age_group'
+    stratification:
+        default:
+            - 'age_group'
