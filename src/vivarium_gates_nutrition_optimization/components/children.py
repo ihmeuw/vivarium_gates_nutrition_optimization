@@ -1,9 +1,10 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Tuple
+from typing import List, Tuple
 
 import numpy as np
 import pandas as pd
+from vivarium import Component
 from vivarium.framework.engine import Builder
 from vivarium.framework.event import Event
 from vivarium_cluster_tools.utilities import mkdir
@@ -15,21 +16,18 @@ from vivarium_gates_nutrition_optimization.constants import (
 )
 
 
-class NewChildren:
-    def __init__(self):
-        self.lbwsg = LBWSGDistribution()
+class NewChildren(Component):
+    ##############
+    # Properties #
+    ##############
 
     @property
-    def name(self):
-        return "child_status"
-
-    @property
-    def sub_components(self):
+    def sub_components(self) -> List[str]:
         return [self.lbwsg]
 
-    @property
-    def columns_created(self):
-        return ["sex_of_child", "birth_weight", "gestational_age"]
+    def __init__(self):
+        super().__init__()
+        self.lbwsg = LBWSGDistribution()
 
     def setup(self, builder: Builder):
         self.randomness = builder.randomness.get_stream(self.name)
@@ -47,7 +45,7 @@ class NewChildren:
             index=index,
         )
 
-    def generate_children(self, index: pd.Index):
+    def generate_children(self, index: pd.Index) -> pd.DataFrame:
         sex_of_child = self.randomness.choice(
             index,
             choices=["Male", "Female"],
@@ -65,11 +63,7 @@ class NewChildren:
         )
 
 
-class LBWSGDistribution:
-    @property
-    def name(self):
-        return "lbwsg_distribution"
-
+class LBWSGDistribution(Component):
     def setup(self, builder: Builder):
         self.randomness = builder.randomness.get_stream(self.name)
         self.exposure = builder.data.load(data_keys.LBWSG.EXPOSURE).set_index("sex")
@@ -142,23 +136,14 @@ class LBWSGDistribution:
         return *birth_weight, *gestational_age
 
 
-class BirthRecorder:
+class BirthRecorder(Component):
+    ##############
+    # Properties #
+    ##############
+
     @property
-    def name(self):
-        return "birth_recorder"
-
-    #################
-    # Setup methods #
-    #################
-
-    # noinspection PyAttributeOutsideInit
-    def setup(self, builder: Builder) -> None:
-        self.output_path = self._build_output_path(builder)
-        self.randomness = builder.randomness.get_stream(self.name)
-
-        self.births = []
-
-        required_columns = [
+    def columns_required(self) -> List[str]:
+        return [
             "pregnancy",
             "previous_pregnancy",
             "pregnancy_outcome",
@@ -168,10 +153,15 @@ class BirthRecorder:
             "maternal_bmi_anemia_category",
             "intervention",
         ]
-        self.population_view = builder.population.get_view(required_columns)
 
-        builder.event.register_listener("collect_metrics", self.on_collect_metrics)
-        builder.event.register_listener("simulation_end", self.write_output)
+    #################
+    # Setup methods #
+    #################
+
+    # noinspection PyAttributeOutsideInit
+    def setup(self, builder: Builder) -> None:
+        self.output_path = self._build_output_path(builder)
+        self.births = []
 
     def on_collect_metrics(self, event: Event):
         pop = self.population_view.get(event.index)
@@ -207,7 +197,7 @@ class BirthRecorder:
         self.births.append(new_births)
 
     # noinspection PyUnusedLocal
-    def write_output(self, event: Event) -> None:
+    def on_simulation_end(self, event: Event) -> None:
         births_data = pd.concat(self.births)
         births_data.to_hdf(f"{self.output_path}.hdf", key="data")
         births_data.to_csv(f"{self.output_path}.csv")

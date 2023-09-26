@@ -1,16 +1,15 @@
+from typing import Dict, List
+
 import pandas as pd
+from vivarium import Component
 from vivarium.framework.engine import Builder
 from vivarium.framework.event import Event
 from vivarium.framework.population import SimulantData
-from vivarium.framework.values import Pipeline
-from vivarium_public_health.disease import (
-    BaseDiseaseState,
-    DiseaseModel,
-    SusceptibleState,
-)
+from vivarium.framework.values import Pipeline, list_combiner, union_post_processor
+from vivarium_public_health.disease import DiseaseModel, DiseaseState, SusceptibleState
+from vivarium_public_health.utilities import is_non_zero
 
 from vivarium_gates_nutrition_optimization.components.children import NewChildren
-from vivarium_gates_nutrition_optimization.components.disease import DiseaseState
 from vivarium_gates_nutrition_optimization.constants import data_keys, models
 from vivarium_gates_nutrition_optimization.constants.data_values import DURATIONS
 from vivarium_gates_nutrition_optimization.constants.metadata import (
@@ -19,15 +18,18 @@ from vivarium_gates_nutrition_optimization.constants.metadata import (
 
 
 class NotPregnantState(SusceptibleState):
-    def __init__(self, cause, *args, **kwargs):
-        super(SusceptibleState, self).__init__(cause, *args, name_prefix="not_", **kwargs)
+    def __init__(self, state_id, *args, **kwargs):
+        super(SusceptibleState, self).__init__(state_id, *args, name_prefix="not_", **kwargs)
 
 
 class PregnantState(DiseaseState):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.new_children = NewChildren()
-        self._sub_components += [self.new_children]
+
+    ##############
+    # Properties #
+    ##############
 
     @property
     def columns_created(self):
@@ -36,38 +38,87 @@ class PregnantState(DiseaseState):
             self.event_count_column,
             "pregnancy_outcome",
             "pregnancy_duration",
-        ] + self.new_children.columns_created
+            "sex_of_child",
+            "birth_weight",
+            "gestational_age",
+        ]
+
+    @property
+    def sub_components(self):
+        return super().sub_components + [self.new_children]
+
+    @property
+    def initialization_requirements(self) -> Dict[str, List[str]]:
+        return {
+            "requires_columns": [self.model],
+            "requires_values": ["birth_outcome_probabilities"],
+            "requires_streams": [],
+        }
 
     def setup(self, builder: Builder):
-        super(BaseDiseaseState, self).setup(builder)
+        """Performs this component's simulation setup.
 
+        Parameters
+        ----------
+        builder : `engine.Builder`
+            Interface to several simulation tools.
+        """
+        super(DiseaseState, self).setup(builder)
         self.clock = builder.time.clock()
 
-        view_columns = self.columns_created + [self._model, "alive"]
-        self.population_view = builder.population.get_view(view_columns)
-        builder.population.initializes_simulants(
-            self.on_initialize_simulants,
-            creates_columns=self.columns_created,
-            requires_columns=[self._model],
-            requires_values=["birth_outcome_probabilities"],
+        prevalence_data = self.load_prevalence_data(builder)
+        self.prevalence = builder.lookup.build_table(
+            prevalence_data, key_columns=["sex"], parameter_columns=["age", "year"]
         )
-        self.prevalence = self.get_prevalence_table(builder)
-        self.birth_prevalence = self.get_birth_prevalence_table(builder)
-        self.dwell_time = self.get_dwell_time_pipeline(builder)
-        self.has_disability, self.base_disability_weight = self.get_disability_weight_table(
-            builder
-        )
-        self.disability_weight = self.get_disability_weight_pipeline(builder)
-        self.register_disability_weight_modifier(builder)
-        (
-            self.has_excess_mortality,
-            self.base_excess_mortality_rate,
-        ) = self.get_excess_mortality_rate_table(builder)
-        self.excess_mortality_rate = self.get_excess_mortality_rate_pipeline(builder)
-        self.joint_paf = self.get_joint_paf_pipeline(builder)
-        self.register_mortality_rate_modifier(builder)
-        self.randomness_prevalence = self.get_prevalence_random_stream(builder)
 
+        birth_prevalence_data = self.load_birth_prevalence_data(builder)
+        self.birth_prevalence = builder.lookup.build_table(
+            birth_prevalence_data, key_columns=["sex"], parameter_columns=["year"]
+        )
+
+        self.dwell_time = self.get_dwell_time_pipeline(builder)
+
+        disability_weight_data = self.load_disability_weight_data(builder)
+        self.has_disability = is_non_zero(disability_weight_data)
+        self.base_disability_weight = builder.lookup.build_table(
+            disability_weight_data, key_columns=["sex"], parameter_columns=["age", "year"]
+        )
+        self.disability_weight = builder.value.register_value_producer(
+            f"{self.state_id}.disability_weight",
+            source=self.compute_disability_weight,
+            requires_columns=["age", "sex", "alive", self.model],
+        )
+        builder.value.register_value_modifier(
+            "disability_weight", modifier=self.disability_weight
+        )
+
+        excess_mortality_data = self.load_excess_mortality_rate_data(builder)
+        self.has_excess_mortality = is_non_zero(excess_mortality_data)
+        self.base_excess_mortality_rate = builder.lookup.build_table(
+            excess_mortality_data, key_columns=["sex"], parameter_columns=["age", "year"]
+        )
+        self.excess_mortality_rate = builder.value.register_rate_producer(
+            self.excess_mortality_rate_pipeline_name,
+            source=self.compute_excess_mortality_rate,
+            requires_columns=["age", "sex", "alive", self.model],
+            requires_values=[self.excess_mortality_rate_paf_pipeline_name],
+        )
+        paf = builder.lookup.build_table(0)
+        self.joint_paf = builder.value.register_value_producer(
+            self.excess_mortality_rate_paf_pipeline_name,
+            source=lambda idx: [paf(idx)],
+            preferred_combiner=list_combiner,
+            preferred_post_processor=union_post_processor,
+        )
+        builder.value.register_value_modifier(
+            "mortality_rate",
+            modifier=self.adjust_mortality_rate,
+            requires_values=[self.excess_mortality_rate_pipeline_name],
+        )
+
+        self.randomness_prevalence = builder.randomness.get_stream(
+            f"{self.state_id}_prevalent_cases"
+        )
         self.time_step = builder.time.step_size()
         self.randomness = builder.randomness.get_stream(self.name)
 
@@ -94,7 +145,9 @@ class PregnantState(DiseaseState):
 
     def sample_pregnancy_outcomes_and_durations(self, pop_data: SimulantData) -> pd.DataFrame:
         # Order the columns so that partial_term isn't in the middle!
-        outcome_probabilities = self.birth_outcome_probabilities(pop_data.index)[["partial_term", "stillbirth", "live_birth"]]
+        outcome_probabilities = self.birth_outcome_probabilities(pop_data.index)[
+            ["partial_term", "stillbirth", "live_birth"]
+        ]
         pregnancy_outcomes = pd.DataFrame(
             {
                 "pregnancy_outcome": self.randomness.choice(
@@ -117,7 +170,8 @@ class PregnantState(DiseaseState):
                 pregnancy_outcomes["pregnancy_outcome"] == term_length
             ].index
             pregnancy_outcomes.loc[
-                term_pop, self.new_children.columns_created + ["pregnancy_duration"]
+                term_pop,
+                ["sex_of_child", "birth_weight", "gestational_age", "pregnancy_duration"],
             ] = sampling_function(term_pop)
 
         return pregnancy_outcomes
@@ -158,50 +212,27 @@ class PregnantState(DiseaseState):
 
 
 class PregnancyModel(DiseaseModel):
-    def setup(self, builder: Builder):
-        """Perform this component's setup."""
-        super(DiseaseModel, self).setup(builder)
-
-        self.configuration_age_start = builder.configuration.population.age_start
-        self.configuration_age_end = builder.configuration.population.age_end
-
-        cause_specific_mortality_rate = self.load_cause_specific_mortality_rate_data(builder)
-        self.cause_specific_mortality_rate = builder.lookup.build_table(
-            cause_specific_mortality_rate,
-            key_columns=["sex"],
-            parameter_columns=["age", "year"],
-        )
-        builder.value.register_value_modifier(
-            "cause_specific_mortality_rate",
-            self.adjust_cause_specific_mortality_rate,
-            requires_columns=["age", "sex"],
-        )
-
-        self.population_view = builder.population.get_view(["age", "sex", self.state_column])
-        builder.population.initializes_simulants(
-            self.on_initialize_simulants,
-            creates_columns=[self.state_column],
-            requires_columns=["age", "sex"],
-            requires_streams=[f"{self.state_column}_initial_states"],
-        )
-        self.randomness = builder.randomness.get_stream(f"{self.state_column}_initial_states")
-
-        builder.event.register_listener("time_step", self.on_time_step, priority=3)
-        builder.event.register_listener("time_step__cleanup", self.on_time_step_cleanup)
+    @property
+    def time_step_priority(self) -> int:
+        return 3
 
 
 def Pregnancy():
     not_pregnant = NotPregnantState(models.PREGNANT_STATE_NAME)
     pregnant = PregnantState(
         models.PREGNANT_STATE_NAME,
+        allow_self_transition=True,
         get_data_functions={
             "prevalence": lambda *_: 1.0,
             "disability_weight": lambda *_: 0.0,
             "excess_mortality_rate": lambda *_: 0.0,
+            # Add a dummy dwell time so we can overwrite it later
+            "dwell_time": lambda *_: None,
         },
     )
     parturition = DiseaseState(
         models.PARTURITION_STATE_NAME,
+        allow_self_transition=True,
         get_data_functions={
             "prevalence": lambda *_: 0.0,
             "disability_weight": lambda *_: 0.0,
@@ -211,6 +242,7 @@ def Pregnancy():
     )
     postpartum = DiseaseState(
         models.POSTPARTUM_STATE_NAME,
+        allow_self_transition=True,
         get_data_functions={
             "prevalence": lambda *_: 0.0,
             "disability_weight": lambda *_: 0.0,
@@ -218,14 +250,12 @@ def Pregnancy():
             "dwell_time": lambda *_: pd.Timedelta(days=DURATIONS.POSTPARTUM_DAYS),
         },
     )
-    pregnant.allow_self_transitions()
-    pregnant.add_transition(parturition)
 
-    parturition.allow_self_transitions()
-    parturition.add_transition(postpartum)
+    pregnant.add_dwell_time_transition(parturition)
 
-    postpartum.allow_self_transitions()
-    postpartum.add_transition(not_pregnant)
+    parturition.add_dwell_time_transition(postpartum)
+
+    postpartum.add_dwell_time_transition(not_pregnant)
 
     return PregnancyModel(
         models.PREGNANCY_MODEL_NAME,
@@ -270,19 +300,12 @@ def get_birth_outcome_probabilities(builder: Builder) -> pd.DataFrame:
     return probabilities
 
 
-class UntrackNotPregnant:
+class UntrackNotPregnant(Component):
     """Component for untracking not pregnant simulants"""
 
     @property
-    def name(self) -> str:
-        return "untrack_not_pregnant"
-
-    # noinspection PyAttributeOutsideInit
-    def setup(self, builder: Builder) -> None:
-        self.population_view = builder.population.get_view(
-            ["pregnancy", "exit_time", "tracked"]
-        )
-        builder.event.register_listener("time_step__cleanup", self.on_time_step_cleanup)
+    def columns_required(self) -> List[str]:
+        return ["pregnancy", "exit_time", "tracked"]
 
     def on_time_step_cleanup(self, event: Event) -> None:
         population = self.population_view.get(event.index)
@@ -294,6 +317,3 @@ class UntrackNotPregnant:
             pop["tracked"] = pd.Series(False, index=pop.index)
             pop["exit_time"] = event.time
             self.population_view.update(pop)
-
-    def __repr__(self) -> str:
-        return "UntrackNotPregnant()"
