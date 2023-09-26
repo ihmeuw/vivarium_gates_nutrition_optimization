@@ -29,10 +29,15 @@ class NewChildren:
     def sub_components(self) -> List[str]:
         return [self.lbwsg]
 
+    @property
+    def columns_created(self) -> List[str]:
+        return ["sex_of_child", "birth_weight", "gestational_age"]
+
     def __init__(self):
         self.lbwsg = LBWSGDistribution()
 
     def setup(self, builder: Builder):
+        super().setup(builder)
         self.randomness = builder.randomness.get_stream(self.name)
         self.male_sex_percentage = data_values.INFANT_MALE_PERCENTAGES[
             builder.data.load(data_keys.POPULATION.LOCATION)

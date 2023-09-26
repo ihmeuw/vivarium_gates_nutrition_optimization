@@ -38,10 +38,7 @@ class PregnantState(DiseaseState):
             self.event_count_column,
             "pregnancy_outcome",
             "pregnancy_duration",
-            "sex_of_child",
-            "birth_weight",
-            "gestational_age",
-        ]
+        ] + self.new_children.columns_created
 
     @property
     def sub_components(self):
@@ -170,8 +167,7 @@ class PregnantState(DiseaseState):
                 pregnancy_outcomes["pregnancy_outcome"] == term_length
             ].index
             pregnancy_outcomes.loc[
-                term_pop,
-                ["sex_of_child", "birth_weight", "gestational_age", "pregnancy_duration"],
+                term_pop, self.new_children.columns_created + ["pregnancy_duration"]
             ] = sampling_function(term_pop)
 
         return pregnancy_outcomes
