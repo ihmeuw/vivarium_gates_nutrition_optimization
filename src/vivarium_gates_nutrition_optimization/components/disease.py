@@ -11,7 +11,6 @@ from vivarium_public_health.disease.transition import ProportionTransition
 from vivarium_gates_nutrition_optimization.constants import models
 
 class ParturitionSelectionState(SusceptibleState):
-
     def add_transition(
         self,
         output: State,
@@ -34,7 +33,6 @@ class ParturitionSelectionState(SusceptibleState):
 
 
 class ParturitionSelectionTransition(ProportionTransition):
-
     ##############
     # Properties #
     ##############
@@ -78,7 +76,6 @@ class ParturitionSelectionTransition(ProportionTransition):
 
 
 class ParturitionExclusionState(DiseaseState):
-
     ##############
     # Properties #
     ##############
@@ -86,7 +83,7 @@ class ParturitionExclusionState(DiseaseState):
     @property
     def columns_required(self) -> List[str]:
         super().columns_required + ["pregnancy", "tracked"]
-    
+
     #####################
     # Lifecycle methods #
     #####################
@@ -158,7 +155,7 @@ class ParturitionExclusionState(DiseaseState):
             modifier=self.adjust_mortality_rate,
             requires_values=[self.excess_mortality_rate_pipeline_name],
         )
-    
+
     ##################################
     # Pipeline sources and modifiers #
     ##################################

@@ -1,19 +1,19 @@
-from typing import Union, List
+from typing import List, Union
 
 import pandas as pd
+from vivarium import Component
 from vivarium.framework.engine import Builder
 from vivarium.framework.event import Event
 from vivarium.framework.lookup import LookupTable
 from vivarium.framework.population import PopulationView, SimulantData
 from vivarium.framework.randomness import RandomnessStream
 from vivarium.framework.values import Pipeline
-from vivarium import Component
-
-from vivarium_gates_nutrition_optimization.constants import data_keys
 from vivarium_public_health.population import Mortality
 
-class MaternalMortality(Mortality):
+from vivarium_gates_nutrition_optimization.constants import data_keys
 
+
+class MaternalMortality(Mortality):
     ##############
     # Properties #
     ##############
@@ -21,7 +21,7 @@ class MaternalMortality(Mortality):
     @property
     def columns_required(self) -> List[str]:
         return super().columns_required + ["maternal_disorders", "pregnancy"]
-    
+
     @property
     def time_step_priority(self) -> int:
         return 9
@@ -29,7 +29,7 @@ class MaternalMortality(Mortality):
     #####################
     # Lifecycle methods #
     #####################
-    
+
     def __init__(self):
         super().__init__()
         self.mortality_probability_pipeline_name = "mortality_probability"
