@@ -38,7 +38,10 @@ class PregnantState(DiseaseState):
             self.event_count_column,
             "pregnancy_outcome",
             "pregnancy_duration",
-        ] + self.new_children.columns_created
+            "sex_of_child",
+            "birth_weight",
+            "gestational_age",
+        ]
 
     @property
     def sub_components(self):
