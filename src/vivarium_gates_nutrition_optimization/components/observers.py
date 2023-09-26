@@ -1,6 +1,7 @@
 from functools import partial
 
 import pandas as pd
+from vivarium import Component
 from vivarium.framework.engine import Builder
 from vivarium.framework.state_machine import State
 from vivarium.framework.time import get_time_stamp
@@ -75,8 +76,8 @@ class MaternalMortalityObserver(MortalityObserver):
         )
 
 
-class AnemiaObserver:
-    configuration_defaults = {
+class AnemiaObserver(Component):
+    CONFIGURATION_DEFAULTS = {
         "stratification": {
             "anemia": {
                 "exclude": [],
@@ -84,13 +85,6 @@ class AnemiaObserver:
             }
         }
     }
-
-    def __repr__(self):
-        return "AnemiaObserver()"
-
-    @property
-    def name(self):
-        return "anemia_observer"
 
     #################
     # Setup methods #
@@ -114,8 +108,8 @@ class AnemiaObserver:
             )
 
 
-class MaternalBMIObserver:
-    configuration_defaults = {
+class MaternalBMIObserver(Component):
+    CONFIGURATION_DEFAULTS = {
         "stratification": {
             "maternal_bmi": {
                 "exclude": [],
@@ -123,13 +117,6 @@ class MaternalBMIObserver:
             }
         }
     }
-
-    def __repr__(self):
-        return "MaternalBMIObserver()"
-
-    @property
-    def name(self):
-        return "maternal_bmi_observer"
 
     #################
     # Setup methods #
@@ -152,8 +139,8 @@ class MaternalBMIObserver:
             )
 
 
-class MaternalInterventionObserver:
-    configuration_defaults = {
+class MaternalInterventionObserver(Component):
+    CONFIGURATION_DEFAULTS = {
         "stratification": {
             "maternal_interventions": {
                 "exclude": [],
@@ -161,13 +148,6 @@ class MaternalInterventionObserver:
             }
         }
     }
-
-    def __repr__(self):
-        return "MaternalInterventionObserver()"
-
-    @property
-    def name(self):
-        return "maternal_intervention_observer"
 
     #################
     # Setup methods #
@@ -192,8 +172,8 @@ class MaternalInterventionObserver:
             )
 
 
-class PregnancyOutcomeObserver:
-    configuration_defaults = {
+class PregnancyOutcomeObserver(Component):
+    CONFIGURATION_DEFAULTS = {
         "stratification": {
             "pregnancy_outcomes": {
                 "exclude": [],
@@ -201,13 +181,6 @@ class PregnancyOutcomeObserver:
             }
         }
     }
-
-    def __repr__(self):
-        return "PregnancyOutcomeObserver()"
-
-    @property
-    def name(self):
-        return "pregnancy_outcome_observer"
 
     #################
     # Setup methods #
@@ -243,7 +216,7 @@ class DisabilityObserver(DisabilityObserver_):
             name="ylds_due_to_all_causes",
             pop_filter=base_query,
             aggregator_sources=[self.disability_weight_pipeline_name],
-            aggregator=self._disability_weight_aggregator,
+            aggregator=self.disability_weight_aggregator,
             requires_columns=["alive"],
             requires_values=["disability_weight"],
             additional_stratifications=self.config.include,
@@ -261,7 +234,7 @@ class DisabilityObserver(DisabilityObserver_):
                 if cause_state.state_id == "maternal_disorders"
                 else base_query + ' and pregnancy != "parturition"',
                 aggregator_sources=[cause_disability_weight_pipeline_name],
-                aggregator=self._disability_weight_aggregator,
+                aggregator=self.disability_weight_aggregator,
                 requires_columns=["alive", "pregnancy"],
                 requires_values=[cause_disability_weight_pipeline_name],
                 additional_stratifications=self.config.include,
