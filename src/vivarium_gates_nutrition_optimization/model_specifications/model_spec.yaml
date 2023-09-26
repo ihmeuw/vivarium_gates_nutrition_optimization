@@ -2,9 +2,9 @@ components:
     vivarium_public_health:
         population:
             - BasePopulation()
-        metrics:
-            - DiseaseObserver("maternal_disorders")
-            - DiseaseObserver("maternal_hemorrhage")
+        # metrics:
+        #     - DiseaseObserver("maternal_disorders")
+        #     - DiseaseObserver("maternal_hemorrhage")
 
     vivarium_gates_nutrition_optimization:
         components:
