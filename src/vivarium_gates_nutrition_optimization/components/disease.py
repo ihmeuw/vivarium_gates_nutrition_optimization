@@ -3,10 +3,10 @@ from typing import Callable, Dict, List
 import pandas as pd
 from vivarium.framework.engine import Builder
 from vivarium.framework.state_machine import State, Transition
-from vivarium.framework.values import Pipeline
-from vivarium_public_health.disease import DiseaseState 
-from vivarium_public_health.disease import SusceptibleState
+from vivarium.framework.values import Pipeline, list_combiner, union_post_processor
+from vivarium_public_health.disease import DiseaseState, SusceptibleState
 from vivarium_public_health.disease.transition import ProportionTransition
+from vivarium_public_health.utilities import is_non_zero
 
 from vivarium_gates_nutrition_optimization.constants import models
 
