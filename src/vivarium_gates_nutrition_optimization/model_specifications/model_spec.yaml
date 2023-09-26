@@ -10,9 +10,9 @@ components:
         components:
             - Pregnancy()
             - UntrackNotPregnant()
-            # - MaternalDisorders()
-            # - MaternalHemorrhage()
-            # - MaternalMortality()
+            - MaternalDisorders()
+            - MaternalHemorrhage()
+            - MaternalMortality()
             # - BackgroundMorbidity()
             # - Hemoglobin()
             # - Anemia()
