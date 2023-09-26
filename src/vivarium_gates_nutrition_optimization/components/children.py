@@ -16,22 +16,18 @@ from vivarium_gates_nutrition_optimization.constants import (
 )
 
 
-class NewChildren:
+class NewChildren(Component):
     ##############
     # Properties #
     ##############
 
     @property
-    def name(self) -> str:
-        return "new_children"
-
-    @property
     def sub_components(self) -> List[str]:
         return [self.lbwsg]
 
-    @property
-    def columns_created(self) -> List[str]:
-        return ["sex_of_child", "birth_weight", "gestational_age"]
+    def __init__(self):
+        super().__init__()
+        self.lbwsg = LBWSGDistribution()
 
     def __init__(self):
         self.lbwsg = LBWSGDistribution()
