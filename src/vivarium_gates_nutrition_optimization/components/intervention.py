@@ -1,9 +1,10 @@
 from datetime import datetime, timedelta
-from typing import Dict
+from typing import Dict, List, Optional
 
 import numpy as np
 import pandas as pd
 import scipy.stats
+from vivarium import Component
 from vivarium.framework.engine import Builder
 from vivarium.framework.event import Event
 from vivarium.framework.population import SimulantData
@@ -17,16 +18,24 @@ from vivarium_gates_nutrition_optimization.constants import (
 )
 
 
-class MaternalInterventions:
-    configuration_defaults = {
+class MaternalInterventions(Component):
+    CONFIGURATION_DEFAULTS = {
         "intervention": {
             "scenario": "baseline",
         }
     }
 
     @property
-    def name(self) -> str:
-        return "maternal_interventions"
+    def columns_created(self) -> List[str]:
+        return ["intervention"]
+
+    @property
+    def columns_required(self) -> List[str]:
+        return ["maternal_bmi_anemia_category", "tracked"]
+
+    @property
+    def initialization_requirements(self) -> Dict[str, List[str]]:
+        return {"requires_streams": [self.name], "requires_columns": [self.columns_required]}
 
     # noinspection PyAttributeOutsideInit
     def setup(self, builder: Builder) -> None:
@@ -47,20 +56,6 @@ class MaternalInterventions:
         self.ifa_effect_size = builder.data.load(
             data_keys.MATERNAL_INTERVENTIONS.IFA_EFFECT_SIZE
         ).value[0]
-
-        self.columns_required = ["maternal_bmi_anemia_category"]
-        self.columns_created = [
-            "intervention",
-        ]
-        self.population_view = builder.population.get_view(
-            self.columns_required + self.columns_created + ["tracked"]
-        )
-        builder.population.initializes_simulants(
-            self.on_initialize_simulants,
-            creates_columns=self.columns_created,
-            requires_columns=self.columns_required,
-            requires_streams=[self.name],
-        )
 
         builder.value.register_value_modifier(
             "hemoglobin.exposure",
