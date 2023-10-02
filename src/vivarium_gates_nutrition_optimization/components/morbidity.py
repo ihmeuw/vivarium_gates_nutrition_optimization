@@ -10,12 +10,12 @@ def BackgroundMorbidity():
     susceptible = SusceptibleState(cause)
     with_condition = ParturitionExclusionState(
         cause,
+        allow_self_transition=True,
         get_data_functions={
             "prevalence": lambda *_: 1.0,
             "excess_mortality_rate": lambda *_: 0.0,
         },
     )
-    with_condition.allow_self_transitions()
     return DiseaseModel(
         cause,
         states=[susceptible, with_condition],
