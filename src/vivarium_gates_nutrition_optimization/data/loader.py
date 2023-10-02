@@ -451,7 +451,7 @@ def get_hemoglobin_csv_data(key: str, location: str):
     data = data.set_index("location_id").loc[location_id]
     age_bins = utility_data.get_age_bins()
     data = data.merge(age_bins, on="age_group_id")
-    data = data.pivot(index=["age_start", "age_end"], columns="input_draw", values="value")
+    data = data.pivot(index=["age_start", "age_end"], columns="draw", values="value")
     data = data.reset_index(level="age_end", drop=True).reindex(
         demography.index, level="age_start", fill_value=0.0
     )

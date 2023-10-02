@@ -15,7 +15,7 @@ MAKE_ARTIFACT_CPU = "1"
 MAKE_ARTIFACT_RUNTIME = "3:00:00"
 MAKE_ARTIFACT_SLEEP = 10
 
-LOCATIONS = ["Ethiopia"]
+LOCATIONS = ["Ethiopia", "Nigeria", "Pakistan"]
 
 ARTIFACT_INDEX_COLUMNS = [
     "sex",
