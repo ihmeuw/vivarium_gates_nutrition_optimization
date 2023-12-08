@@ -78,27 +78,34 @@ class MaternalInterventions:
         pop = self.population_view.subview(["maternal_bmi_anemia_category"]).get(
             pop_data.index
         )
-        pop_update = pd.DataFrame(
-            {"intervention": None},
-            index=pop.index,
-        )
-        baseline_ifa = self.randomness.choice(
-            pop.index,
-            choices=[models.IFA_SUPPLEMENTATION, models.NO_TREATMENT],
-            p=[self.ifa_coverage, RESIDUAL_CHOICE],
-            additional_key="baseline_ifa",
-        )
-        low_bmi = pop["maternal_bmi_anemia_category"].isin(
-            [models.LOW_BMI_NON_ANEMIC, models.LOW_BMI_ANEMIC]
-        )
-        coverage = data_values.INTERVENTION_SCENARIO_COVERAGE.loc[self.scenario]
-        pop_update["intervention"] = np.where(
-            low_bmi, coverage["low_bmi"], coverage["normal_bmi"]
-        )
+        if self.scenario == 'ifa':
+            pop_update = pd.DataFrame(
+                {"intervention": 'ifa'},
+                index=pop.index,
+            )
+            self.population_view.update(pop_update)
+        else:
+            pop_update = pd.DataFrame(
+                {"intervention": None},
+                index=pop.index,
+            )
+            baseline_ifa = self.randomness.choice(
+                pop.index,
+                choices=[models.IFA_SUPPLEMENTATION, models.NO_TREATMENT],
+                p=[self.ifa_coverage, RESIDUAL_CHOICE],
+                additional_key="baseline_ifa",
+            )
+            low_bmi = pop["maternal_bmi_anemia_category"].isin(
+                [models.LOW_BMI_NON_ANEMIC, models.LOW_BMI_ANEMIC]
+            )
+            coverage = data_values.INTERVENTION_SCENARIO_COVERAGE.loc[self.scenario]
+            pop_update["intervention"] = np.where(
+                low_bmi, coverage["low_bmi"], coverage["normal_bmi"]
+            )
 
-        unsampled_ifa = pop_update["intervention"] == "maybe_ifa"
-        pop_update.loc[unsampled_ifa, "intervention"] = baseline_ifa.loc[unsampled_ifa]
-        self.population_view.update(pop_update)
+            unsampled_ifa = pop_update["intervention"] == "maybe_ifa"
+            pop_update.loc[unsampled_ifa, "intervention"] = baseline_ifa.loc[unsampled_ifa]
+            self.population_view.update(pop_update)
 
     def update_exposure(self, index, exposure):
         if self.clock() - self.start_date >= timedelta(
