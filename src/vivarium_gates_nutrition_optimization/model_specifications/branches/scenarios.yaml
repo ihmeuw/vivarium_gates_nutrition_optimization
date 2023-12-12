@@ -7,6 +7,6 @@ branches:
         - 'zero_coverage'
         - 'baseline'
         - 'mms'
-        - 'universal_bep'
+        - 'ifa'
         - 'targeted_bep_no_mms'
         - 'targeted_bep_mms'
