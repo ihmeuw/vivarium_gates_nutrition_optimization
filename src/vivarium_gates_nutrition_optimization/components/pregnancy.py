@@ -23,8 +23,8 @@ class NotPregnantState(SusceptibleState):
 
 
 class PregnantState(DiseaseState):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, state_id, *args, **kwargs):
+        super().__init__(state_id, *args, **kwargs)
         self.new_children = NewChildren()
 
     ##############
@@ -212,6 +212,10 @@ class PregnantState(DiseaseState):
 
 
 class PregnancyModel(DiseaseModel):
+    def __init__(self, cause: str, **kwargs):
+        super().__init__(cause, **kwargs)
+        self._name = f"disease_model.{cause}"
+
     @property
     def time_step_priority(self) -> int:
         return 3
