@@ -35,7 +35,7 @@ class MaternalInterventions(Component):
 
     @property
     def initialization_requirements(self) -> Dict[str, List[str]]:
-        return {"requires_streams": [self.name], "requires_columns": [self.columns_required]}
+        return {"requires_streams": [self.name], "requires_columns": self.columns_required}
 
     # noinspection PyAttributeOutsideInit
     def setup(self, builder: Builder) -> None:
