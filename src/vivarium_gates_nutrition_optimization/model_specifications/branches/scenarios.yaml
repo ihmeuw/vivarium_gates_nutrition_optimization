@@ -8,5 +8,5 @@ branches:
         - 'baseline'
         - 'mms'
         - 'ifa'
-        - 'targeted_bep_ifa'
+        #- 'targeted_bep_ifa'
         - 'targeted_bep_mms'
