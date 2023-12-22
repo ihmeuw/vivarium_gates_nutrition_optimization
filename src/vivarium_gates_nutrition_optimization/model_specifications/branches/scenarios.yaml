@@ -1,4 +1,4 @@
-input_draw_count: 1
+input_draw_count: 20
 random_seed_count: 80
 
 branches:
@@ -8,3 +8,5 @@ branches:
         - 'baseline'
         - 'mms'
         - 'ifa'
+        #- 'targeted_bep_ifa'
+        - 'targeted_bep_mms'

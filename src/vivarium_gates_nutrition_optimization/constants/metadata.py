@@ -34,7 +34,7 @@ class __Scenarios(NamedTuple):
     baseline: str
     mms: str
     universal_bep: str
-    targeted_bep_no_mms: str
+    targeted_bep_ifa: str
     targeted_bep_mms: str
 
 

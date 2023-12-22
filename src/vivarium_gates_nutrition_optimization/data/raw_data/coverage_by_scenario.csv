@@ -3,6 +3,5 @@ zero_coverage,uncovered,uncovered
 baseline,maybe_ifa,maybe_ifa
 mms,mms,mms
 ifa,ifa,ifa
-universal_bep,bep,bep
-targeted_bep_no_mms,maybe_ifa,bep
+targeted_bep_ifa,ifa,bep
 targeted_bep_mms,mms,bep
