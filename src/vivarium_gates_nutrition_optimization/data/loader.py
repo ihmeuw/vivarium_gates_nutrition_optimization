@@ -37,6 +37,7 @@ from vivarium_gates_nutrition_optimization.data import extra_gbd, sampling
 from vivarium_gates_nutrition_optimization.data.utilities import get_entity
 from vivarium_gates_nutrition_optimization.utilities import get_random_variable_draws
 
+##Note: need to remove all instances where we limit the size of the data manually. This will be done when RT updates in the input files. 
 
 def get_data(lookup_key: str, location: str) -> pd.DataFrame:
     """Retrieves data from an appropriate source.
