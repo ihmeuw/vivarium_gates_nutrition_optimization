@@ -105,7 +105,7 @@ PREGNANCY_CORRECTION_FACTORS = {
         paths.HEMOGLOBIN_PREGNANCY_ADJUSTMENT_FACTORS_CSV, index_col=0
     ).squeeze(),
     data_keys.HEMOGLOBIN.STANDARD_DEVIATION: pd.Series(
-        np.repeat(1.032920188, 1000), [f"draw_{i}" for i in range(1000)]
+        np.repeat(1.032920188, 500), [f"draw_{i}" for i in range(500)]
     ),
 }
 PROBABILITY_MODERATE_MATERNAL_HEMORRHAGE = (0.85, 0.81, 0.89)

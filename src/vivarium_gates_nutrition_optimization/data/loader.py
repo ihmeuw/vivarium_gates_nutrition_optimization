@@ -259,7 +259,7 @@ def load_maternal_csmr(key: str, location: str) -> pd.DataFrame:
 
 def load_maternal_disorders_ylds(key: str, location: str) -> pd.DataFrame:
     groupby_cols = ["age_group_id", "sex_id", "year_id"]
-    draw_cols = [f"draw_{i}" for i in range(1000)]
+    draw_cols = vi_globals.DRAW_COLUMNS
 
     all_md_ylds = extra_gbd.get_maternal_disorder_ylds(location)
     all_md_ylds = all_md_ylds[groupby_cols + draw_cols]
@@ -323,7 +323,7 @@ def load_hemoglobin_maternal_hemorrhage_rr(key: str, location: str) -> pd.DataFr
 
     rng = np.random.default_rng(get_hash(f"{key}_{location}"))
     maternal_hemorrhage_rr = pd.DataFrame(
-        np.tile(dist.rvs(size=1000, random_state=rng), (len(demographic_dimensions), 1)),
+        np.tile(dist.rvs(size=500, random_state=rng), (len(demographic_dimensions), 1)),
         columns=vi_globals.DRAW_COLUMNS,
         index=demographic_dimensions.index,
     )
@@ -338,7 +338,9 @@ def load_hemoglobin_maternal_hemorrhage_paf(key: str, location: str) -> pd.DataF
     proportion = get_data(
         data_keys.HEMOGLOBIN.PREGNANT_PROPORTION_WITH_HEMOGLOBIN_BELOW_70, location
     )
-
+    existing_draw_cols = [col for col in proportion if col.startswith("draw_")]
+    extra_draw_cols = [col for col in existing_draw_cols if col not in vi_globals.DRAW_COLUMNS]
+    proportion = proportion.drop(columns=extra_draw_cols, errors="ignore")
     return (rr * proportion + (1 - proportion) - 1) / (rr * proportion + (1 - proportion))
 
 
@@ -347,7 +349,7 @@ def load_hemoglobin_maternal_disorders_rr(key: str, location: str) -> pd.DataFra
         raise ValueError(f"Unrecognized key {key}")
 
     groupby_cols = ["age_group_id", "sex_id", "year_id"]
-    draw_cols = [f"draw_{i}" for i in range(1000)]
+    draw_cols = vi_globals.DRAW_COLUMNS
     rr = extra_gbd.get_hemoglobin_maternal_disorders_rr()
     rr = rr.groupby(groupby_cols)[draw_cols].sum().reset_index()
     rr = reshape_to_vivarium_format(rr, location)
@@ -367,6 +369,9 @@ def load_hemoglobin_maternal_disorders_paf(key: str, location: str) -> pd.DataFr
     data = data.reset_index(level="age_end", drop=True).reindex(
         demography.index, level="age_start", fill_value=0.0
     )
+    existing_draw_cols = [col for col in data if col.startswith("draw_")]
+    extra_draw_cols = [col for col in existing_draw_cols if col not in vi_globals.DRAW_COLUMNS]
+    data = data.drop(columns=extra_draw_cols, errors="ignore")
     return data
 
 
@@ -377,7 +382,7 @@ def get_moderate_hemorrhage_probability(key: str, location: str) -> pd.DataFrame
     # random seed
     rng = np.random.default_rng(get_hash(f"hemorrhage_severity"))
     moderate_hemorrhage_probability = pd.DataFrame(
-        [dist.rvs(size=1000, random_state=rng)],
+        [dist.rvs(size=500, random_state=rng)],
         columns=vi_globals.DRAW_COLUMNS,
         index=["probability"],
     )
@@ -438,8 +443,12 @@ def get_hemoglobin_data(key: str, location: str) -> pd.DataFrame:
 
     location_id = utility_data.get_location_id(location)
     hemoglobin_data = gbd.get_modelable_entity_draws(me_id=me_id, location_id=location_id)
-    hemoglobin_data = reshape_to_vivarium_format(hemoglobin_data, location)
 
+    existing_draw_cols = [col for col in hemoglobin_data if col.startswith("draw_")]
+    extra_draw_cols = [col for col in existing_draw_cols if col not in vi_globals.DRAW_COLUMNS]
+    hemoglobin_data = hemoglobin_data.drop(columns=extra_draw_cols, errors="ignore")
+    
+    hemoglobin_data = reshape_to_vivarium_format(hemoglobin_data, location)
     return hemoglobin_data * correction_factors
 
 
@@ -455,6 +464,9 @@ def get_hemoglobin_csv_data(key: str, location: str):
     data = data.reset_index(level="age_end", drop=True).reindex(
         demography.index, level="age_start", fill_value=0.0
     )
+    existing_draw_cols = [col for col in data if col.startswith("draw_")]
+    extra_draw_cols = [col for col in existing_draw_cols if col not in vi_globals.DRAW_COLUMNS]
+    data = data.drop(columns=extra_draw_cols, errors="ignore")
     return data
 
 
@@ -486,6 +498,10 @@ def load_bmi_prevalence(key: str, location: str):
     data = vi_utils.sort_hierarchical_data(data)
     data.index = data.index.droplevel("location")
 
+    existing_draw_cols = [col for col in data if col.startswith("draw_")]
+    extra_draw_cols = [col for col in existing_draw_cols if col not in vi_globals.DRAW_COLUMNS]
+    data = data.drop(columns=extra_draw_cols, errors="ignore")
+
     return data
 
 
@@ -499,6 +515,9 @@ def load_ifa_coverage(key: str, location: str) -> pd.DataFrame:
         paths.CSV_RAW_DATA_ROOT / "baseline_ifa_coverage" / (location + ".csv"), index_col=0
     )
     df = df.drop(columns=["location_id", "location_name"]).set_index(["draw"]).T
+    existing_draw_cols = [col for col in df if col.startswith("draw_")]
+    extra_draw_cols = [col for col in existing_draw_cols if col not in vi_globals.DRAW_COLUMNS]
+    df = df.drop(columns=extra_draw_cols, errors="ignore")
     return df
 
 
@@ -507,7 +526,7 @@ def load_ifa_effect_size(key: str, location: str) -> pd.DataFrame:
     dist = stats.norm(loc, scale)
     rng = np.random.default_rng(get_hash(f"ifa_effect_size_{location}"))
     ifa_effect_size = pd.DataFrame(
-        [dist.rvs(size=1000, random_state=rng)],
+        [dist.rvs(size=500, random_state=rng)],
         columns=vi_globals.DRAW_COLUMNS,
         index=["value"],
     )
@@ -525,7 +544,7 @@ def load_supplementation_stillbirth_rr(key: str, location: str) -> pd.DataFrame:
     # for MMS RR as for BEP
     rng = np.random.default_rng(get_hash(f"stillbirth_rr_{location}"))
     stillbirth_rr = pd.DataFrame(
-        [dist.rvs(size=1000, random_state=rng)],
+        [dist.rvs(size=500, random_state=rng)],
         columns=vi_globals.DRAW_COLUMNS,
         index=["relative_risk"],
     )

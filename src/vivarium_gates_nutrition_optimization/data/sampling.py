@@ -87,10 +87,10 @@ def generate_vectorized_lognormal_draws(
 
     distribution = stats.lognorm(s=sigma, scale=mean[sample_mask])
     np.random.seed(get_hash(seed))
-    lognorm_samples = distribution.rvs(size=(1000, sample_mask.sum())).T
+    lognorm_samples = distribution.rvs(size=(500, sample_mask.sum())).T
     lognorm_samples = pd.DataFrame(lognorm_samples, index=df[sample_mask].index)
 
-    use_means = np.tile(mean[~sample_mask], 1000).reshape((1000, ~sample_mask.sum())).T
+    use_means = np.tile(mean[~sample_mask], 500).reshape((500, ~sample_mask.sum())).T
     use_means = pd.DataFrame(use_means, index=df[~sample_mask].index)
     draws = pd.concat([lognorm_samples, use_means])
     draws = draws.sort_index().rename(columns=lambda d: f"draw_{d}")

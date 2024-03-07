@@ -8,8 +8,6 @@ from vivarium_inputs import utility_data
 from vivarium_gates_nutrition_optimization.constants import data_keys
 from vivarium_gates_nutrition_optimization.data import utilities
 
-GBD_2020_ROUND_ID = 7
-
 
 @gbd.memory.cache
 def load_lbwsg_exposure(location: str):
@@ -22,11 +20,10 @@ def load_lbwsg_exposure(location: str):
         location_id=location_id,
         sex_id=gbd_constants.SEX.MALE + gbd_constants.SEX.FEMALE,
         age_group_id=164,  # Birth prevalence
-        gbd_round_id=gbd_constants.ROUND_IDS.GBD_2019,
-        decomp_step=gbd_constants.DECOMP_STEP.STEP_4,
+        release_id = gbd_constants.RELEASE_IDS.GBD_2021,
     )
     # This data set is big, so let's reduce it by a factor of ~40
-    data = data[data["year_id"] == 2019].drop(columns="year_id")
+    data = data[data["year_id"] == 2021].drop(columns="year_id")
     return data
 
 
@@ -39,8 +36,7 @@ def get_all_cause_yld_rate(location: str):
         entity.gbd_id,
         source=gbd_constants.SOURCES.COMO,
         location_id=location_id,
-        decomp_step=gbd_constants.DECOMP_STEP.STEP_5,
-        gbd_round_id=gbd_constants.ROUND_IDS.GBD_2019,
+        release_id = gbd_constants.RELEASE_IDS.GBD_2021,
         measure_id=vi_globals.MEASURES["YLDs"],
         metric_id=3,  # rate
     )
@@ -56,8 +52,7 @@ def get_maternal_disorder_ylds(location: str, metric_id=None):
         entity.gbd_id,
         source=gbd_constants.SOURCES.COMO,
         location_id=location_id,
-        decomp_step=gbd_constants.DECOMP_STEP.STEP_5,
-        gbd_round_id=gbd_constants.ROUND_IDS.GBD_2019,
+        release_id = gbd_constants.RELEASE_IDS.GBD_2021,
         measure_id=vi_globals.MEASURES["YLDs"],
         metric_id=metric_id,
     )
@@ -78,8 +73,7 @@ def get_anemia_ylds(location: str, metric_id=None):
         anemia_ids,
         source=gbd_constants.SOURCES.COMO,
         location_id=location_id,
-        decomp_step=gbd_constants.DECOMP_STEP.STEP_5,
-        gbd_round_id=gbd_constants.ROUND_IDS.GBD_2019,
+        release_id = gbd_constants.RELEASE_IDS.GBD_2021,
         measure_id=vi_globals.MEASURES["YLDs"],
         metric_id=metric_id,
     )
@@ -94,8 +88,7 @@ def get_anemia_yld_rate(location: str):
         192,
         source=gbd_constants.SOURCES.COMO,
         location_id=location_id,
-        decomp_step=gbd_constants.DECOMP_STEP.STEP_5,
-        gbd_round_id=gbd_constants.ROUND_IDS.GBD_2019,
+        release_id = gbd_constants.RELEASE_IDS.GBD_2021,
         measure_id=vi_globals.MEASURES["YLDs"],
         metric_id=3,
     )
@@ -108,11 +101,10 @@ def get_hemoglobin_maternal_disorders_rr():
     data = vi_utils.get_draws(
         gbd_id_type="rei_id",
         gbd_id=95,
-        gbd_round_id=gbd_constants.ROUND_IDS.GBD_2019,
-        year_id=2019,
+        release_id = gbd_constants.RELEASE_IDS.GBD_2021,
+        year_id=2021,
         sex_id=2,
         source="rr",
-        decomp_step="iterative",
         status="best",
     )
     # Subset to a single sub-cause as the get_draws call returns values for 10 sub-causes within the
