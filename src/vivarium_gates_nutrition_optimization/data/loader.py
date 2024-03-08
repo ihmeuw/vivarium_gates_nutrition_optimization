@@ -339,9 +339,6 @@ def load_hemoglobin_maternal_hemorrhage_paf(key: str, location: str) -> pd.DataF
     proportion = get_data(
         data_keys.HEMOGLOBIN.PREGNANT_PROPORTION_WITH_HEMOGLOBIN_BELOW_70, location
     )
-    existing_draw_cols = [col for col in proportion if col.startswith("draw_")]
-    extra_draw_cols = [col for col in existing_draw_cols if col not in vi_globals.DRAW_COLUMNS]
-    proportion = proportion.drop(columns=extra_draw_cols, errors="ignore")
     return (rr * proportion + (1 - proportion) - 1) / (rr * proportion + (1 - proportion))
 
 
@@ -370,9 +367,6 @@ def load_hemoglobin_maternal_disorders_paf(key: str, location: str) -> pd.DataFr
     data = data.reset_index(level="age_end", drop=True).reindex(
         demography.index, level="age_start", fill_value=0.0
     )
-    existing_draw_cols = [col for col in data if col.startswith("draw_")]
-    extra_draw_cols = [col for col in existing_draw_cols if col not in vi_globals.DRAW_COLUMNS]
-    data = data.drop(columns=extra_draw_cols, errors="ignore")
     return data
 
 
@@ -444,10 +438,6 @@ def get_hemoglobin_data(key: str, location: str) -> pd.DataFrame:
 
     location_id = utility_data.get_location_id(location)
     hemoglobin_data = gbd.get_modelable_entity_draws(me_id=me_id, location_id=location_id)
-
-    existing_draw_cols = [col for col in hemoglobin_data if col.startswith("draw_")]
-    extra_draw_cols = [col for col in existing_draw_cols if col not in vi_globals.DRAW_COLUMNS]
-    hemoglobin_data = hemoglobin_data.drop(columns=extra_draw_cols, errors="ignore")
     
     hemoglobin_data = reshape_to_vivarium_format(hemoglobin_data, location)
     return hemoglobin_data * correction_factors
@@ -465,9 +455,6 @@ def get_hemoglobin_csv_data(key: str, location: str):
     data = data.reset_index(level="age_end", drop=True).reindex(
         demography.index, level="age_start", fill_value=0.0
     )
-    existing_draw_cols = [col for col in data if col.startswith("draw_")]
-    extra_draw_cols = [col for col in existing_draw_cols if col not in vi_globals.DRAW_COLUMNS]
-    data = data.drop(columns=extra_draw_cols, errors="ignore")
     return data
 
 
@@ -499,10 +486,6 @@ def load_bmi_prevalence(key: str, location: str):
     data = vi_utils.sort_hierarchical_data(data)
     data.index = data.index.droplevel("location")
 
-    existing_draw_cols = [col for col in data if col.startswith("draw_")]
-    extra_draw_cols = [col for col in existing_draw_cols if col not in vi_globals.DRAW_COLUMNS]
-    data = data.drop(columns=extra_draw_cols, errors="ignore")
-
     return data
 
 
@@ -516,9 +499,6 @@ def load_ifa_coverage(key: str, location: str) -> pd.DataFrame:
         paths.CSV_RAW_DATA_ROOT / "baseline_ifa_coverage" / (location + ".csv"), index_col=0
     )
     df = df.drop(columns=["location_id", "location_name"]).set_index(["draw"]).T
-    existing_draw_cols = [col for col in df if col.startswith("draw_")]
-    extra_draw_cols = [col for col in existing_draw_cols if col not in vi_globals.DRAW_COLUMNS]
-    df = df.drop(columns=extra_draw_cols, errors="ignore")
     return df
 
 
