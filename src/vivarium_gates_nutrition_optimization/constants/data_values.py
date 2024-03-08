@@ -2,6 +2,7 @@ from typing import NamedTuple
 
 import numpy as np
 import pandas as pd
+from vivarium_inputs import globals as vi_globals
 
 from vivarium_gates_nutrition_optimization.constants import data_keys, models, paths
 
@@ -19,6 +20,7 @@ class _Durations(NamedTuple):
 
 
 DURATIONS = _Durations()
+draw_count = vi_globals.NUM_DRAWS
 
 
 INFANT_MALE_PERCENTAGES = {
@@ -105,7 +107,7 @@ PREGNANCY_CORRECTION_FACTORS = {
         paths.HEMOGLOBIN_PREGNANCY_ADJUSTMENT_FACTORS_CSV, index_col=0
     ).squeeze(),
     data_keys.HEMOGLOBIN.STANDARD_DEVIATION: pd.Series(
-        np.repeat(1.032920188, 1000), [f"draw_{i}" for i in range(1000)]
+        np.repeat(1.032920188, draw_count), [f"draw_{i}" for i in range(draw_count)]
     ),
 }
 PROBABILITY_MODERATE_MATERNAL_HEMORRHAGE = (0.85, 0.81, 0.89)

@@ -37,6 +37,8 @@ from vivarium_gates_nutrition_optimization.data import extra_gbd, sampling
 from vivarium_gates_nutrition_optimization.data.utilities import get_entity
 from vivarium_gates_nutrition_optimization.utilities import get_random_variable_draws
 
+##Note: need to remove all instances where we limit the size of the data manually. This will be done when RT updates in the input files.
+
 
 def get_data(lookup_key: str, location: str) -> pd.DataFrame:
     """Retrieves data from an appropriate source.
@@ -259,7 +261,7 @@ def load_maternal_csmr(key: str, location: str) -> pd.DataFrame:
 
 def load_maternal_disorders_ylds(key: str, location: str) -> pd.DataFrame:
     groupby_cols = ["age_group_id", "sex_id", "year_id"]
-    draw_cols = [f"draw_{i}" for i in range(1000)]
+    draw_cols = vi_globals.DRAW_COLUMNS
 
     all_md_ylds = extra_gbd.get_maternal_disorder_ylds(location)
     all_md_ylds = all_md_ylds[groupby_cols + draw_cols]
@@ -285,8 +287,8 @@ def load_maternal_disorders_ylds(key: str, location: str) -> pd.DataFrame:
         .set_index(idx_cols)
         .sort_index()
     )
-
-    return (all_md_ylds - anemia_ylds) / (incidence - csmr)
+    ylds = (all_md_ylds - anemia_ylds) / (incidence - csmr)
+    return ylds.fillna(0)
 
 
 def load_pregnant_maternal_disorders_incidence(key: str, location: str):
@@ -294,13 +296,15 @@ def load_pregnant_maternal_disorders_incidence(key: str, location: str):
     pregnancy_end_rate = get_pregnancy_end_incidence(location)
     maternal_disorders_incidence = total_incidence / pregnancy_end_rate
     ## We have to normalize, since this comes to a probability with some values > 1
-    return maternal_disorders_incidence.applymap(lambda value: 1 if value > 1 else value)
+    maternal_disorders_incidence = maternal_disorders_incidence.applymap(lambda value: 1 if value > 1 else value)
+    return maternal_disorders_incidence.fillna(0)
 
 
 def load_maternal_disorders_mortality_probability(key: str, location: str):
     total_csmr = get_data(data_keys.MATERNAL_DISORDERS.CSMR, location)
     total_incidence = get_data(data_keys.MATERNAL_DISORDERS.RAW_INCIDENCE_RATE, location)
-    return total_csmr / total_incidence
+    mortality_probability = total_csmr / total_incidence
+    return mortality_probability.fillna(0)
 
 
 def load_pregnant_maternal_hemorrhage_incidence(key: str, location: str):
@@ -309,7 +313,8 @@ def load_pregnant_maternal_hemorrhage_incidence(key: str, location: str):
     pregnancy_end_rate = get_pregnancy_end_incidence(location)
     maternal_hemorrhage_incidence = (mh_incidence - mh_csmr) / pregnancy_end_rate
     ## I'm not as sure we need to normalize here, but we may as well.
-    return maternal_hemorrhage_incidence.applymap(lambda value: 1 if value > 1 else value)
+    maternal_hemorrhage_incidence = maternal_hemorrhage_incidence.applymap(lambda value: 1 if value > 1 else value)
+    return maternal_hemorrhage_incidence.fillna(0)
 
 
 def load_hemoglobin_maternal_hemorrhage_rr(key: str, location: str) -> pd.DataFrame:
@@ -322,8 +327,11 @@ def load_hemoglobin_maternal_hemorrhage_rr(key: str, location: str) -> pd.DataFr
     demographic_dimensions = get_data(data_keys.POPULATION.DEMOGRAPHY, location)
 
     rng = np.random.default_rng(get_hash(f"{key}_{location}"))
+    draw_count = vi_globals.NUM_DRAWS
     maternal_hemorrhage_rr = pd.DataFrame(
-        np.tile(dist.rvs(size=1000, random_state=rng), (len(demographic_dimensions), 1)),
+        np.tile(
+            dist.rvs(size=draw_count, random_state=rng), (len(demographic_dimensions), 1)
+        ),
         columns=vi_globals.DRAW_COLUMNS,
         index=demographic_dimensions.index,
     )
@@ -338,7 +346,6 @@ def load_hemoglobin_maternal_hemorrhage_paf(key: str, location: str) -> pd.DataF
     proportion = get_data(
         data_keys.HEMOGLOBIN.PREGNANT_PROPORTION_WITH_HEMOGLOBIN_BELOW_70, location
     )
-
     return (rr * proportion + (1 - proportion) - 1) / (rr * proportion + (1 - proportion))
 
 
@@ -347,7 +354,7 @@ def load_hemoglobin_maternal_disorders_rr(key: str, location: str) -> pd.DataFra
         raise ValueError(f"Unrecognized key {key}")
 
     groupby_cols = ["age_group_id", "sex_id", "year_id"]
-    draw_cols = [f"draw_{i}" for i in range(1000)]
+    draw_cols = vi_globals.DRAW_COLUMNS
     rr = extra_gbd.get_hemoglobin_maternal_disorders_rr()
     rr = rr.groupby(groupby_cols)[draw_cols].sum().reset_index()
     rr = reshape_to_vivarium_format(rr, location)
@@ -376,8 +383,9 @@ def get_moderate_hemorrhage_probability(key: str, location: str) -> pd.DataFrame
     dist = sampling.get_truncnorm_from_quantiles(*hemorrhage_dist_params, lower_clip=0.1)
     # random seed
     rng = np.random.default_rng(get_hash(f"hemorrhage_severity"))
+    draw_count = vi_globals.NUM_DRAWS
     moderate_hemorrhage_probability = pd.DataFrame(
-        [dist.rvs(size=1000, random_state=rng)],
+        [dist.rvs(size=draw_count, random_state=rng)],
         columns=vi_globals.DRAW_COLUMNS,
         index=["probability"],
     )
@@ -420,8 +428,8 @@ def load_background_morbidity(key: str, location: str) -> pd.DataFrame:
     anemia_sequelae_yld_rate = reshape_to_vivarium_format(anemia_sequelae_yld_rate, location)
 
     pop_md_yld_rate = all_md_yld_rate - anemia_sequelae_yld_rate
-
-    return all_cause_yld_rate - all_anemia_yld_rate - pop_md_yld_rate
+    final = all_cause_yld_rate - all_anemia_yld_rate - pop_md_yld_rate
+    return final.fillna(0)
 
 
 ###########################
@@ -438,8 +446,8 @@ def get_hemoglobin_data(key: str, location: str) -> pd.DataFrame:
 
     location_id = utility_data.get_location_id(location)
     hemoglobin_data = gbd.get_modelable_entity_draws(me_id=me_id, location_id=location_id)
-    hemoglobin_data = reshape_to_vivarium_format(hemoglobin_data, location)
 
+    hemoglobin_data = reshape_to_vivarium_format(hemoglobin_data, location)
     return hemoglobin_data * correction_factors
 
 
@@ -506,8 +514,9 @@ def load_ifa_effect_size(key: str, location: str) -> pd.DataFrame:
     loc, scale = data_values.IFA_EFFECT_SIZE
     dist = stats.norm(loc, scale)
     rng = np.random.default_rng(get_hash(f"ifa_effect_size_{location}"))
+    draw_count = vi_globals.NUM_DRAWS
     ifa_effect_size = pd.DataFrame(
-        [dist.rvs(size=1000, random_state=rng)],
+        [dist.rvs(size=draw_count, random_state=rng)],
         columns=vi_globals.DRAW_COLUMNS,
         index=["value"],
     )
@@ -524,8 +533,9 @@ def load_supplementation_stillbirth_rr(key: str, location: str) -> pd.DataFrame:
     # Don't hash on key because we want simulants to have the same percentile
     # for MMS RR as for BEP
     rng = np.random.default_rng(get_hash(f"stillbirth_rr_{location}"))
+    draw_count = vi_globals.NUM_DRAWS
     stillbirth_rr = pd.DataFrame(
-        [dist.rvs(size=1000, random_state=rng)],
+        [dist.rvs(size=draw_count, random_state=rng)],
         columns=vi_globals.DRAW_COLUMNS,
         index=["relative_risk"],
     )
