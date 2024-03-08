@@ -287,8 +287,8 @@ def load_maternal_disorders_ylds(key: str, location: str) -> pd.DataFrame:
         .set_index(idx_cols)
         .sort_index()
     )
-
-    return (all_md_ylds - anemia_ylds) / (incidence - csmr)
+    ylds = (all_md_ylds - anemia_ylds) / (incidence - csmr)
+    return ylds.fillna(0)
 
 
 def load_pregnant_maternal_disorders_incidence(key: str, location: str):
@@ -296,13 +296,15 @@ def load_pregnant_maternal_disorders_incidence(key: str, location: str):
     pregnancy_end_rate = get_pregnancy_end_incidence(location)
     maternal_disorders_incidence = total_incidence / pregnancy_end_rate
     ## We have to normalize, since this comes to a probability with some values > 1
-    return maternal_disorders_incidence.applymap(lambda value: 1 if value > 1 else value)
+    maternal_disorders_incidence = maternal_disorders_incidence.applymap(lambda value: 1 if value > 1 else value)
+    return maternal_disorders_incidence.fillna(0)
 
 
 def load_maternal_disorders_mortality_probability(key: str, location: str):
     total_csmr = get_data(data_keys.MATERNAL_DISORDERS.CSMR, location)
     total_incidence = get_data(data_keys.MATERNAL_DISORDERS.RAW_INCIDENCE_RATE, location)
-    return total_csmr / total_incidence
+    mortality_probability = total_csmr / total_incidence
+    return mortality_probability.fillna(0)
 
 
 def load_pregnant_maternal_hemorrhage_incidence(key: str, location: str):
@@ -311,7 +313,8 @@ def load_pregnant_maternal_hemorrhage_incidence(key: str, location: str):
     pregnancy_end_rate = get_pregnancy_end_incidence(location)
     maternal_hemorrhage_incidence = (mh_incidence - mh_csmr) / pregnancy_end_rate
     ## I'm not as sure we need to normalize here, but we may as well.
-    return maternal_hemorrhage_incidence.applymap(lambda value: 1 if value > 1 else value)
+    maternal_hemorrhage_incidence = maternal_hemorrhage_incidence.applymap(lambda value: 1 if value > 1 else value)
+    return maternal_hemorrhage_incidence.fillna(0)
 
 
 def load_hemoglobin_maternal_hemorrhage_rr(key: str, location: str) -> pd.DataFrame:
@@ -425,8 +428,8 @@ def load_background_morbidity(key: str, location: str) -> pd.DataFrame:
     anemia_sequelae_yld_rate = reshape_to_vivarium_format(anemia_sequelae_yld_rate, location)
 
     pop_md_yld_rate = all_md_yld_rate - anemia_sequelae_yld_rate
-
-    return all_cause_yld_rate - all_anemia_yld_rate - pop_md_yld_rate
+    final = all_cause_yld_rate - all_anemia_yld_rate - pop_md_yld_rate
+    return final.fillna(0)
 
 
 ###########################
