@@ -2,9 +2,9 @@ from typing import NamedTuple
 
 import numpy as np
 import pandas as pd
+from vivarium_inputs import globals as vi_globals
 
 from vivarium_gates_nutrition_optimization.constants import data_keys, models, paths
-from vivarium_inputs import globals as vi_globals
 
 
 ############################
