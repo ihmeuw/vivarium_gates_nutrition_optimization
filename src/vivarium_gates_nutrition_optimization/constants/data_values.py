@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 
 from vivarium_gates_nutrition_optimization.constants import data_keys, models, paths
+from vivarium_inputs import globals as vi_globals
 
 
 ############################
@@ -100,12 +101,14 @@ RR_SCALAR = (
     10.0  # Conversion factor between hemoglobin units (g/L) and relative risk units (g/dL)
 )
 
+draw_count = vi_globals.NUM_DRAWS
+
 PREGNANCY_CORRECTION_FACTORS = {
     data_keys.HEMOGLOBIN.MEAN: pd.read_csv(
         paths.HEMOGLOBIN_PREGNANCY_ADJUSTMENT_FACTORS_CSV, index_col=0
     ).squeeze(),
     data_keys.HEMOGLOBIN.STANDARD_DEVIATION: pd.Series(
-        np.repeat(1.032920188, 500), [f"draw_{i}" for i in range(500)]
+        np.repeat(1.032920188, draw_count), [f"draw_{i}" for i in range(draw_count)]
     ),
 }
 PROBABILITY_MODERATE_MATERNAL_HEMORRHAGE = (0.85, 0.81, 0.89)

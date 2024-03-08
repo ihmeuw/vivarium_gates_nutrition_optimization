@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 from vivarium.framework.randomness import get_hash
+from vivarium_inputs import globals as vi_globals
 
 
 def get_norm_from_quantiles(
@@ -85,12 +86,13 @@ def generate_vectorized_lognormal_draws(
         stdnorm_quantiles[1] - stdnorm_quantiles[0]
     )
 
+    draw_count = vi_globals.NUM_DRAWS
     distribution = stats.lognorm(s=sigma, scale=mean[sample_mask])
     np.random.seed(get_hash(seed))
-    lognorm_samples = distribution.rvs(size=(500, sample_mask.sum())).T
+    lognorm_samples = distribution.rvs(size=(draw_count, sample_mask.sum())).T
     lognorm_samples = pd.DataFrame(lognorm_samples, index=df[sample_mask].index)
 
-    use_means = np.tile(mean[~sample_mask], 500).reshape((500, ~sample_mask.sum())).T
+    use_means = np.tile(mean[~sample_mask], draw_count).reshape((draw_count, ~sample_mask.sum())).T
     use_means = pd.DataFrame(use_means, index=df[~sample_mask].index)
     draws = pd.concat([lognorm_samples, use_means])
     draws = draws.sort_index().rename(columns=lambda d: f"draw_{d}")

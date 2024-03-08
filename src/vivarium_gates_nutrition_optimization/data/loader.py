@@ -323,8 +323,9 @@ def load_hemoglobin_maternal_hemorrhage_rr(key: str, location: str) -> pd.DataFr
     demographic_dimensions = get_data(data_keys.POPULATION.DEMOGRAPHY, location)
 
     rng = np.random.default_rng(get_hash(f"{key}_{location}"))
+    draw_count = vi_globals.NUM_DRAWS
     maternal_hemorrhage_rr = pd.DataFrame(
-        np.tile(dist.rvs(size=500, random_state=rng), (len(demographic_dimensions), 1)),
+        np.tile(dist.rvs(size=draw_count, random_state=rng), (len(demographic_dimensions), 1)),
         columns=vi_globals.DRAW_COLUMNS,
         index=demographic_dimensions.index,
     )
@@ -376,8 +377,9 @@ def get_moderate_hemorrhage_probability(key: str, location: str) -> pd.DataFrame
     dist = sampling.get_truncnorm_from_quantiles(*hemorrhage_dist_params, lower_clip=0.1)
     # random seed
     rng = np.random.default_rng(get_hash(f"hemorrhage_severity"))
+    draw_count = vi_globals.NUM_DRAWS
     moderate_hemorrhage_probability = pd.DataFrame(
-        [dist.rvs(size=500, random_state=rng)],
+        [dist.rvs(size=draw_count, random_state=rng)],
         columns=vi_globals.DRAW_COLUMNS,
         index=["probability"],
     )
@@ -506,8 +508,9 @@ def load_ifa_effect_size(key: str, location: str) -> pd.DataFrame:
     loc, scale = data_values.IFA_EFFECT_SIZE
     dist = stats.norm(loc, scale)
     rng = np.random.default_rng(get_hash(f"ifa_effect_size_{location}"))
+    draw_count = vi_globals.NUM_DRAWS
     ifa_effect_size = pd.DataFrame(
-        [dist.rvs(size=500, random_state=rng)],
+        [dist.rvs(size=draw_count, random_state=rng)],
         columns=vi_globals.DRAW_COLUMNS,
         index=["value"],
     )
@@ -524,8 +527,9 @@ def load_supplementation_stillbirth_rr(key: str, location: str) -> pd.DataFrame:
     # Don't hash on key because we want simulants to have the same percentile
     # for MMS RR as for BEP
     rng = np.random.default_rng(get_hash(f"stillbirth_rr_{location}"))
+    draw_count = vi_globals.NUM_DRAWS
     stillbirth_rr = pd.DataFrame(
-        [dist.rvs(size=500, random_state=rng)],
+        [dist.rvs(size=draw_count, random_state=rng)],
         columns=vi_globals.DRAW_COLUMNS,
         index=["relative_risk"],
     )

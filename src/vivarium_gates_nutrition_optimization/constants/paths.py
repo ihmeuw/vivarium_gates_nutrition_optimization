@@ -5,7 +5,7 @@ from vivarium_gates_nutrition_optimization.constants import metadata
 
 BASE_DIR = Path(vivarium_gates_nutrition_optimization.__file__).resolve().parent
 
-ARTIFACT_ROOT = Path(f"/team/simulation_science/pub/models/vivarium_gates_nutrition_optimization/artifacts/{metadata.PROJECT_NAME}/")
+ARTIFACT_ROOT = Path(f"/mnt/team/simulation_science/pub/models/{metadata.PROJECT_NAME}/artifacts/")
 MODEL_SPEC_DIR = BASE_DIR / "model_specifications"
 RESULTS_ROOT = Path(f"/share/costeffectiveness/results/{metadata.PROJECT_NAME}/")
 CSV_RAW_DATA_ROOT = BASE_DIR / "data" / "raw_data"

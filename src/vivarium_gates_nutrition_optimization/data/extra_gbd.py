@@ -18,12 +18,11 @@ def load_lbwsg_exposure(location: str):
         gbd_id=entity.gbd_id,
         source=gbd_constants.SOURCES.EXPOSURE,
         location_id=location_id,
+        year_id=2021,
         sex_id=gbd_constants.SEX.MALE + gbd_constants.SEX.FEMALE,
         age_group_id=164,  # Birth prevalence
         release_id = gbd_constants.RELEASE_IDS.GBD_2021,
     )
-    # This data set is big, so let's reduce it by a factor of ~40
-    data = data[data["year_id"] == 2021].drop(columns="year_id")
     return data
 
 
