@@ -20,6 +20,7 @@ class _Durations(NamedTuple):
 
 
 DURATIONS = _Durations()
+draw_count = vi_globals.NUM_DRAWS
 
 
 INFANT_MALE_PERCENTAGES = {
@@ -100,8 +101,6 @@ TMREL_HEMOGLOBIN_ON_MATERNAL_DISORDERS = 120.0
 RR_SCALAR = (
     10.0  # Conversion factor between hemoglobin units (g/L) and relative risk units (g/dL)
 )
-
-draw_count = vi_globals.NUM_DRAWS
 
 PREGNANCY_CORRECTION_FACTORS = {
     data_keys.HEMOGLOBIN.MEAN: pd.read_csv(

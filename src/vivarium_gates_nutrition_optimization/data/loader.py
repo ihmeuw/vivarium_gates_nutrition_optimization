@@ -37,7 +37,8 @@ from vivarium_gates_nutrition_optimization.data import extra_gbd, sampling
 from vivarium_gates_nutrition_optimization.data.utilities import get_entity
 from vivarium_gates_nutrition_optimization.utilities import get_random_variable_draws
 
-##Note: need to remove all instances where we limit the size of the data manually. This will be done when RT updates in the input files. 
+##Note: need to remove all instances where we limit the size of the data manually. This will be done when RT updates in the input files.
+
 
 def get_data(lookup_key: str, location: str) -> pd.DataFrame:
     """Retrieves data from an appropriate source.
@@ -325,7 +326,9 @@ def load_hemoglobin_maternal_hemorrhage_rr(key: str, location: str) -> pd.DataFr
     rng = np.random.default_rng(get_hash(f"{key}_{location}"))
     draw_count = vi_globals.NUM_DRAWS
     maternal_hemorrhage_rr = pd.DataFrame(
-        np.tile(dist.rvs(size=draw_count, random_state=rng), (len(demographic_dimensions), 1)),
+        np.tile(
+            dist.rvs(size=draw_count, random_state=rng), (len(demographic_dimensions), 1)
+        ),
         columns=vi_globals.DRAW_COLUMNS,
         index=demographic_dimensions.index,
     )
@@ -440,7 +443,7 @@ def get_hemoglobin_data(key: str, location: str) -> pd.DataFrame:
 
     location_id = utility_data.get_location_id(location)
     hemoglobin_data = gbd.get_modelable_entity_draws(me_id=me_id, location_id=location_id)
-    
+
     hemoglobin_data = reshape_to_vivarium_format(hemoglobin_data, location)
     return hemoglobin_data * correction_factors
 
