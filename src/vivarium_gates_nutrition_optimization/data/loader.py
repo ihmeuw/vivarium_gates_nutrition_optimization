@@ -12,6 +12,7 @@ for an example.
 
    No logging is done here. Logging is done in vivarium inputs itself and forwarded.
 """
+from typing import List, Union
 
 import numpy as np
 import pandas as pd
@@ -40,7 +41,9 @@ from vivarium_gates_nutrition_optimization.utilities import get_random_variable_
 ##Note: need to remove all instances where we limit the size of the data manually. This will be done when RT updates in the input files.
 
 
-def get_data(lookup_key: str, location: str) -> pd.DataFrame:
+def get_data(
+    lookup_key: str, location: str, fetch_subnationals: bool = False
+) -> pd.DataFrame:
     """Retrieves data from an appropriate source.
 
     Parameters
@@ -93,7 +96,22 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
         data_keys.MATERNAL_INTERVENTIONS.BEP_STILLBIRTH_RR: load_supplementation_stillbirth_rr,
         data_keys.POPULATION.BACKGROUND_MORBIDITY: load_background_morbidity,
     }
-    return mapping[lookup_key](lookup_key, location)
+
+    if (
+        lookup_key
+        in [
+            data_keys.LBWSG.DISTRIBUTION,
+            data_keys.LBWSG.CATEGORIES,
+            data_keys.LBWSG.EXPOSURE,
+        ]
+        or not fetch_subnationals
+    ):
+        data = mapping[lookup_key](lookup_key, location)
+    else:
+        subnational_ids = fetch_subnational_ids(location)
+        data = mapping[lookup_key](lookup_key, subnational_ids)
+
+    return data
 
 
 def load_population_location(key: str, location: str) -> str:
@@ -126,10 +144,14 @@ def load_theoretical_minimum_risk_life_expectancy(key: str, location: str) -> pd
     return interface.get_theoretical_minimum_risk_life_expectancy()
 
 
-def load_standard_data(key: str, location: str) -> pd.DataFrame:
+def load_standard_data(
+    key: str, location: Union[int, str], fetch_subnationals: bool = True
+) -> pd.DataFrame:
     key = EntityKey(key)
     entity = get_entity(key)
-    return interface.get_measure(entity, key.measure, location).droplevel("location")
+    data = interface.get_measure(entity, key.measure, location)
+
+    return data
 
 
 # TODO: Remove this if/ when Vivarium Inputs implements the change directly
@@ -207,7 +229,7 @@ def load_asfr(key: str, location: str) -> pd.DataFrame:
     asfr = load_standard_data(key, location)
     asfr = asfr.reset_index()
     asfr_pivot = asfr.pivot(
-        index=[col for col in metadata.ARTIFACT_INDEX_COLUMNS if col != "location"],
+        index=[col for col in metadata.ARTIFACT_INDEX_COLUMNS],
         columns="parameter",
         values="value",
     )
@@ -559,3 +581,14 @@ def reshape_to_vivarium_format(df, location):
     df = vi_utils.sort_hierarchical_data(df)
     df.index = df.index.droplevel("location")
     return df
+
+
+def fetch_subnational_ids(location: int) -> List[int]:
+    location_id = gbd.get_location_id(location)
+    location_metadata = gbd.get_location_path_to_global()
+    subnational_location_metadata = location_metadata.loc[
+        (location_metadata["path_to_top_parent"].apply(lambda x: str(location_id) in x))
+        & (location_metadata["location_id"] != location_id)
+    ]
+    subnational_location_ids = subnational_location_metadata["location_id"].tolist()
+    return subnational_location_ids

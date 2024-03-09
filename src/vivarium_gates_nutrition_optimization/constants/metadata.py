@@ -23,6 +23,7 @@ ARTIFACT_INDEX_COLUMNS = [
     "age_end",
     "year_start",
     "year_end",
+    "location",
 ]
 
 DRAW_COUNT = 1000

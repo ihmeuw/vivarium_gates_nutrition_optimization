@@ -68,7 +68,7 @@ def load_and_write_data(artifact: Artifact, key: str, location: str, replace: bo
         logger.debug(f"Data for {key} already in artifact.  Skipping...")
     else:
         logger.debug(f"Loading data for {key} for location {location}.")
-        data = loader.get_data(key, location)
+        data = loader.get_data(key, location, True)
         if key not in artifact:
             logger.debug(f"Writing data for {key} to artifact.")
             artifact.write(key, data)
