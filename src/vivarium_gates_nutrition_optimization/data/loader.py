@@ -296,7 +296,9 @@ def load_pregnant_maternal_disorders_incidence(key: str, location: str):
     pregnancy_end_rate = get_pregnancy_end_incidence(location)
     maternal_disorders_incidence = total_incidence / pregnancy_end_rate
     ## We have to normalize, since this comes to a probability with some values > 1
-    maternal_disorders_incidence = maternal_disorders_incidence.applymap(lambda value: 1 if value > 1 else value)
+    maternal_disorders_incidence = maternal_disorders_incidence.applymap(
+        lambda value: 1 if value > 1 else value
+    )
     return maternal_disorders_incidence.fillna(0)
 
 
@@ -313,7 +315,9 @@ def load_pregnant_maternal_hemorrhage_incidence(key: str, location: str):
     pregnancy_end_rate = get_pregnancy_end_incidence(location)
     maternal_hemorrhage_incidence = (mh_incidence - mh_csmr) / pregnancy_end_rate
     ## I'm not as sure we need to normalize here, but we may as well.
-    maternal_hemorrhage_incidence = maternal_hemorrhage_incidence.applymap(lambda value: 1 if value > 1 else value)
+    maternal_hemorrhage_incidence = maternal_hemorrhage_incidence.applymap(
+        lambda value: 1 if value > 1 else value
+    )
     return maternal_hemorrhage_incidence.fillna(0)
 
 
