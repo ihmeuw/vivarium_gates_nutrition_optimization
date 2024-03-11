@@ -51,34 +51,6 @@ class MaternalMortalityObserver(MortalityObserver):
         cause_of_death = models.MATERNAL_DISORDERS_MODEL_NAME
         self.causes_of_death += cause_of_death
 
-    # Overwrite the _register_mortality_observations method to include tracked
-    def _register_mortality_observations(
-        self, builder: Builder, cause: str, additional_pop_filter: str = ""
-    ) -> None:
-        pop_filter = (
-            'alive == "dead" and tracked == True'
-            if additional_pop_filter == ""
-            else f'alive == "dead" and tracked == True and {additional_pop_filter}'
-        )
-        builder.results.register_observation(
-            name=f"death_due_to_{cause}",
-            pop_filter=pop_filter,
-            aggregator=self.count_deaths,
-            requires_columns=self.required_death_columns,
-            additional_stratifications=self.config.include,
-            excluded_stratifications=self.config.exclude,
-            when="collect_metrics",
-        )
-        builder.results.register_observation(
-            name=f"ylls_due_to_{cause}",
-            pop_filter=pop_filter,
-            aggregator=self.calculate_ylls,
-            requires_columns=self.required_yll_columns,
-            additional_stratifications=self.config.include,
-            excluded_stratifications=self.config.exclude,
-            when="collect_metrics",
-        )
-
 
 class AnemiaObserver(Component):
     CONFIGURATION_DEFAULTS = {
