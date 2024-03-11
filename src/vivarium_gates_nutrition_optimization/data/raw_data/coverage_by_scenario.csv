@@ -2,6 +2,6 @@ scenario,normal_bmi,low_bmi
 zero_coverage,uncovered,uncovered
 baseline,maybe_ifa,maybe_ifa
 mms,mms,mms
-universal_bep,bep,bep
-targeted_bep_no_mms,maybe_ifa,bep
+ifa,ifa,ifa
+targeted_bep_ifa,ifa,bep
 targeted_bep_mms,mms,bep

@@ -1,3 +1,7 @@
+**1.0.2 - 03/11/24**
+
+ - Remove universal BEP scenario and targeted BEP/no MMS scenario and include universal IFA scenario and targeted BEP/IFA scenario
+
 **1.0.1 - 10/02/23**
 
  - Refactor to use vivarium Components

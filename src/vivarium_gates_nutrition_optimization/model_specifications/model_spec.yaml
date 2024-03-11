@@ -2,9 +2,9 @@ components:
     vivarium_public_health:
         population:
             - BasePopulation()
-        # metrics:
-        #     - DiseaseObserver("maternal_disorders")
-        #     - DiseaseObserver("maternal_hemorrhage")
+#        metrics:
+#            - DiseaseObserver("maternal_disorders")
+#            - DiseaseObserver("maternal_hemorrhage")
 
     vivarium_gates_nutrition_optimization:
         components:
@@ -20,7 +20,7 @@ components:
             - MaternalInterventions()
             - ResultsStratifier()
             - PregnancyObserver()
-            # - PregnancyOutcomeObserver()
+            - PregnancyOutcomeObserver()
             - BirthRecorder()
             - MaternalMortalityObserver()
             - DisabilityObserver()
@@ -31,7 +31,7 @@ components:
 configuration:
     input_data:
         input_draw_number: 0
-        artifact_path: '/mnt/team/simulation_science/costeffectiveness/artifacts/vivarium_gates_nutrition_optimization/model8.3/ethiopia.hdf'
+        artifact_path: '/mnt/team/simulation_science/pub/models/vivarium_gates_nutrition_optimization/artifacts/model10.0/nigeria.hdf'
     interpolation:
         order: 0
         extrapolate: True
