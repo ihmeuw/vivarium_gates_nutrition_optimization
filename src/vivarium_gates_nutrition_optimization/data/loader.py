@@ -593,7 +593,7 @@ def reshape_to_vivarium_format(df, location):
 
 
 def fetch_subnational_ids(location: int) -> List[int]:
-    location_id = gbd.get_location_id(location)
+    location_id = gbd.get_location_ids(location)
     location_metadata = gbd.get_location_path_to_global()
     subnational_location_metadata = location_metadata.loc[
         (location_metadata["path_to_top_parent"].apply(lambda x: str(location_id) in x))
