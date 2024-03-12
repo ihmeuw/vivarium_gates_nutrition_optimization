@@ -51,30 +51,6 @@ class MaternalMortalityObserver(MortalityObserver):
         cause_of_death = models.MATERNAL_DISORDERS_MODEL_NAME
         self.causes_of_death += cause_of_death
 
-        builder.results.register_observation(
-            name=f"death_due_to_{cause_of_death}",
-            pop_filter=f'alive == "dead" and cause_of_death == "{cause_of_death}" and tracked == True',
-            aggregator=self.count_cause_specific_deaths,
-            requires_columns=["alive", "cause_of_death", "exit_time"],
-            additional_stratifications=self.config.include,
-            excluded_stratifications=self.config.exclude,
-            when="collect_metrics",
-        )
-        builder.results.register_observation(
-            name=f"ylls_due_to_{cause_of_death}",
-            pop_filter=f'alive == "dead" and cause_of_death == "{cause_of_death}" and tracked == True',
-            aggregator=self.calculate_cause_specific_ylls,
-            requires_columns=[
-                "alive",
-                "cause_of_death",
-                "exit_time",
-                "years_of_life_lost",
-            ],
-            additional_stratifications=self.config.include,
-            excluded_stratifications=self.config.exclude,
-            when="collect_metrics",
-        )
-
 
 class AnemiaObserver(Component):
     CONFIGURATION_DEFAULTS = {

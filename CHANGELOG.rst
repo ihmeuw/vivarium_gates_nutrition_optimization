@@ -1,3 +1,7 @@
+**1.0.3 - 3/12/24**
+
+ - Update Mortality observer to incorporate update in VPH Mortality Observer
+
 **1.0.2 - 03/11/24**
 
  - Remove universal BEP scenario and targeted BEP/no MMS scenario and include universal IFA scenario and targeted BEP/IFA scenario
