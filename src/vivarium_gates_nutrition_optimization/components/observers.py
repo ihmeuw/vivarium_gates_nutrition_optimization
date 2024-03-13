@@ -47,9 +47,8 @@ class PregnancyObserver(DiseaseObserver):
 
 class MaternalMortalityObserver(MortalityObserver):
     def setup(self, builder: Builder):
+        self.causes_of_death += [models.MATERNAL_DISORDERS_MODEL_NAME]
         super().setup(builder)
-        cause_of_death = models.MATERNAL_DISORDERS_MODEL_NAME
-        self.causes_of_death += cause_of_death
 
 
 class AnemiaObserver(Component):
