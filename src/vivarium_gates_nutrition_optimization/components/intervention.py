@@ -73,10 +73,10 @@ class MaternalInterventions(Component):
         pop = self.population_view.subview(["maternal_bmi_anemia_category"]).get(
             pop_data.index
         )
-        
-        if self.scenario == 'ifa':
+
+        if self.scenario == "ifa":
             pop_update = pd.DataFrame(
-                {"intervention": 'ifa'},
+                {"intervention": "ifa"},
                 index=pop.index,
             )
         else:
