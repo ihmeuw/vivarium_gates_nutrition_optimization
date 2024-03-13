@@ -237,7 +237,7 @@ def load_asfr(key: str, location: Union[str, List[str]]) -> pd.DataFrame:
 
 def load_sbr(key: str, location: Union[str, List[str]]) -> pd.DataFrame:
     sbr = load_standard_data(key, location)
-    sbr = sbr.reorder_levels(["location", "parameter", "year_start", "year_end"]).loc[
+    sbr = sbr.reorder_levels(["parameter", "year_start", "year_end", "location"])[
         "value"
     ]
     return sbr
