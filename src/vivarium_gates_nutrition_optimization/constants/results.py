@@ -162,7 +162,7 @@ def RESULTS_MAP(kind):
         )
     df = pd.DataFrame(value_groups, columns=map(lambda x: x.lower(), fields))
     df["key"] = columns
-    df[
-        "measure"
-    ] = kind  # per researcher feedback, this column is useful, even when it's identical for all rows
+    df["measure"] = (
+        kind  # per researcher feedback, this column is useful, even when it's identical for all rows
+    )
     return df.set_index("key").sort_index()

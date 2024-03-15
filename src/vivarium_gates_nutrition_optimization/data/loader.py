@@ -12,6 +12,7 @@ for an example.
 
    No logging is done here. Logging is done in vivarium inputs itself and forwarded.
 """
+
 from typing import List, Union
 
 import numpy as np
@@ -80,23 +81,23 @@ def get_data(
         data_keys.MATERNAL_DISORDERS.RAW_INCIDENCE_RATE: load_raw_incidence_data,
         data_keys.MATERNAL_DISORDERS.CSMR: load_maternal_csmr,
         data_keys.MATERNAL_DISORDERS.MORTALITY_PROBABILITY: load_maternal_disorders_mortality_probability,
-        data_keys.MATERNAL_DISORDERS.INCIDENT_PROBABILITY: load_pregnant_maternal_disorders_incidence,
+        # data_keys.MATERNAL_DISORDERS.INCIDENT_PROBABILITY: load_pregnant_maternal_disorders_incidence,
         data_keys.MATERNAL_DISORDERS.YLDS: load_maternal_disorders_ylds,
         data_keys.MATERNAL_DISORDERS.RR_ATTRIBUTABLE_TO_HEMOGLOBIN: load_hemoglobin_maternal_disorders_rr,
-        data_keys.MATERNAL_DISORDERS.PAF_ATTRIBUTABLE_TO_HEMOGLOBIN: load_hemoglobin_maternal_disorders_paf,
+        # data_keys.MATERNAL_DISORDERS.PAF_ATTRIBUTABLE_TO_HEMOGLOBIN: load_hemoglobin_maternal_disorders_paf,
         data_keys.MATERNAL_HEMORRHAGE.RAW_INCIDENCE_RATE: load_raw_incidence_data,
         data_keys.MATERNAL_HEMORRHAGE.CSMR: load_maternal_csmr,
-        data_keys.MATERNAL_HEMORRHAGE.INCIDENT_PROBABILITY: load_pregnant_maternal_hemorrhage_incidence,
+        # data_keys.MATERNAL_HEMORRHAGE.INCIDENT_PROBABILITY: load_pregnant_maternal_hemorrhage_incidence,
         data_keys.MATERNAL_HEMORRHAGE.RR_ATTRIBUTABLE_TO_HEMOGLOBIN: load_hemoglobin_maternal_hemorrhage_rr,
-        data_keys.MATERNAL_HEMORRHAGE.PAF_ATTRIBUTABLE_TO_HEMOGLOBIN: load_hemoglobin_maternal_hemorrhage_paf,
+        # data_keys.MATERNAL_HEMORRHAGE.PAF_ATTRIBUTABLE_TO_HEMOGLOBIN: load_hemoglobin_maternal_hemorrhage_paf,
         data_keys.MATERNAL_HEMORRHAGE.MODERATE_HEMORRHAGE_PROBABILITY: get_moderate_hemorrhage_probability,
         data_keys.HEMOGLOBIN.MEAN: get_hemoglobin_data,
         data_keys.HEMOGLOBIN.STANDARD_DEVIATION: get_hemoglobin_data,
-        data_keys.HEMOGLOBIN.PREGNANT_PROPORTION_WITH_HEMOGLOBIN_BELOW_70: get_hemoglobin_csv_data,
-        data_keys.MATERNAL_BMI.PREVALENCE_LOW_BMI_ANEMIC: load_bmi_prevalence,
-        data_keys.MATERNAL_BMI.PREVALENCE_LOW_BMI_NON_ANEMIC: load_bmi_prevalence,
-        data_keys.MATERNAL_INTERVENTIONS.IFA_COVERAGE: load_ifa_coverage,
-        data_keys.MATERNAL_INTERVENTIONS.IFA_EFFECT_SIZE: load_ifa_effect_size,
+        # data_keys.HEMOGLOBIN.PREGNANT_PROPORTION_WITH_HEMOGLOBIN_BELOW_70: get_hemoglobin_csv_data,
+        # data_keys.MATERNAL_BMI.PREVALENCE_LOW_BMI_ANEMIC: load_bmi_prevalence,
+        # data_keys.MATERNAL_BMI.PREVALENCE_LOW_BMI_NON_ANEMIC: load_bmi_prevalence,
+        # data_keys.MATERNAL_INTERVENTIONS.IFA_COVERAGE: load_ifa_coverage,
+        # data_keys.MATERNAL_INTERVENTIONS.IFA_EFFECT_SIZE: load_ifa_effect_size,
         data_keys.MATERNAL_INTERVENTIONS.MMS_STILLBIRTH_RR: load_supplementation_stillbirth_rr,
         data_keys.MATERNAL_INTERVENTIONS.BEP_STILLBIRTH_RR: load_supplementation_stillbirth_rr,
         data_keys.POPULATION.BACKGROUND_MORBIDITY: load_background_morbidity,
@@ -237,9 +238,7 @@ def load_asfr(key: str, location: Union[str, List[str]]) -> pd.DataFrame:
 
 def load_sbr(key: str, location: Union[str, List[str]]) -> pd.DataFrame:
     sbr = load_standard_data(key, location)
-    sbr = sbr.reorder_levels(["parameter", "year_start", "year_end", "location"])[
-        "value"
-    ]
+    sbr = sbr.reorder_levels(["parameter", "year_start", "year_end", "location"])["value"]
     return sbr
 
 
@@ -395,7 +394,9 @@ def load_hemoglobin_maternal_disorders_rr(
 def load_hemoglobin_maternal_disorders_paf(
     key: str, location: Union[str, List[str]]
 ) -> pd.DataFrame:
-    location_id = utility_data.get_location_id(location)
+    location_id = (
+        utility_data.get_location_id(location) if isinstance(location, str) else location
+    )
     demography = get_data(data_keys.POPULATION.DEMOGRAPHY, location)
 
     data = pd.read_csv(paths.HEMOGLOBIN_MATERNAL_DISORDERS_PAF_CSV)
@@ -479,7 +480,9 @@ def get_hemoglobin_data(key: str, location: Union[str, List[str]]) -> pd.DataFra
     }[key]
     correction_factors = data_values.PREGNANCY_CORRECTION_FACTORS[key]
 
-    location_id = utility_data.get_location_id(location)
+    location_id = (
+        utility_data.get_location_id(location) if isinstance(location, str) else location
+    )
     hemoglobin_data = gbd.get_modelable_entity_draws(me_id=me_id, location_id=location_id)
 
     hemoglobin_data = reshape_to_vivarium_format(hemoglobin_data, location)
@@ -487,7 +490,9 @@ def get_hemoglobin_data(key: str, location: Union[str, List[str]]) -> pd.DataFra
 
 
 def get_hemoglobin_csv_data(key: str, location: Union[str, List[str]]):
-    location_id = utility_data.get_location_id(location)
+    location_id = (
+        utility_data.get_location_id(location) if isinstance(location, str) else location
+    )
     demography = get_data(data_keys.POPULATION.DEMOGRAPHY, location)
 
     data = pd.read_csv(paths.PREGNANT_PROPORTION_WITH_HEMOGLOBIN_BELOW_70_CSV)
@@ -507,7 +512,9 @@ def get_hemoglobin_csv_data(key: str, location: Union[str, List[str]]):
 
 
 def load_bmi_prevalence(key: str, location: Union[str, List[str]]):
-    location_id = utility_data.get_location_id(location)
+    location_id = (
+        utility_data.get_location_id(location) if isinstance(location, str) else location
+    )
     demography = get_data(data_keys.POPULATION.DEMOGRAPHY, location)
 
     path = {
@@ -527,7 +534,7 @@ def load_bmi_prevalence(key: str, location: Union[str, List[str]]):
     data = data.reindex(demography.index, level="age_start").fillna(0.0)
 
     data = vi_utils.sort_hierarchical_data(data)
-    data.index = data.index.droplevel("location")
+    # data.index = data.index.droplevel("location")
 
     return data
 
@@ -541,7 +548,7 @@ def load_ifa_coverage(key: str, location: Union[str, List[str]]) -> pd.DataFrame
     df = pd.read_csv(
         paths.CSV_RAW_DATA_ROOT / "baseline_ifa_coverage" / (location + ".csv"), index_col=0
     )
-    df = df.drop(columns=["location_id", "location_name"]).set_index(["draw"]).T
+    df = df.drop(columns=["location_id"]).set_index(["location_name", "draw"]).T
     return df
 
 

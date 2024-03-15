@@ -9,6 +9,7 @@ Some degree of verbosity/boilerplate is fine in the interest of transparency.
    Logging in this module should be done at the ``debug`` level.
 
 """
+
 from pathlib import Path
 
 import pandas as pd

@@ -81,9 +81,9 @@ def read_data_by_draw(artifact_path: str, key: str, draw: int) -> pd.DataFrame:
     data = pd.concat([index, draw], axis=1)
     data = data.drop(columns="location")
     data = pivot_categorical(data)
-    data[
-        project_globals.LBWSG_MISSING_CATEGORY.CAT
-    ] = project_globals.LBWSG_MISSING_CATEGORY.EXPOSURE
+    data[project_globals.LBWSG_MISSING_CATEGORY.CAT] = (
+        project_globals.LBWSG_MISSING_CATEGORY.EXPOSURE
+    )
     return data
 
 

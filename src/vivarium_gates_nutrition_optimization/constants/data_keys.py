@@ -69,7 +69,7 @@ LBWSG = __LowBirthWeightShortGestation()
 
 class __MaternalDisorders(NamedTuple):
     RAW_INCIDENCE_RATE: str = "cause.maternal_disorders.raw_incidence_rate"
-    INCIDENT_PROBABILITY: str = "cause.maternal_disorders.incident_probability"
+    # INCIDENT_PROBABILITY: str = "cause.maternal_disorders.incident_probability"
     CSMR: str = "cause.maternal_disorders.cause_specific_mortality_rate"
     MORTALITY_PROBABILITY: str = "cause.maternal_disorders.mortality_probability"
     YLDS: str = "cause.maternal_disorders.ylds"
@@ -77,7 +77,7 @@ class __MaternalDisorders(NamedTuple):
     RR_ATTRIBUTABLE_TO_HEMOGLOBIN: str = (
         "risk_factor.hemoglobin_on_maternal_disorder.relative_risk"
     )
-    PAF_ATTRIBUTABLE_TO_HEMOGLOBIN: str = "risk_factor.hemoglobin_on_maternal_disorder.paf"
+    # PAF_ATTRIBUTABLE_TO_HEMOGLOBIN: str = "risk_factor.hemoglobin_on_maternal_disorder.paf"
 
     @property
     def name(self):
@@ -94,12 +94,12 @@ MATERNAL_DISORDERS = __MaternalDisorders()
 class __MaternalHemorrhage(NamedTuple):
     RAW_INCIDENCE_RATE: str = "cause.maternal_hemorrhage.raw_incidence_rate"
     CSMR: str = "cause.maternal_hemorrhage.cause_specific_mortality_rate"
-    INCIDENT_PROBABILITY: str = "cause.maternal_hemorrhage.incident_probability"
+    # INCIDENT_PROBABILITY: str = "cause.maternal_hemorrhage.incident_probability"
 
     RR_ATTRIBUTABLE_TO_HEMOGLOBIN: str = (
         "risk_factor.hemoglobin_on_maternal_hemorrhage.relative_risk"
     )
-    PAF_ATTRIBUTABLE_TO_HEMOGLOBIN: str = "risk_factor.hemoglobin_on_maternal_hemorrhage.paf"
+    # PAF_ATTRIBUTABLE_TO_HEMOGLOBIN: str = "risk_factor.hemoglobin_on_maternal_hemorrhage.paf"
 
     MODERATE_HEMORRHAGE_PROBABILITY: str = (
         "covariate.moderate_hemorrhage_probability.estimate"
@@ -122,9 +122,9 @@ class _Hemoglobin(NamedTuple):
     STANDARD_DEVIATION: TargetString = TargetString(
         "risk_factor.hemoglobin.standard_deviation"
     )
-    PREGNANT_PROPORTION_WITH_HEMOGLOBIN_BELOW_70: TargetString = TargetString(
-        "risk_factor.hemoglobin.pregnant_proportion_below_70_gL"
-    )
+    # PREGNANT_PROPORTION_WITH_HEMOGLOBIN_BELOW_70: TargetString = TargetString(
+    #     "risk_factor.hemoglobin.pregnant_proportion_below_70_gL"
+    # )
 
     @property
     def name(self):
@@ -139,8 +139,8 @@ HEMOGLOBIN = _Hemoglobin()
 
 
 class __MaternalBMI(NamedTuple):
-    PREVALENCE_LOW_BMI_ANEMIC: str = "maternal_bmi.prevalance_low_bmi_anemic"
-    PREVALENCE_LOW_BMI_NON_ANEMIC: str = "maternal_bmi.prevalence_low_bmi_non_anemic"
+    # PREVALENCE_LOW_BMI_ANEMIC: str = "maternal_bmi.prevalance_low_bmi_anemic"
+    # PREVALENCE_LOW_BMI_NON_ANEMIC: str = "maternal_bmi.prevalence_low_bmi_non_anemic"
 
     @property
     def name(self):
@@ -155,8 +155,8 @@ MATERNAL_BMI = __MaternalBMI()
 
 
 class __MaternalInterventions(NamedTuple):
-    IFA_COVERAGE: str = "maternal_interventions.ifa_coverage"
-    IFA_EFFECT_SIZE: str = "maternal_interventions.ifa_effect_size"
+    # IFA_COVERAGE: str = "maternal_interventions.ifa_coverage"
+    # IFA_EFFECT_SIZE: str = "maternal_interventions.ifa_effect_size"
     MMS_STILLBIRTH_RR: str = "maternal_interventions.mms_stillbirth_rr"
     BEP_STILLBIRTH_RR: str = "maternal_interventions.bep_stillbirth_rr"
 
@@ -172,7 +172,7 @@ class __MaternalInterventions(NamedTuple):
 MATERNAL_INTERVENTIONS = __MaternalInterventions()
 
 MAKE_ARTIFACT_KEY_GROUPS = [
-    POPULATION,
+    #  POPULATION,
     PREGNANCY,
     LBWSG,
     MATERNAL_DISORDERS,

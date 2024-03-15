@@ -207,9 +207,11 @@ class DisabilityObserver(DisabilityObserver_):
             )
             builder.results.register_observation(
                 name=f"ylds_due_to_{cause_state.state_id}",
-                pop_filter=base_query
-                if cause_state.state_id == "maternal_disorders"
-                else base_query + ' and pregnancy != "parturition"',
+                pop_filter=(
+                    base_query
+                    if cause_state.state_id == "maternal_disorders"
+                    else base_query + ' and pregnancy != "parturition"'
+                ),
                 aggregator_sources=[cause_disability_weight_pipeline_name],
                 aggregator=self.disability_weight_aggregator,
                 requires_columns=["alive", "pregnancy"],
