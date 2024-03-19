@@ -13,7 +13,7 @@ components:
             - MaternalDisorders()
             - MaternalHemorrhage()
             - MaternalMortality()
-            - BackgroundMorbidity()
+            #- BackgroundMorbidity()
             - Hemoglobin()
             - Anemia()
             - MaternalBMIExposure()
@@ -24,8 +24,8 @@ components:
             - BirthRecorder()
             - MaternalMortalityObserver()
             - DisabilityObserver()
-            # - AnemiaObserver()
-            # - MaternalBMIObserver()
+            - AnemiaObserver()
+            - MaternalBMIObserver()
             - MaternalInterventionObserver()
 
 configuration:
@@ -59,3 +59,7 @@ configuration:
     stratification:
         default:
             - 'age_group'
+        anemia:
+            - 'pregnancy'
+        pregnancy: 
+            - 'pregnancy_outcome'

@@ -91,7 +91,7 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
         data_keys.MATERNAL_INTERVENTIONS.IFA_EFFECT_SIZE: load_ifa_effect_size,
         data_keys.MATERNAL_INTERVENTIONS.MMS_STILLBIRTH_RR: load_supplementation_stillbirth_rr,
         data_keys.MATERNAL_INTERVENTIONS.BEP_STILLBIRTH_RR: load_supplementation_stillbirth_rr,
-        data_keys.POPULATION.BACKGROUND_MORBIDITY: load_background_morbidity,
+        #data_keys.POPULATION.BACKGROUND_MORBIDITY: load_background_morbidity,
     }
     return mapping[lookup_key](lookup_key, location)
 
@@ -450,6 +450,10 @@ def get_hemoglobin_data(key: str, location: str) -> pd.DataFrame:
 
     location_id = utility_data.get_location_id(location)
     hemoglobin_data = gbd.get_modelable_entity_draws(me_id=me_id, location_id=location_id)
+
+    existing_draw_cols = [col for col in hemoglobin_data if col.startswith("draw_")]
+    extra_draw_cols = [col for col in existing_draw_cols if col not in vi_globals.DRAW_COLUMNS]
+    hemoglobin_data = hemoglobin_data.drop(columns=extra_draw_cols, errors="ignore")
 
     hemoglobin_data = reshape_to_vivarium_format(hemoglobin_data, location)
     return hemoglobin_data * correction_factors
