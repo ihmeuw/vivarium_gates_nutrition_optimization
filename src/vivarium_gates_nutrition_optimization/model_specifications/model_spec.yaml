@@ -60,6 +60,6 @@ configuration:
         default:
             - 'age_group'
         anemia:
-            - 'pregnancy'
+            include: ['pregnancy']
         pregnancy: 
-            - 'pregnancy_outcome'
+            include: ['pregnancy_outcome']
