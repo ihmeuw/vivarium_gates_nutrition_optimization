@@ -170,8 +170,8 @@ class PregnancyOutcomeObserver(Component):
         for outcome in models.PREGNANCY_OUTCOMES:
             builder.results.register_observation(
                 name=f"pregnancy_outcome_{outcome}_count",
-                pop_filter=f'alive == "alive" and pregnancy_outcome == "{outcome}" and tracked == True',
-                requires_columns=["alive", "pregnancy_outcome"],
+                pop_filter=f'alive == "alive" and previous_pregnancy == "pregnant" and pregnancy == "parturition" and pregnancy_outcome == "{outcome}" and tracked == True',
+                requires_columns=["alive","previous_pregnancy", "pregnancy", "pregnancy_outcome"],
                 additional_stratifications=self.config.include,
                 excluded_stratifications=self.config.exclude,
             )
