@@ -266,10 +266,12 @@ def load_maternal_disorders_ylds(key: str, location: str) -> pd.DataFrame:
     all_md_ylds = extra_gbd.get_maternal_disorder_ylds(location)
     all_md_ylds = all_md_ylds[groupby_cols + draw_cols]
     all_md_ylds = reshape_to_vivarium_format(all_md_ylds, location)
+    #all_md_ylds = all_md_ylds.loc[all_md_ylds['year_start'] == 2021]
 
     anemia_ylds = extra_gbd.get_anemia_ylds(location)
     anemia_ylds = anemia_ylds.groupby(groupby_cols)[draw_cols].sum().reset_index()
     anemia_ylds = reshape_to_vivarium_format(anemia_ylds, location)
+    #anemia_ylds = anemia_ylds.loc[anemia_ylds['year_start'] == 2021]
 
     csmr = get_data(data_keys.MATERNAL_DISORDERS.CSMR, location)
     incidence = load_raw_incidence_data(

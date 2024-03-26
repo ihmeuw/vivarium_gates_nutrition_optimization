@@ -25,7 +25,7 @@ ARTIFACT_INDEX_COLUMNS = [
     "year_end",
 ]
 
-DRAW_COUNT = 1000
+DRAW_COUNT = 500
 ARTIFACT_COLUMNS = pd.Index([f"draw_{i}" for i in range(DRAW_COUNT)])
 
 
