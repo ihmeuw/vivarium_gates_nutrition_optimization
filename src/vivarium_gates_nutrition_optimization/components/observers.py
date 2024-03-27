@@ -164,6 +164,8 @@ class PregnancyOutcomeObserver(Component):
 
     # noinspection PyAttributeOutsideInit
     def setup(self, builder: Builder) -> None:
+        self.clock = builder.time.clock()
+        self.start_date = get_time_stamp(builder.configuration.time.start)
         self.step_size = builder.time.step_size()
         self.config = builder.configuration.stratification.pregnancy_outcomes
 
@@ -182,8 +184,10 @@ class PregnancyOutcomeObserver(Component):
     ###############
 
     def count_pregnancy_outcomes_at_initialization(self, x: pd.DataFrame) -> float:
-        breakpoint()
-        return len(x)
+        if self.clock() == self.start_date:
+            return len(x)
+        else:
+            return 0
 
 
 class DisabilityObserver(DisabilityObserver_):
