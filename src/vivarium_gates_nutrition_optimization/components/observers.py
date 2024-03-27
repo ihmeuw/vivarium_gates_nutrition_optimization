@@ -170,18 +170,20 @@ class PregnancyOutcomeObserver(Component):
         for outcome in models.PREGNANCY_OUTCOMES:
             builder.results.register_observation(
                 name=f"pregnancy_outcome_{outcome}_count",
-                pop_filter=f'alive == "alive" and tracked == True '
-                f'and previous_pregnancy == "pregnant" and pregnancy == "parturition" '
-                f'and pregnancy_outcome == "{outcome}"',
-                requires_columns=[
-                    "alive",
-                    "previous_pregnancy",
-                    "pregnancy",
-                    "pregnancy_outcome",
-                ],
+                pop_filter=f'pregnancy_outcome == "{outcome}"',
+                aggregator=self.count_pregnancy_outcomes_at_initialization,
+                requires_columns=["pregnancy_outcome"],
                 additional_stratifications=self.config.include,
                 excluded_stratifications=self.config.exclude,
             )
+
+    ###############
+    # Aggregators #
+    ###############
+
+    def count_pregnancy_outcomes_at_initialization(self, x: pd.DataFrame) -> float:
+        breakpoint()
+        return len(x)
 
 
 class DisabilityObserver(DisabilityObserver_):
