@@ -1,6 +1,6 @@
 **11.0 - 3/26/24**
 
- - Update to 2021 data for Ethiopia 
+ - Update to 2021 data for Ethiopia, bug-fix changes to pregnancy observation, changes to stratification (anemia by pregnancy state and pregnancy transitions by pregnancy outcomes), temporary removal of the IFA scenario, and removal of background morbidity.
 
 **1.0.3 - 3/12/24**
 
