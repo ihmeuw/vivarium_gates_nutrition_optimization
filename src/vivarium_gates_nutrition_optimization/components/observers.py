@@ -164,17 +164,30 @@ class PregnancyOutcomeObserver(Component):
 
     # noinspection PyAttributeOutsideInit
     def setup(self, builder: Builder) -> None:
+        self.clock = builder.time.clock()
+        self.start_date = get_time_stamp(builder.configuration.time.start)
         self.step_size = builder.time.step_size()
         self.config = builder.configuration.stratification.pregnancy_outcomes
 
         for outcome in models.PREGNANCY_OUTCOMES:
             builder.results.register_observation(
                 name=f"pregnancy_outcome_{outcome}_count",
-                pop_filter=f'alive == "alive" and pregnancy_outcome == "{outcome}" and tracked == True',
-                requires_columns=["alive", "pregnancy_outcome"],
+                pop_filter=f'pregnancy_outcome == "{outcome}"',
+                aggregator=self.count_pregnancy_outcomes_at_initialization,
+                requires_columns=["pregnancy_outcome"],
                 additional_stratifications=self.config.include,
                 excluded_stratifications=self.config.exclude,
             )
+
+    ###############
+    # Aggregators #
+    ###############
+
+    def count_pregnancy_outcomes_at_initialization(self, x: pd.DataFrame) -> float:
+        if self.clock() == self.start_date:
+            return len(x)
+        else:
+            return 0
 
 
 class DisabilityObserver(DisabilityObserver_):
