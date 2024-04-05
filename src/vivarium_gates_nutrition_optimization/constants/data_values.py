@@ -20,7 +20,7 @@ class _Durations(NamedTuple):
 
 
 DURATIONS = _Durations()
-draw_count = vi_globals.NUM_DRAWS
+draw_count = 500
 
 
 INFANT_MALE_PERCENTAGES = {
