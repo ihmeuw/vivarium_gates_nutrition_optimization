@@ -2,7 +2,6 @@ from typing import NamedTuple
 
 import numpy as np
 import pandas as pd
-from vivarium_inputs import globals as vi_globals
 
 from vivarium_gates_nutrition_optimization.constants import data_keys, models, paths
 
@@ -20,7 +19,7 @@ class _Durations(NamedTuple):
 
 
 DURATIONS = _Durations()
-draw_count = vi_globals.NUM_DRAWS
+draw_count = 500
 
 
 INFANT_MALE_PERCENTAGES = {
