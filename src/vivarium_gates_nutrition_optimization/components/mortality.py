@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import Any, Dict, List, Union
 
 import pandas as pd
 from vivarium import Component
@@ -9,6 +9,7 @@ from vivarium.framework.population import PopulationView, SimulantData
 from vivarium.framework.randomness import RandomnessStream
 from vivarium.framework.values import Pipeline
 from vivarium_public_health.population import Mortality
+from vivarium_public_health.utilities import get_lookup_columns
 
 from vivarium_gates_nutrition_optimization.constants import data_keys
 
@@ -26,6 +27,16 @@ class MaternalMortality(Mortality):
     def time_step_priority(self) -> int:
         return 9
 
+    @property
+    def configuration_defaults(self) -> Dict[str, Dict[str, Any]]:
+        return {
+            self.name: {
+                "data_sources": {
+                    "life_expectancy": "population.theoretical_minimum_risk_life_expectancy",
+                },
+            },
+        }
+
     #####################
     # Lifecycle methods #
     #####################
@@ -39,30 +50,23 @@ class MaternalMortality(Mortality):
         self.random = self.get_randomness_stream(builder)
         self.clock = builder.time.clock()
         self.mortality_probability = self.get_mortality_probability(builder)
-        self.life_expectancy = self.get_life_expectancy(builder)
 
     ###################
     # Setup Methods   #
     ###################
 
-    # noinspection PyMethodMayBeStatic
-    def get_life_expectancy(self, builder: Builder) -> Union[LookupTable, Pipeline]:
-        life_expectancy_data = builder.data.load(
-            "population.theoretical_minimum_risk_life_expectancy"
-        )
-        return builder.lookup.build_table(life_expectancy_data, parameter_columns=["age"])
-
     def get_mortality_probability(self, builder: Builder):
         probability_data = builder.data.load(
             data_keys.MATERNAL_DISORDERS.MORTALITY_PROBABILITY
         )
-        probability_pipeline_source = builder.lookup.build_table(
-            probability_data, key_columns=["sex"], parameter_columns=["age", "year"]
+        probability_pipeline_source = self.build_lookup_table(
+            builder,
+            probability_data,
         )
         return builder.value.register_value_producer(
             self.mortality_probability_pipeline_name,
             source=probability_pipeline_source,
-            requires_columns=["age", "sex"],
+            requires_columns=get_lookup_columns([probability_pipeline_source]),
         )
 
     ########################
@@ -92,6 +96,6 @@ class MaternalMortality(Mortality):
 
         pop.loc[deaths, "alive"] = "dead"
         pop.loc[deaths, "exit_time"] = event.time
-        pop.loc[deaths, "years_of_life_lost"] = self.life_expectancy(deaths)
+        pop.loc[deaths, "years_of_life_lost"] = self.lookup_tables["life_expectancy"](deaths)
         pop.loc[deaths, "cause_of_death"] = "maternal_disorders"
         self.population_view.update(pop)

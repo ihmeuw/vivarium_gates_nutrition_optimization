@@ -5,9 +5,10 @@ from vivarium import Component
 from vivarium.framework.engine import Builder
 from vivarium.framework.event import Event
 from vivarium.framework.population import SimulantData
+from vivarium.framework.lookup import LookupTableData
 from vivarium.framework.values import Pipeline, list_combiner, union_post_processor
 from vivarium_public_health.disease import DiseaseModel, DiseaseState, SusceptibleState
-from vivarium_public_health.utilities import is_non_zero
+from vivarium_public_health.utilities import get_lookup_columns
 
 from vivarium_gates_nutrition_optimization.components.children import NewChildren
 from vivarium_gates_nutrition_optimization.constants import data_keys, models
@@ -63,72 +64,27 @@ class PregnantState(DiseaseState):
         builder : `engine.Builder`
             Interface to several simulation tools.
         """
-        super(DiseaseState, self).setup(builder)
-        self.clock = builder.time.clock()
-
-        prevalence_data = self.load_prevalence_data(builder)
-        self.prevalence = builder.lookup.build_table(
-            prevalence_data, key_columns=["sex"], parameter_columns=["age", "year"]
-        )
-
-        birth_prevalence_data = self.load_birth_prevalence_data(builder)
-        self.birth_prevalence = builder.lookup.build_table(
-            birth_prevalence_data, key_columns=["sex"], parameter_columns=["year"]
-        )
-
-        self.dwell_time = self.get_dwell_time_pipeline(builder)
-
-        disability_weight_data = self.load_disability_weight_data(builder)
-        self.has_disability = is_non_zero(disability_weight_data)
-        self.base_disability_weight = builder.lookup.build_table(
-            disability_weight_data, key_columns=["sex"], parameter_columns=["age", "year"]
-        )
-        self.disability_weight = builder.value.register_value_producer(
-            f"{self.state_id}.disability_weight",
-            source=self.compute_disability_weight,
-            requires_columns=["age", "sex", "alive", self.model],
-        )
-        builder.value.register_value_modifier(
-            "disability_weight", modifier=self.disability_weight
-        )
-
-        excess_mortality_data = self.load_excess_mortality_rate_data(builder)
-        self.has_excess_mortality = is_non_zero(excess_mortality_data)
-        self.base_excess_mortality_rate = builder.lookup.build_table(
-            excess_mortality_data, key_columns=["sex"], parameter_columns=["age", "year"]
-        )
-        self.excess_mortality_rate = builder.value.register_rate_producer(
-            self.excess_mortality_rate_pipeline_name,
-            source=self.compute_excess_mortality_rate,
-            requires_columns=["age", "sex", "alive", self.model],
-            requires_values=[self.excess_mortality_rate_paf_pipeline_name],
-        )
-        paf = builder.lookup.build_table(0)
-        self.joint_paf = builder.value.register_value_producer(
-            self.excess_mortality_rate_paf_pipeline_name,
-            source=lambda idx: [paf(idx)],
-            preferred_combiner=list_combiner,
-            preferred_post_processor=union_post_processor,
-        )
-        builder.value.register_value_modifier(
-            "mortality_rate",
-            modifier=self.adjust_mortality_rate,
-            requires_values=[self.excess_mortality_rate_pipeline_name],
-        )
-
-        self.randomness_prevalence = builder.randomness.get_stream(
-            f"{self.state_id}_prevalent_cases"
-        )
+        super().setup(builder)
         self.time_step = builder.time.step_size()
         self.randomness = builder.randomness.get_stream(self.name)
 
         self.birth_outcome_probabilities = builder.value.register_value_producer(
             "birth_outcome_probabilities",
-            source=builder.lookup.build_table(
-                get_birth_outcome_probabilities(builder),
-                key_columns=["sex"],
-                parameter_columns=["age", "year"],
+            source=self.lookup_tables["birth_outcome_probabilities"],
+            requires_columns=get_lookup_columns(
+                [self.lookup_tables["birth_outcome_probabilities"]]
             ),
+        )
+
+    def build_all_lookup_tables(self, builder: Builder) -> None:
+        super().build_all_lookup_tables(builder)
+        # I am not making birth outcome probabilities configurable because the
+        # method is so complicated - albrja
+        birth_outcome_probabilities = get_birth_outcome_probabilities(builder)
+        self.lookup_tables["birth_outcome_probabilities"] = self.build_lookup_table(
+            builder,
+            birth_outcome_probabilities,
+            value_columns=["live_birth", "partial_term", "stillbirth"],
         )
 
     def on_initialize_simulants(self, pop_data: SimulantData) -> None:
@@ -231,7 +187,7 @@ def Pregnancy():
             "disability_weight": lambda *_: 0.0,
             "excess_mortality_rate": lambda *_: 0.0,
             # Add a dummy dwell time so we can overwrite it later
-            "dwell_time": lambda *_: None,
+            "dwell_time": lambda *_: 0.0,
         },
     )
     parturition = DiseaseState(

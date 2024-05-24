@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Any, Dict, List
 
 import numpy as np
 import pandas as pd
@@ -26,27 +26,27 @@ class MaternalBMIExposure(Component):
             "requires_streams": [self.name],
         }
 
+    @property
+    def configuration_defaults(self) -> Dict[str, Dict[str, Any]]:
+        return {
+            self.name: {
+                "data_sources": {
+                    "prevalence_low_bmi_anemic": data_keys.MATERNAL_BMI.PREVALENCE_LOW_BMI_ANEMIC,
+                    "prevalence_low_bmi_non_anemic": data_keys.MATERNAL_BMI.PREVALENCE_LOW_BMI_NON_ANEMIC,
+                }
+            }
+        }
+
     def setup(self, builder: Builder):
         self.randomness = builder.randomness.get_stream(self.name)
         self.hemoglobin = builder.value.get_value("raw_hemoglobin.exposure")
         self.threshold = data_values.MATERNAL_BMI_ANEMIA_THRESHOLD
 
-        self.probability_low_given_anemic = builder.lookup.build_table(
-            builder.data.load(data_keys.MATERNAL_BMI.PREVALENCE_LOW_BMI_ANEMIC),
-            key_columns=["sex"],
-            parameter_columns=["age", "year"],
-        )
-        self.probability_low_given_non_anemic = builder.lookup.build_table(
-            builder.data.load(data_keys.MATERNAL_BMI.PREVALENCE_LOW_BMI_NON_ANEMIC),
-            key_columns=["sex"],
-            parameter_columns=["age", "year"],
-        )
-
     def on_initialize_simulants(self, pop_data: SimulantData):
         index = pop_data.index
         propensity = self.randomness.get_draw(index)
-        p_low_anemic = self.probability_low_given_anemic(index)
-        p_low_non_anemic = self.probability_low_given_non_anemic(index)
+        p_low_anemic = self.lookup_tables["prevalence_low_bmi_anemic"](index)
+        p_low_non_anemic = self.lookup_tables["prevalence_low_bmi_non_anemic"](index)
         hemoglobin = self.hemoglobin(index)
         anemic = index[hemoglobin < self.threshold]
         non_anemic = index.difference(anemic)

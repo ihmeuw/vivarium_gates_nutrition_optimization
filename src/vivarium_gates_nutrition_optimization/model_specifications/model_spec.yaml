@@ -2,18 +2,18 @@ components:
     vivarium_public_health:
         population:
             - BasePopulation()
-#        metrics:
-#            - DiseaseObserver("maternal_disorders")
-#            - DiseaseObserver("maternal_hemorrhage")
+        metrics:
+            - DiseaseObserver("maternal_disorders")
+            - DiseaseObserver("maternal_hemorrhage")
 
     vivarium_gates_nutrition_optimization:
         components:
             - Pregnancy()
             - UntrackNotPregnant()
             - MaternalDisorders()
-            - MaternalHemorrhage()
+            - MaternalHemorrhage()  
             - MaternalMortality()
-            #- BackgroundMorbidity()
+            # - BackgroundMorbidity()
             - Hemoglobin()
             - Anemia()
             - MaternalBMIExposure()
@@ -24,14 +24,14 @@ components:
             - BirthRecorder()
             - MaternalMortalityObserver()
             - DisabilityObserver()
-#            - AnemiaObserver()
-#            - MaternalBMIObserver()
+            - AnemiaObserver()
+            - MaternalBMIObserver()
             - MaternalInterventionObserver()
 
 configuration:
     input_data:
         input_draw_number: 0
-        artifact_path: '/mnt/team/simulation_science/pub/models/vivarium_gates_nutrition_optimization/artifacts/model12.0/nigeria.hdf'
+        artifact_path: '/home/albrja/scratch/artifacts/nigeria.hdf'
     interpolation:
         order: 0
         extrapolate: True
@@ -48,7 +48,7 @@ configuration:
             day: 1
         end:
             year: 2025
-            month: 12
+            month: 3
             day: 31
         step_size: 7 # Days
     population:
