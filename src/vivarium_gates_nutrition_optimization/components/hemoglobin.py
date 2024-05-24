@@ -183,7 +183,7 @@ class Hemoglobin(Component):
         distribution with the specified mean and standard deviation.
         """
         shape = (mean / sd) ** 2
-        scale = sd ** 2 / mean
+        scale = sd**2 / mean
         return scipy.stats.gamma(a=shape, scale=scale).ppf(propensity)
 
     @staticmethod
@@ -234,7 +234,7 @@ class Hemoglobin(Component):
         per_simulant_exposure = (
             (tmrel - hemoglobin_level + abs(tmrel - hemoglobin_level)) / 2 / RR_SCALAR
         )
-        per_simulant_rr = rr ** per_simulant_exposure
+        per_simulant_rr = rr**per_simulant_exposure
         maternal_disorder_probability *= (1 - paf) * per_simulant_rr
         return maternal_disorder_probability.map(lambda value: 1 if value > 1 else value)
 
