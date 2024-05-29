@@ -6,6 +6,10 @@ from vivarium_gates_nutrition_optimization.components.disease import (
 
 
 def BackgroundMorbidity():
+    # NOTE: I have not updated this component to work with the new lookup table
+    # configuration work so this component is not used in the model spec because
+    # it is currently broken. This component was an exploratory component and may
+    # be revisited in the future - albrja
     cause = "other_causes"
     susceptible = SusceptibleState(cause)
     with_condition = ParturitionExclusionState(
