@@ -2,18 +2,18 @@ components:
     vivarium_public_health:
         population:
             - BasePopulation()
-#        metrics:
-#            - DiseaseObserver("maternal_disorders")
-#            - DiseaseObserver("maternal_hemorrhage")
+        metrics:
+            - DiseaseObserver("maternal_disorders")
+            - DiseaseObserver("maternal_hemorrhage")
 
     vivarium_gates_nutrition_optimization:
         components:
             - Pregnancy()
             - UntrackNotPregnant()
             - MaternalDisorders()
-            - MaternalHemorrhage()
+            - MaternalHemorrhage()  
             - MaternalMortality()
-            #- BackgroundMorbidity()
+            # - BackgroundMorbidity()
             - Hemoglobin()
             - Anemia()
             - MaternalBMIExposure()
@@ -24,8 +24,8 @@ components:
             - BirthRecorder()
             - MaternalMortalityObserver()
             - DisabilityObserver()
-#            - AnemiaObserver()
-#            - MaternalBMIObserver()
+            - AnemiaObserver()
+            - MaternalBMIObserver()
             - MaternalInterventionObserver()
 
 configuration:
