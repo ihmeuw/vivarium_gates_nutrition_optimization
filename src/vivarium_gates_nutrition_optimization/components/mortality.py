@@ -56,6 +56,8 @@ class MaternalMortality(Mortality):
     ###################
 
     def get_mortality_probability(self, builder: Builder):
+        # NOTE: I did not add this to the configurable lookup tables because
+        # it is only used as the source for the pipeline.
         probability_data = builder.data.load(
             data_keys.MATERNAL_DISORDERS.MORTALITY_PROBABILITY
         )

@@ -87,6 +87,8 @@ class Hemoglobin(Component):
             .set_index(index_columns)["value"]
             .rename("stddev")
         )
+        # NOTE: I did not add this to the configurable lookup tables because
+        # it is only used as the source for the pipeline.
         distribution_parameters = self.build_lookup_table(
             builder,
             pd.concat([mean, stddev], axis=1).reset_index(),
