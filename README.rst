@@ -23,7 +23,7 @@ Once you have all three installed, you should open up your normal shell
 You'll then make an environment, clone this repository, then install
 all necessary requirements as follows::
 
-  :~$ conda create --name=vivarium_gates_nutrition_optimization python=3.8
+  :~$ conda create --name=vivarium_gates_nutrition_optimization python=3.10
   ...conda will download python and base dependencies...
   :~$ conda activate vivarium_gates_nutrition_optimization
   (vivarium_gates_nutrition_optimization) :~$ git clone https://github.com/ihmeuw/vivarium_gates_nutrition_optimization.git
@@ -98,26 +98,19 @@ You'll find six directories inside the main
   This directory hold Python files used to run scripts used to prepare input
   data or process outputs.
 
-
 Running Simulations
 -------------------
 
-With your conda environment active, the first step to running simulations
-is making the model specification files.  A model specification is a
-complete description of a vivarium model. The command to generate model
-specifications is installed with this repository and it can be run
-from any directory.::
+You can run your simulation from the command line. 
+With your conda environment active, you can run with, e.g.::
 
-  (vivarium_gates_nutrition_optimization) :~$ make_specs -v
-  2020-06-18 18:18:28.311 | 0:00:00.679701 | build_model_specifications:48 - Writing model spec(s) to "/REPO_INSTALLATION_DIRECTORY/vivarium_gates_nutrition_optimization/src/vivarium_gates_nutrition_optimization/model_specifications"
+   (vivarium_gates_nutrition_optimization) :~$ simulate run -vvv /<REPO_INSTALLATION_DIRECTORY>/vivarium_gates_nutrition_optimization/src/vivarium_gates_nutrition_optimization/model_specifications/model_spec.yaml -o /FILE/PATH/TO/SAVE/RESULTS -i src/vivarium_gates_nutrition_optimization/artifacts/<COUNTRY_TO_RUN_IN>.hdf
 
-As the log message indicates, the model specifications will be written to
-the ``model_specifications`` subdirectory in this repository. You can then
-run simulations by, e.g.::
+The simulation will run in one location at a time, enter the country you wish to 
+run the simulation for in your call. Currently Ethiopia, Nigeria, and Paksitan are supported. 
+The country name should be in lower case, for example 'ethiopia' or 'nigeria'.  
 
-   (vivarium_gates_nutrition_optimization) :~$ simulate run -v /<REPO_INSTALLATION_DIRECTORY>/vivarium_gates_nutrition_optimization/src/vivarium_gates_nutrition_optimization/model_specifications/china.yaml
-
-The ``-v`` flag will log verbosely, so you will get log messages every time
+The ``-vvv`` flag will log verbosely, so you will get log messages every time
 step. For more ways to run simulations, see the tutorials at
 https://vivarium.readthedocs.io/en/latest/tutorials/running_a_simulation/index.html
 and https://vivarium.readthedocs.io/en/latest/tutorials/exploration.html
