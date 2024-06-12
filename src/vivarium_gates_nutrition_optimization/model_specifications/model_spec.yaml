@@ -21,7 +21,7 @@ components:
             - ResultsStratifier()
             - PregnancyObserver()
             - PregnancyOutcomeObserver()
-            - BirthRecorder()
+#            - BirthRecorder()
             - MaternalMortalityObserver()
             - DisabilityObserver()
 #            - AnemiaObserver()

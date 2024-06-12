@@ -7,7 +7,7 @@ import pandas as pd
 from vivarium import Component
 from vivarium.framework.engine import Builder
 from vivarium.framework.event import Event
-from vivarium_cluster_tools.utilities import mkdir
+#from vivarium_cluster_tools.utilities import mkdir
 
 from vivarium_gates_nutrition_optimization.constants import (
     data_keys,
