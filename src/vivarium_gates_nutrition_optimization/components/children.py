@@ -1,13 +1,13 @@
+import os
 from datetime import datetime
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 import numpy as np
 import pandas as pd
 from vivarium import Component
 from vivarium.framework.engine import Builder
 from vivarium.framework.event import Event
-#from vivarium_cluster_tools.utilities import mkdir
 
 from vivarium_gates_nutrition_optimization.constants import (
     data_keys,
@@ -219,3 +219,28 @@ class BirthRecorder(Component):
         output_path = output_root / f"scenario_{scenario}_draw_{input_draw}_seed_{seed}"
 
         return output_path
+
+
+def mkdir(
+    path: Union[str, Path], umask: int = 0o002, exists_ok: bool = False, parents: bool = False
+) -> None:
+    """Utility method to create a directory with specified permissions.
+
+    Parameters
+    ----------
+    path
+        Path of the directory to create.
+    umask
+        Umask specifying the desired permissions - defaults to 0o002.
+    exists_ok
+        If False, raises FileExistsError if the directory already exists.
+    parents
+        If False, raises FileNotFoundError if the directory's parent doesn't exist.
+
+    """
+    path = Path(path)
+    old_umask = os.umask(umask)
+    try:
+        path.mkdir(exist_ok=exists_ok, parents=parents)
+    finally:
+        os.umask(old_umask)
