@@ -3,11 +3,56 @@
     "title": "ihmeuw/vivarium_gates_nutrition_optimization: Archival release",
     "upload_type": "software",
     "creators": [
-//        {
-//            "orcid": "0000-0000-0000-0000",
-//            "affiliation": "Institute for Health Metrics and Evaluation",
-//            "name": "TODO: Add authors names, affiliation, and orcid (if applicable) to `creators` array"
-//        }
+        {
+            "orcid": "0000-0001-8649-7561",
+            "affiliation": "Institute for Health Metrics and Evaluation",
+            "name": "Rajan Mudambi"
+        },
+        {
+            "orcid": "0000-0002-7556-2740",
+            "affiliation": "Institute for Health Metrics and Evaluation",
+            "name": "Hussain Jafari"
+        },
+        {
+            "orcid": "0000-0002-5775-2719",
+            "affiliation": "Institute for Health Metrics and Evaluation",
+            "name": "James Albright"
+        },
+                {
+            "orcid": "0009-0008-1094-6293",
+            "affiliation": "Institute for Health Metrics and Evaluation",
+            "name": "Patrick Nast"
+        },
+        {
+            "orcid": "0009-0005-7858-0222",
+            "affiliation": "Institute for Health Metrics and Evaluation",
+            "name": "Sylvia Lutze"
+        },
+        {
+            "orcid": "0000-0003-1585-5100",
+            "affiliation": "Institute for Health Metrics and Evaluation",
+            "name": "Alison Bowman"
+        },
+        {
+            "orcid": "0000-0001-8397-4123",
+            "affiliation": "Institute for Health Metrics and Evaluation",
+            "name": "Nathaniel Blair-Stahn"
+        },
+        {
+            "orcid": "0009-0009-1585-4766",
+            "affiliation": "Institute for Health Metrics and Evaluation",
+            "name": "Alix Pletcher"
+        },
+                {
+            "orcid": "0009-0009-3789-5382",
+            "affiliation": "Institute for Health Metrics and Evaluation",
+            "name": "Caroline Kinuthia"
+        },
+        {
+            "orcid": "0000-0001-6033-4713",
+            "affiliation": "Institute for Health Metrics and Evaluation",
+            "name": "Abraham Flaxman"
+        }
     ],
     "access_right": "open",
     "description": "<p>TODO: add description (e.g., Archival release of simulation software.)</p>"
