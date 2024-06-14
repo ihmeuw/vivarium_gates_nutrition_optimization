@@ -23,7 +23,7 @@ Once you have all three installed, you should open up your normal shell
 You'll then make an environment, clone this repository, then install
 all necessary requirements as follows::
 
-  :~$ conda create --name=vivarium_gates_nutrition_optimization python=3.10
+  :~$ conda create --name=vivarium_gates_nutrition_optimization python=3.11
   ...conda will download python and base dependencies...
   :~$ conda activate vivarium_gates_nutrition_optimization
   (vivarium_gates_nutrition_optimization) :~$ git clone https://github.com/ihmeuw/vivarium_gates_nutrition_optimization.git
