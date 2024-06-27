@@ -2,7 +2,7 @@ components:
     vivarium_public_health:
         population:
             - BasePopulation()
-        metrics:
+        results:
             - DiseaseObserver("maternal_disorders")
             - DiseaseObserver("maternal_hemorrhage")
 
@@ -21,7 +21,7 @@ components:
             - ResultsStratifier()
             - PregnancyObserver()
             - PregnancyOutcomeObserver()
-            - BirthRecorder()
+            # - BirthRecorder()
             - MaternalMortalityObserver()
             - DisabilityObserver()
             - AnemiaObserver()
