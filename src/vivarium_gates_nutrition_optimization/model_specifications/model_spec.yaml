@@ -48,9 +48,9 @@ configuration:
             day: 1
         end:
             year: 2025
-            month: 3
+            month: 12
             day: 31
-        step_size: 28 # Days
+        step_size: 7 # Days
     population:
         population_size: 20_000
         initialization_age_min: 10
