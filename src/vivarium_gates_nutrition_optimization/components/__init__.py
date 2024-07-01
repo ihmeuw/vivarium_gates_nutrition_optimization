@@ -1,4 +1,4 @@
-from .children import BirthRecorder
+from .children import BirthObserver
 from .hemoglobin import Anemia, Hemoglobin
 from .intervention import MaternalInterventions
 from .maternal_bmi import MaternalBMIExposure

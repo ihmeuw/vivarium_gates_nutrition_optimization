@@ -1,13 +1,11 @@
 from datetime import datetime
-from pathlib import Path
 from typing import List, Tuple
 
 import numpy as np
 import pandas as pd
 from vivarium import Component
 from vivarium.framework.engine import Builder
-from vivarium.framework.event import Event
-from vivarium_cluster_tools.utilities import mkdir
+from vivarium.framework.results import Observer
 
 from vivarium_gates_nutrition_optimization.constants import (
     data_keys,
@@ -136,56 +134,35 @@ class LBWSGDistribution(Component):
         return *birth_weight, *gestational_age
 
 
-class BirthRecorder(Component):
-    ##############
-    # Properties #
-    ##############
+class BirthObserver(Observer):
 
-    @property
-    def columns_required(self) -> List[str]:
-        return [
-            "pregnancy",
-            "previous_pregnancy",
-            "pregnancy_outcome",
-            "gestational_age",
-            "birth_weight",
-            "sex_of_child",
-            "maternal_bmi_anemia_category",
-            "intervention",
-        ]
+    COL_MAPPING = {
+        "sex_of_child": "sex",
+        "birth_weight": "birth_weight",
+        "maternal_bmi_anemia_category": "joint_bmi_anemia_category",
+        "gestational_age": "gestational_age",
+        "pregnancy_outcome": "pregnancy_outcome",
+        "intervention": "maternal_intervention",
+    }
 
-    #################
-    # Setup methods #
-    #################
-
-    # noinspection PyAttributeOutsideInit
-    def setup(self, builder: Builder) -> None:
-        self.output_path = self._build_output_path(builder)
-        self.births = []
-
-    def on_collect_metrics(self, event: Event):
-        pop = self.population_view.get(event.index)
-        new_birth_mask = (
-            (
-                pop["pregnancy_outcome"].isin(
-                    [models.LIVE_BIRTH_OUTCOME, models.STILLBIRTH_OUTCOME]
-                )
-            )
-            & (pop["previous_pregnancy"] == models.PREGNANT_STATE_NAME)
-            & (pop["pregnancy"] == models.PARTURITION_STATE_NAME)
+    def register_observations(self, builder: Builder) -> None:
+        builder.results.register_concatenating_observation(
+            name="births",
+            pop_filter=(
+                "("
+                f"pregnancy_outcome == '{models.LIVE_BIRTH_OUTCOME}' "
+                f"or pregnancy_outcome == '{models.STILLBIRTH_OUTCOME}'"
+                ") "
+                f"and previous_pregnancy == '{models.PREGNANT_STATE_NAME}' "
+                f"and pregnancy == '{models.PARTURITION_STATE_NAME}'"
+            ),
+            requires_columns=list(self.COL_MAPPING),
+            results_formatter=self.format,
         )
-        birth_cols = {
-            "sex_of_child": "sex",
-            "birth_weight": "birth_weight",
-            "maternal_bmi_anemia_category": "joint_bmi_anemia_category",
-            "gestational_age": "gestational_age",
-            "pregnancy_outcome": "pregnancy_outcome",
-            "intervention": "maternal_intervention",
-        }
 
-        new_births = pop.loc[new_birth_mask, list(birth_cols)].rename(columns=birth_cols)
+    def format(self, measure: str, results: pd.DataFrame) -> pd.DataFrame:
+        new_births = results[list(self.COL_MAPPING)].rename(columns=self.COL_MAPPING)
         new_births["birth_date"] = datetime(2024, 12, 30).strftime("%Y-%m-%d T%H:%M.%f")
-
         new_births["joint_bmi_anemia_category"] = new_births["joint_bmi_anemia_category"].map(
             {
                 "low_bmi_anemic": "cat1",
@@ -194,28 +171,5 @@ class BirthRecorder(Component):
                 "normal_bmi_non_anemic": "cat4",
             }
         )
-        self.births.append(new_births)
 
-    # noinspection PyUnusedLocal
-    def on_simulation_end(self, event: Event) -> None:
-        births_data = pd.concat(self.births)
-        births_data.to_hdf(f"{self.output_path}.hdf", key="data")
-        births_data.to_csv(f"{self.output_path}.csv")
-
-    ###########
-    # Helpers #
-    ###########
-
-    @staticmethod
-    def _build_output_path(builder: Builder) -> Path:
-        results_root = builder.configuration.output_data.results_directory
-        output_root = Path(results_root) / "child_data"
-
-        mkdir(output_root, exists_ok=True)
-
-        input_draw = builder.configuration.input_data.input_draw_number
-        seed = builder.configuration.randomness.random_seed
-        scenario = builder.configuration.intervention.scenario
-        output_path = output_root / f"scenario_{scenario}_draw_{input_draw}_seed_{seed}"
-
-        return output_path
+        return new_births
