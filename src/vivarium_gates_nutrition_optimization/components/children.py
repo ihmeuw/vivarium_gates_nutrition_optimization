@@ -1,11 +1,9 @@
-from datetime import datetime
 from typing import List, Tuple
 
 import numpy as np
 import pandas as pd
 from vivarium import Component
 from vivarium.framework.engine import Builder
-from vivarium.framework.results import Observer
 
 from vivarium_gates_nutrition_optimization.constants import (
     data_keys,
@@ -132,44 +130,3 @@ class LBWSGDistribution(Component):
             float(val) for val in description.split("- [")[1].split(")")[0].split(", ")
         ]
         return *birth_weight, *gestational_age
-
-
-class BirthObserver(Observer):
-
-    COL_MAPPING = {
-        "sex_of_child": "sex",
-        "birth_weight": "birth_weight",
-        "maternal_bmi_anemia_category": "joint_bmi_anemia_category",
-        "gestational_age": "gestational_age",
-        "pregnancy_outcome": "pregnancy_outcome",
-        "intervention": "maternal_intervention",
-    }
-
-    def register_observations(self, builder: Builder) -> None:
-        builder.results.register_concatenating_observation(
-            name="births",
-            pop_filter=(
-                "("
-                f"pregnancy_outcome == '{models.LIVE_BIRTH_OUTCOME}' "
-                f"or pregnancy_outcome == '{models.STILLBIRTH_OUTCOME}'"
-                ") "
-                f"and previous_pregnancy == '{models.PREGNANT_STATE_NAME}' "
-                f"and pregnancy == '{models.PARTURITION_STATE_NAME}'"
-            ),
-            requires_columns=list(self.COL_MAPPING),
-            results_formatter=self.format,
-        )
-
-    def format(self, measure: str, results: pd.DataFrame) -> pd.DataFrame:
-        new_births = results[list(self.COL_MAPPING)].rename(columns=self.COL_MAPPING)
-        new_births["birth_date"] = datetime(2024, 12, 30).strftime("%Y-%m-%d T%H:%M.%f")
-        new_births["joint_bmi_anemia_category"] = new_births["joint_bmi_anemia_category"].map(
-            {
-                "low_bmi_anemic": "cat1",
-                "normal_bmi_anemic": "cat2",
-                "low_bmi_non_anemic": "cat3",
-                "normal_bmi_non_anemic": "cat4",
-            }
-        )
-
-        return new_births
