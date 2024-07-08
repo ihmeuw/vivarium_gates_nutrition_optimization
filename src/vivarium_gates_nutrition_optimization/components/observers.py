@@ -68,14 +68,6 @@ class MaternalMortalityObserver(MortalityObserver):
         maternal_disorders.set_model(models.MATERNAL_DISORDERS_MODEL_NAME)
         self.causes_of_death += [maternal_disorders]
 
-    #     self.causes_to_stratify += [models.MATERNAL_DISORDERS_MODEL_NAME]
-
-    # def get_entity_type_column(self, measure: str, results: pd.DataFrame) -> pd.Series:
-    #     entity_type = super().get_entity_type_column(measure, results)
-    #     # Fill in the missing values due to 'maternal_disorders' not being set
-    #     # up as a propery DiseaseState
-    #     return entity_type.fillna("cause")
-
 
 class AnemiaObserver(PublicHealthObserver):
     @property
