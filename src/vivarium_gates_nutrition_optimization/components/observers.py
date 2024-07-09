@@ -7,8 +7,13 @@ from vivarium.framework.engine import Builder
 from vivarium.framework.results import Observer
 from vivarium.framework.time import get_time_stamp
 from vivarium_public_health.disease import DiseaseState
+from vivarium_public_health.results import COLUMNS
 from vivarium_public_health.results import DisabilityObserver as DisabilityObserver_
-from vivarium_public_health.results import DiseaseObserver, MortalityObserver
+from vivarium_public_health.results import (
+    DiseaseObserver,
+    MortalityObserver,
+    PublicHealthObserver,
+)
 from vivarium_public_health.results import ResultsStratifier as ResultsStratifier_
 from vivarium_public_health.utilities import to_years
 
@@ -58,10 +63,13 @@ class PregnancyObserver(DiseaseObserver):
 class MaternalMortalityObserver(MortalityObserver):
     def setup(self, builder: Builder) -> None:
         super().setup(builder)
-        self.causes_to_stratify += [models.MATERNAL_DISORDERS_MODEL_NAME]
+        # Hack in maternal disorders
+        maternal_disorders = DiseaseState(models.MATERNAL_DISORDERS_MODEL_NAME)
+        maternal_disorders.set_model(models.MATERNAL_DISORDERS_MODEL_NAME)
+        self.causes_of_death += [maternal_disorders]
 
 
-class AnemiaObserver(Observer):
+class AnemiaObserver(PublicHealthObserver):
     @property
     def configuration_defaults(self) -> Dict[str, Any]:
         return {
@@ -74,7 +82,8 @@ class AnemiaObserver(Observer):
         }
 
     def register_observations(self, builder: Builder) -> None:
-        builder.results.register_adding_observation(
+        self.register_adding_observation(
+            builder=builder,
             name=f"person_time_anemia",
             pop_filter=f'alive == "alive" and tracked == True',
             when="time_step__prepare",
@@ -85,8 +94,26 @@ class AnemiaObserver(Observer):
             aggregator=partial(aggregate_state_person_time, builder.time.step_size()()),
         )
 
+    def format(self, measure: str, results: pd.DataFrame) -> pd.DataFrame:
+        results = results.reset_index()
+        results.rename(columns={"anemia_levels": "sub_entity"}, inplace=True)
+        return results
 
-class MaternalBMIObserver(Observer):
+    def get_measure_column(self, measure: str, results: pd.DataFrame) -> pd.Series:
+        return pd.Series("person_time", index=results.index)
+
+    def get_entity_type_column(self, measure: str, results: pd.DataFrame) -> pd.Series:
+        return pd.Series("impairment", index=results.index)
+
+    def get_entity_column(self, measure: str, results: pd.DataFrame) -> pd.Series:
+        return pd.Series("anemia", index=results.index)
+
+    def get_sub_entity_column(self, measure: str, results: pd.DataFrame) -> pd.Series:
+        # This column was created in the 'format' method
+        return results[COLUMNS.SUB_ENTITY]
+
+
+class MaternalBMIObserver(PublicHealthObserver):
     @property
     def configuration_defaults(self) -> Dict[str, Any]:
         return {
@@ -99,7 +126,8 @@ class MaternalBMIObserver(Observer):
         }
 
     def register_observations(self, builder: Builder) -> None:
-        builder.results.register_adding_observation(
+        self.register_adding_observation(
+            builder=builder,
             name=f"person_time_maternal_bmi_anemia",
             pop_filter=f'alive == "alive" and tracked == True',
             when="time_step__prepare",
@@ -109,8 +137,26 @@ class MaternalBMIObserver(Observer):
             aggregator=partial(aggregate_state_person_time, builder.time.step_size()()),
         )
 
+    def format(self, measure: str, results: pd.DataFrame) -> pd.DataFrame:
+        results = results.reset_index()
+        results.rename(columns={"maternal_bmi_anemia_category": "sub_entity"}, inplace=True)
+        return results
 
-class MaternalInterventionObserver(Observer):
+    def get_measure_column(self, measure: str, results: pd.DataFrame) -> pd.Series:
+        return pd.Series("person_time", index=results.index)
+
+    def get_entity_type_column(self, measure: str, results: pd.DataFrame) -> pd.Series:
+        return pd.Series("custom_risk_exposure", index=results.index)
+
+    def get_entity_column(self, measure: str, results: pd.DataFrame) -> pd.Series:
+        return pd.Series("bmi_anemia", index=results.index)
+
+    def get_sub_entity_column(self, measure: str, results: pd.DataFrame) -> pd.Series:
+        # This column was created in the 'format' method
+        return results[COLUMNS.SUB_ENTITY]
+
+
+class MaternalInterventionObserver(PublicHealthObserver):
     @property
     def configuration_defaults(self) -> Dict[str, Any]:
         return {
@@ -127,7 +173,8 @@ class MaternalInterventionObserver(Observer):
         intervention_date = get_time_stamp(builder.configuration.time.start) + pd.Timedelta(
             days=data_values.DURATIONS.INTERVENTION_DELAY_DAYS - 2 * 7
         )
-        builder.results.register_adding_observation(
+        self.register_adding_observation(
+            builder=builder,
             name="intervention_count",
             pop_filter=(
                 'alive == "alive" and tracked == True and '
@@ -139,8 +186,26 @@ class MaternalInterventionObserver(Observer):
             excluded_stratifications=builder.configuration.stratification.maternal_intervention.exclude,
         )
 
+    def format(self, measure: str, results: pd.DataFrame) -> pd.DataFrame:
+        results = results.reset_index()
+        results.rename(columns={"intervention": "sub_entity"}, inplace=True)
+        return results
 
-class PregnancyOutcomeObserver(Observer):
+    def get_measure_column(self, measure: str, results: pd.DataFrame) -> pd.Series:
+        return pd.Series(measure, index=results.index)
+
+    def get_entity_type_column(self, measure: str, results: pd.DataFrame) -> pd.Series:
+        return pd.Series("intervention", index=results.index)
+
+    def get_entity_column(self, measure: str, results: pd.DataFrame) -> pd.Series:
+        return pd.Series("maternal_intervention", index=results.index)
+
+    def get_sub_entity_column(self, measure: str, results: pd.DataFrame) -> pd.Series:
+        # This column was created in the 'format' method
+        return results[COLUMNS.SUB_ENTITY]
+
+
+class PregnancyOutcomeObserver(PublicHealthObserver):
     @property
     def configuration_defaults(self) -> Dict[str, Any]:
         return {
@@ -158,7 +223,8 @@ class PregnancyOutcomeObserver(Observer):
 
     def register_observations(self, builder: Builder) -> None:
 
-        builder.results.register_adding_observation(
+        self.register_adding_observation(
+            builder=builder,
             name=f"pregnancy_outcome_count",
             pop_filter="",
             requires_columns=["pregnancy_outcome"],
@@ -166,6 +232,24 @@ class PregnancyOutcomeObserver(Observer):
             excluded_stratifications=builder.configuration.stratification.pregnancy_outcome.exclude,
             aggregator=self.count_pregnancy_outcomes_at_initialization,
         )
+
+    def format(self, measure: str, results: pd.DataFrame) -> pd.DataFrame:
+        results = results.reset_index()
+        results.rename(columns={"pregnancy_outcome": "sub_entity"}, inplace=True)
+        return results
+
+    def get_measure_column(self, measure: str, results: pd.DataFrame) -> pd.Series:
+        return pd.Series(measure, index=results.index)
+
+    def get_entity_type_column(self, measure: str, results: pd.DataFrame) -> pd.Series:
+        return pd.Series("custom_fertility", index=results.index)
+
+    def get_entity_column(self, measure: str, results: pd.DataFrame) -> pd.Series:
+        return pd.Series("pregnancy_countcome", index=results.index)
+
+    def get_sub_entity_column(self, measure: str, results: pd.DataFrame) -> pd.Series:
+        # This column was created in the 'format' method
+        return results[COLUMNS.SUB_ENTITY]
 
     ###############
     # Aggregators #
