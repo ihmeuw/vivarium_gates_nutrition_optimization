@@ -137,12 +137,12 @@ pipeline {
     stage("Test") {
       // removable, if passwords can be exported to env. securely without bash indirection
         steps {
-            sh "${ACTIVATE} && make integration"
+            sh "${ACTIVATE} && make test"
             publishHTML([
                 allowMissing: true,
                 alwaysLinkToLastBuild: false,
                 keepAll: true,
-                reportDir: "output/htmlcov_integration",
+                reportDir: "output/htmlcov",
                 reportFiles: "index.html",
                 reportName: "Coverage Report",
                 reportTitles: ''
