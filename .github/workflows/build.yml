@@ -74,11 +74,11 @@ jobs:
       - name: Install dependencies
         run: |
           pip install .[test]
-      - name: Test
-        run: |
-          pytest ./tests
       - name: Lint
         run: |
           pip install black==22.3.0 isort
           isort . --check -v
           black . --check -v
+      - name: Test
+        run: |
+          pytest ./tests/unit/
