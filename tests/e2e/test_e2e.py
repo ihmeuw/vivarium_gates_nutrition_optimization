@@ -10,7 +10,7 @@ import yaml
 @pytest.fixture
 def model_spec(tmp_path: Path) -> Path:
     model_spec_path = (
-        Path(__file__).parent.parent
+        Path(__file__).parent.parent.parent
         / "src"
         / "vivarium_gates_nutrition_optimization"
         / "model_specifications"
