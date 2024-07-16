@@ -72,13 +72,13 @@ typecheck: pytype.cfg $(MAKE_SOURCES) # Run the type checker
 	-pytype --config=pytype.cfg $(LOCATIONS)
 	@echo "Ignore, Created by Makefile, `date`" > $@
 
-test: $(MAKE_SOURCES) # Run unit tests
+unit: $(MAKE_SOURCES) # Run tests
 	export COVERAGE_FILE=./output/.coverage
-	pytest --runslow --cov --cov-report term --cov-report html:./output/htmlcov tests/
+	pytest -vvv --runslow --cov --cov-report term --cov-report html:./output/htmlcov tests/
 	@echo "Ignore, Created by Makefile, `date`" > $@
 
 clean: # Delete build artifacts and do any custom cleanup such as spinning down services
-	@rm -rf format lint typecheck build-doc build-package unit e2e integration .pytest_cache .pytype
+	@rm -rf format lint typecheck build-doc build-package tests .pytest_cache .pytype
 	@rm -rf dist output
 	$(shell find . -type f -name '*py[co]' -delete -o -type d -name __pycache__ -delete)
 
