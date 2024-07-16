@@ -63,7 +63,7 @@ format: setup.py pyproject.toml $(MAKE_SOURCES) # Run the code formatter and imp
 	-isort $(LOCATIONS)
 	@echo "Ignore, Created by Makefile, `date`" > $@
 
-lint: .flake8 .bandit $(MAKE_SOURCES) # Run the code linter and package security vulnerability checker
+lint: .flake8 $(MAKE_SOURCES) # Run the code linter and package security vulnerability checker
 	-flake8 $(LOCATIONS)
 	-safety check
 	@echo "Ignore, Created by Makefile, `date`" > $@
