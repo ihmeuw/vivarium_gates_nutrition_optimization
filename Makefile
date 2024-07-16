@@ -72,7 +72,7 @@ typecheck: pytype.cfg $(MAKE_SOURCES) # Run the type checker
 	-pytype --config=pytype.cfg $(LOCATIONS)
 	@echo "Ignore, Created by Makefile, `date`" > $@
 
-unit: $(MAKE_SOURCES) # Run tests
+test: $(MAKE_SOURCES) # Run tests
 	export COVERAGE_FILE=./output/.coverage
 	pytest -vvv --runslow --cov --cov-report term --cov-report html:./output/htmlcov tests/
 	@echo "Ignore, Created by Makefile, `date`" > $@
