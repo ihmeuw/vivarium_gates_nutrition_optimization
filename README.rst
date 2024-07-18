@@ -79,19 +79,14 @@ You'll find six directories inside the main
 
 - ``data``
 
-  If you have **small scale** external data for use in your sim or in your
-  results processing, it can live here. This is almost certainly not the right
-  place for data, so make sure there's not a better place to put it first.
+  If you have **small scale** external data for use in your sim, it can live here.
+  This is almost certainly not the right place for data, so make sure there's not
+  a better place to put it first.
 
 - ``model_specifications``
 
   This directory should hold all model specifications and branch files
   associated with the project.
-
-- ``results_processing``
-
-  Any post-processing and analysis code or notebooks you write should be
-  stored in this directory.
 
 - ``tools``
 
