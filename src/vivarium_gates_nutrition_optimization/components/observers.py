@@ -64,8 +64,8 @@ class MaternalMortalityObserver(MortalityObserver):
     def setup(self, builder: Builder) -> None:
         super().setup(builder)
         # Hack in maternal disorders
-        maternal_disorders = DiseaseState(models.MATERNAL_DISORDERS_MODEL_NAME)
-        maternal_disorders.set_model(models.MATERNAL_DISORDERS_MODEL_NAME)
+        maternal_disorders = DiseaseState(models.MATERNAL_DISORDERS_STATE_NAME)
+        maternal_disorders.set_model(models.MATERNAL_DISORDERS_STATE_NAME)
         self.causes_of_death += [maternal_disorders]
 
 
