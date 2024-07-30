@@ -5,6 +5,8 @@ from vivarium_gates_nutrition_optimization.constants import data_keys
 ###########################
 
 PREGNANCY_MODEL_NAME = data_keys.PREGNANCY.name
+
+# states
 PREGNANT_STATE_NAME = "pregnant"
 NOT_PREGNANT_STATE_NAME = "not_pregnant"
 PARTURITION_STATE_NAME = "parturition"
@@ -15,11 +17,12 @@ PREGNANCY_MODEL_STATES = (
     PARTURITION_STATE_NAME,
     POSTPARTUM_STATE_NAME,
 )
+
+# outcomes
 PARTIAL_TERM_OUTCOME = "partial_term"
 LIVE_BIRTH_OUTCOME = "live_birth"
 STILLBIRTH_OUTCOME = "stillbirth"
 INVALID_OUTCOME = "invalid"  ## For sex of partial births
-
 PREGNANCY_OUTCOMES = (
     PARTIAL_TERM_OUTCOME,
     LIVE_BIRTH_OUTCOME,
@@ -51,6 +54,10 @@ BMI_ANEMIA_CATEGORIES = (
     NORMAL_BMI_ANEMIC,
     NORMAL_BMI_NON_ANEMIC,
 )
+
+###########################
+# Interventions           #
+###########################
 
 NO_TREATMENT = "uncovered"
 IFA_SUPPLEMENTATION = "ifa"
