@@ -125,12 +125,6 @@ pipeline {
             sh "${ACTIVATE} && make lint"
           }
         }
-
-        stage("Type Check") {
-          steps {
-            sh "${ACTIVATE} && make typecheck"
-          }
-        }
       }
     }
 

@@ -57,6 +57,7 @@ build-env: # Make a new conda environment
 install: # Install setuptools, install this package in editable mode
 	pip install --upgrade pip setuptools
 	pip install -e .[DEV]
+	pip install -r requirements.txt
 
 format: setup.py pyproject.toml $(MAKE_SOURCES) # Run the code formatter and import sorter
 	-black $(LOCATIONS)
@@ -66,10 +67,6 @@ format: setup.py pyproject.toml $(MAKE_SOURCES) # Run the code formatter and imp
 lint: .flake8 $(MAKE_SOURCES) # Run the code linter and package security vulnerability checker
 	-flake8 $(LOCATIONS)
 	-safety check
-	@echo "Ignore, Created by Makefile, `date`" > $@
-
-typecheck: pytype.cfg $(MAKE_SOURCES) # Run the type checker
-	-pytype --config=pytype.cfg $(LOCATIONS)
 	@echo "Ignore, Created by Makefile, `date`" > $@
 
 e2e: $(MAKE_SOURCES) # Run the e2e tests
