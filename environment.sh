@@ -111,12 +111,6 @@ if [[ $create_env == 'yes' ]]; then
   # Create conda environment
   conda create -n $env_name python=3.11 -y
   conda activate $env_name
-else
-  echo "Existing environment validated"
-fi
-
-# Install requirements via Github
-if [[ $create_env == 'yes' ]]; then
   # NOTE: update branch name if you update requirements.txt in a branch
   echo "Installing packages for $env_type environment"
   pip install -r $install_file
@@ -126,4 +120,6 @@ if [[ $create_env == 'yes' ]]; then
   if [$env_type == 'simulation']; then
     conda install redis -y
   fi
+else
+  echo "Existing environment validated"
 fi
