@@ -298,7 +298,7 @@ class Anemia(Component):
         )
 
         builder.value.register_value_modifier(
-            "disability_weight",
+            "all_causes.disability_weight",
             self.disability_weight,
         )
 

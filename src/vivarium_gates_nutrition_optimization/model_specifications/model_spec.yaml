@@ -59,3 +59,20 @@ configuration:
     stratification:
         default:
             - 'age_group'
+        excluded_categories:
+            age_group:
+                - '60_to_64'
+                - '65_to_69'
+                - '70_to_74'
+                - '75_to_79'
+                - '80_to_84'
+                - '85_to_89'
+                - '90_to_94'
+                - '95_plus'
+            cause_of_death:
+                - 'other_causes'
+            disability:
+                - 'maternal_hemorrhage'
+                - 'parturition'
+                - 'postpartum'
+                - 'pregnant'
