@@ -105,6 +105,7 @@ class ParturitionExclusionState(DiseaseState):
         disability_weight = pd.Series(0, index=index)
         raw_disability_weight = pd.Series(0, index=index)
         with_condition = self.with_condition(index)
+        # FIXME: this is broken (self.base_disability_weight is undefined)
         raw_disability_weight.loc[with_condition] = self.base_disability_weight(
             with_condition
         )
