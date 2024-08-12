@@ -32,25 +32,25 @@ class ResultsStratifier(ResultsStratifier_):
 
         builder.results.register_stratification(
             "anemia_levels",
-            data_values.ANEMIA_DISABILITY_WEIGHTS.keys(),
+            list(data_values.ANEMIA_DISABILITY_WEIGHTS.keys()),
             requires_values=["anemia_levels"],
         )
 
         builder.results.register_stratification(
             "maternal_bmi_anemia_category",
-            models.BMI_ANEMIA_CATEGORIES,
+            list(models.BMI_ANEMIA_CATEGORIES),
             requires_columns=["maternal_bmi_anemia_category"],
         )
 
         builder.results.register_stratification(
             "intervention",
-            models.SUPPLEMENTATION_CATEGORIES,
+            list(models.SUPPLEMENTATION_CATEGORIES),
             requires_columns=["intervention"],
         )
 
         builder.results.register_stratification(
             "pregnancy_outcome",
-            models.PREGNANCY_OUTCOMES,
+            list(models.PREGNANCY_OUTCOMES),
             requires_columns=["pregnancy_outcome"],
         )
 
@@ -268,7 +268,7 @@ class DisabilityObserver(DisabilityObserver_):
         # Hack in Anemia
         anemia = DiseaseState("anemia")
         anemia.set_model("anemia")
-        self.causes_of_disease += [anemia]
+        self.causes_of_disability += [anemia]
 
 
 def aggregate_state_person_time(step_size, df: pd.DataFrame) -> float:
