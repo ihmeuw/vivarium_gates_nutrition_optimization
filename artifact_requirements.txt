@@ -1,7 +1,7 @@
 # Note: This requires users to update the branch to create an envrionment from the branch they are
 #   working on.
-vivarium @ git+https://github.com/ihmeuw/vivarium@main
-vivarium_public_health @ git+https://github.com/ihmeuw/vivarium_public_health@main
+vivarium>=3.0.0
+vivarium_public_health>=3.0.0
 gbd_mapping>=4.0.0
 click
 jinja2
@@ -12,6 +12,6 @@ pyyaml
 scipy
 tables
 vivarium_inputs[data]>=5.0.0
-vivarium_cluster_tools @ git+https://github.com/ihmeuw/vivarium_cluster_tools@main
+vivarium_cluster_tools>=2.0.0
 black==22.3.0
 isort
