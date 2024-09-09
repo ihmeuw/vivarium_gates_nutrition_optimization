@@ -1,12 +1,14 @@
-input_draw_count: 100
+input_draw_count: 1
 random_seed_count: 80
+
+input_draws: [0]
 
 branches:
   - intervention:
       scenario:
         - 'zero_coverage'
         - 'baseline'
-        - 'mms'
+        # - 'mms'
         - 'ifa'
         #- 'targeted_bep_ifa'
-        - 'targeted_bep_mms'
+        # - 'targeted_bep_mms'
