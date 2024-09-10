@@ -11,7 +11,7 @@ Help()
    echo "options:"
    echo "h     Print this Help."
    echo "t     Type of conda environment. Either 'simulation' (default) or 'artifact'."
-   echo "n     Make a new conda environment even if one currently exists."
+   echo "f     Force creation of a new environment."
 }
 
 # Define variables
@@ -20,14 +20,14 @@ env_type="simulation"
 make_new="no"
 
 # Process input options
-while getopts ":hnt:" option; do
+while getopts ":hft:" option; do
    case $option in
       h) # display help
          Help
          return;;
       t) # Type of conda environment to build
          env_type=$OPTARG;;
-      n) # Create new environment
+      f) # Force creation of a new environment
          make_new="yes";;
      \?) # Invalid option
          echo "Error: Invalid option"
