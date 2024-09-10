@@ -10,7 +10,6 @@ Help()
    echo "Syntax: source environment.sh [-h|t|v]"
    echo "options:"
    echo "h     Print this Help."
-   echo "v     Verbose mode."
    echo "t     Type of conda environment. Either 'simulation' (default) or 'artifact'."
    echo "n     Make a new conda environment even if one currently exists."
 }
@@ -21,7 +20,7 @@ env_type="simulation"
 make_new="no"
 
 # Process input options
-while getopts ":ht:n" option; do
+while getopts ":hnt:" option; do
    case $option in
       h) # display help
          Help
@@ -68,7 +67,7 @@ if [[ $create_env == '' ]]; then
   env_exists="no"
 elif [[ $make_new == 'yes' ]]; then
   # User has requested to make a new environment
-  echo "User has requested to make a new environment."
+  echo "Making a new environment."
   create_env="yes"
   env_exists="yes"
 else
