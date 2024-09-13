@@ -1,7 +1,8 @@
 components:
     vivarium:
         framework:
-            results: FullHistoryObserver()
+            results:
+                - FullHistoryObserver()
     vivarium_public_health:
         population:
             - BasePopulation()
