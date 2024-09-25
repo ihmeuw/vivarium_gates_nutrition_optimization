@@ -77,10 +77,11 @@ else
   echo "Existing environment found for $env_name."
   one_week_ago=$(date -d "7 days ago" '+%Y-%m-%d %H:%M:%S')
   creation_time="$(head -n1 $CONDA_PREFIX/conda-meta/history)"
+  creation_time=$(echo $creation_time | sed -e 's/^==>\ //g' -e 's/\ <==//g')
   requirements_modification_time="$(date -r $install_file '+%Y-%m-%d %H:%M:%S')"
   # Check if existing environment is older than a week or if environment was built 
   # before last modification to requirements file. If so, mark for recreation.
-  if [[ $one_week_ago > $creation_time ]] | [[ $creation_time < $requirements_modification_time ]]; then
+  if [[ $one_week_ag > $creation_time ]] | [[ $creation_time < $requirements_modification_time ]]; then
     echo "Environment is stale. Deleting and remaking environment..."
     create_env="yes"
   else
@@ -90,16 +91,22 @@ else
       # Empty string is no return on grep
       conda install jq -y
     fi
+    echo "Checking framework packages are up to date..."
     # Check if there has been an update to vivarium packages since last modification to requirements file
     # or more reccent than environment creation
-    grep @ $install_file 
-    # TODO: can we make this grep output a variable?
-    while read -r line ; do
-      # Parse each line of grep output
-      repo_info=(${line//@/ })
-      repo=${repo_info[0]}
-      repo_branch=${repo_info[2]}
-      last_commit_time=$(curl -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/ihmeuw/$repo/commits?sha=$repo_branch | jq '.["0"].commit.committer.date')
+    # Note: The lines we will return via grep will look like 'vivarium>=#.#.#' or will be of the format 
+    # 'vivvarium @ git+https://github.com/ihmeuw/vivarium@SOME_BRANCH'
+    grep -E 'vivarium|gbd|risk_distribution|layered_config' $install_file 
+    while read -r line; do
+      # Check if the line contains '@'
+      if [[ "$line" == *"@"* ]]; then
+          repo=$(echo "$line" | cut -d'@' -f1)
+          repo_branch=$(echo "$line" | cut -d'@' -f3)
+          last_update_time=$(curl -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/ihmeuw/$repo/commits?sha=$repo_branch | jq '.["0"].commit.committer.date')
+      else
+          repo=$(echo "$line" | cut -d'=' -f1 | cut -d">" -f1)
+          last_update_time=$(curl -s https://pypi.org/pypi/$repo/json | jq '.releases | to_entries | max_by(.key) | .value | .[0].upload_time')
+      fi
       if [[ $creation_time > $last_commit_time ]]; then
         create_env="yes"
         break
