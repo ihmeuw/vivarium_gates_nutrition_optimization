@@ -95,26 +95,31 @@ else
     # Check if there has been an update to vivarium packages since last modification to requirements file
     # or more reccent than environment creation
     # Note: The lines we will return via grep will look like 'vivarium>=#.#.#' or will be of the format 
-    # 'vivvarium @ git+https://github.com/ihmeuw/vivarium@SOME_BRANCH'
-    grep -E 'vivarium|gbd|risk_distribution|layered_config' $install_file 
-    while read -r line; do
+    # 'vivarium @ git+https://github.com/ihmeuw/vivarium@SOME_BRANCH'
+    # echo $(grep -E 'vivarium|gbd|risk_distribution|layered_config' $install_file)
+    framework_packages=$(grep -E 'vivarium|gbd|risk_distribution|layered_config' $install_file)
+    echo "Grep output: $framework_packages"
+    num_packages=$(grep -E 'vivarium|gbd|risk_distribution|layered_config' -c $install_file)
+    echo "Number of framework packages: $num_packages"
+    for ((i = 1; i <= $num_packages; i++)); do
+      line=$(echo "$framework_packages" | sed -n "${i}p")
+      echo "Line is: $line"
       # Check if the line contains '@'
       if [[ "$line" == *"@"* ]]; then
-          repo=$(echo "$line" | cut -d'@' -f1)
-          repo_branch=$(echo "$line" | cut -d'@' -f3)
-          last_update_time=$(curl -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/ihmeuw/$repo/commits?sha=$repo_branch | jq '.["0"].commit.committer.date')
+          repo_info=(${line//@/ })
+          repo=${repo_info[0]}
+          repo_branch=${repo_info[2]}
+          last_update_time=$(curl -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/ihmeuw/$repo/commits?sha=$repo_branch | jq '.[0].commit.committer.date')
       else
-          repo=$(echo "$line" | cut -d'=' -f1 | cut -d">" -f1)
+          repo=$(echo "$line" | cut -d '>' -f1)
           last_update_time=$(curl -s https://pypi.org/pypi/$repo/json | jq '.releases | to_entries | max_by(.key) | .value | .[0].upload_time')
       fi
       if [[ $creation_time > $last_commit_time ]]; then
         create_env="yes"
+        echo "Last update time for $repo: $last_update_time. Environment is stale. Remaking environment..."
         break
       fi
-    # This way of writing/exiting while loop is a here string so the process runs
-    # in the main shell and not a subshell: https://www.gnu.org/software/bash/manual/bashref.html#Here-Strings
-    # I put an arbitrary empty string here but this is so we can set create_env to yes if we hit that trigger
-    done <<< "$(echo "")"
+    done
   fi
 fi
 
