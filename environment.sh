@@ -81,7 +81,7 @@ else
   requirements_modification_time="$(date -r $install_file '+%Y-%m-%d %H:%M:%S')"
   # Check if existing environment is older than a week or if environment was built 
   # before last modification to requirements file. If so, mark for recreation.
-  if [[ $one_week_ag > $creation_time ]] | [[ $creation_time < $requirements_modification_time ]]; then
+  if [[ $one_week_ago > $creation_time ]] | [[ $creation_time < $requirements_modification_time ]]; then
     echo "Environment is stale. Deleting and remaking environment..."
     create_env="yes"
   else
