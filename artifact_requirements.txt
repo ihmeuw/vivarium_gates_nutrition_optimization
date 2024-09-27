@@ -12,8 +12,8 @@ pyyaml
 scipy
 tables
 vivarium_inputs>=5.0.0
-# Note inputs is not install with [data] extra because we might need to specify the branch
-# for inputs for the data requirements
+# Note viv_in is not install with [data] extra because we might need to specify the branch
+# for viv_in for the data requirements
 vivarium_gbd_access>=4.0.0
 core-maths
 vivarium_cluster_tools>=2.0.0

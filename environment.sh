@@ -98,12 +98,11 @@ else
     # 'vivarium @ git+https://github.com/ihmeuw/vivarium@SOME_BRANCH'
     # echo $(grep -E 'vivarium|gbd|risk_distribution|layered_config' $install_file)
     framework_packages=$(grep -E 'vivarium|gbd|risk_distribution|layered_config' $install_file)
-    echo "Grep output: $framework_packages"
     num_packages=$(grep -E 'vivarium|gbd|risk_distribution|layered_config' -c $install_file)
-    echo "Number of framework packages: $num_packages"
+    
+    # Iterate through each return of the grep output
     for ((i = 1; i <= $num_packages; i++)); do
       line=$(echo "$framework_packages" | sed -n "${i}p")
-      echo "Line is: $line"
       # Check if the line contains '@'
       if [[ "$line" == *"@"* ]]; then
           repo_info=(${line//@/ })
