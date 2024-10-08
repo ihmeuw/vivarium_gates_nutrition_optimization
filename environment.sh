@@ -78,6 +78,7 @@ else
   one_week_ago=$(date -d "7 days ago" '+%Y-%m-%d %H:%M:%S')
   creation_time="$(head -n1 $CONDA_PREFIX/conda-meta/history)"
   creation_time=$(echo $creation_time | sed -e 's/^==>\ //g' -e 's/\ <==//g')
+  echo "Environment was created on $creation_time"
   requirements_modification_time="$(date -r $install_file '+%Y-%m-%d %H:%M:%S')"
   # Check if existing environment is older than a week or if environment was built 
   # before last modification to requirements file. If so, mark for recreation.
@@ -108,12 +109,14 @@ else
           repo_info=(${line//@/ })
           repo=${repo_info[0]}
           repo_branch=${repo_info[2]}
-          last_update_time=$(curl -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/ihmeuw/$repo/commits?sha=$repo_branch | jq '.[0].commit.committer.date')
+          last_update_time=$(curl -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/ihmeuw/$repo/commits?sha=$repo_branch | jq .[0].commit.committer.date)
       else
           repo=$(echo "$line" | cut -d '>' -f1)
-          last_update_time=$(curl -s https://pypi.org/pypi/$repo/json | jq '.releases | to_entries | max_by(.key) | .value | .[0].upload_time')
+          last_update_time=$(curl -s https://pypi.org/pypi/$repo/json | jq -r '.releases | to_entries | max_by(.key) | .value | .[0].upload_time')
       fi
-      if [[ $creation_time > $last_commit_time ]]; then
+      last_update_time=$(date -d "$last_update_time" '+%Y-%m-%d %H:%M:%S')
+      echo "Last update time for $repo: $last_update_time"
+      if [[ $creation_time < $last_update_time ]]; then
         create_env="yes"
         echo "Last update time for $repo: $last_update_time. Environment is stale. Remaking environment..."
         break
