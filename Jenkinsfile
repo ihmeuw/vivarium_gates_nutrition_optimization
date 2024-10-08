@@ -38,7 +38,6 @@ pipeline {
   environment {
     // Get the branch being built and strip everything but the text after the last "/"
     BRANCH = sh(script: "echo ${GIT_BRANCH} | rev | cut -d '/' -f1 | rev", returnStdout: true).trim()
-    // DEVELOPER_ID = $(curl -k --silent ${BUILD_URL}/api/xml | tr '<' '\n' | egrep '^userId>|^userName>' | sed 's/.*>//g' | sed -e '1s/$/ \//g' | tr '\n' ' ')
     TIMESTAMP = sh(script: 'date', returnStdout: true)
     // Specify the path to the .condarc file via environment variable.
     // This file configures the shared conda package cache.
@@ -168,6 +167,7 @@ pipeline {
     always {
       sh "${ACTIVATE} && make clean"
       sh "rm -rf ${CONDA_ENV_PATH}"
+      DEVELOPER_ID = sh $(curl -k --silent ${BUILD_URL}/api/xml | tr '<' '\n' | egrep '^userId>|^userName>' | sed 's/.*>//g' | sed -e '1s/$/ \//g' | tr '\n' ' ')
       // Delete the workspace directory.
       deleteDir()
     }
@@ -182,7 +182,7 @@ pipeline {
       // TODO: DM the developer instead of the slack channel
       echo "This build failed on ${GIT_BRANCH}. Sending a failure message to Slack."
       slackSend channel: "#${channelName}",
-                  message: ":x: JOB FAILURE: $env.BUILD_USER_ID triggered $JOB_NAME - $BUILD_ID\n\n${BUILD_URL}console\n\n<!channel>",
+                  message: ":x: JOB FAILURE: $DEVELOPER_ID triggered $JOB_NAME - $BUILD_ID\n\n${BUILD_URL}console\n\n<!channel>",
                   teamDomain: "ihme",
                   tokenCredentialId: "slack"
     }
