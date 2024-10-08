@@ -78,6 +78,7 @@ else
   one_week_ago=$(date -d "7 days ago" '+%Y-%m-%d %H:%M:%S')
   creation_time="$(head -n1 $CONDA_PREFIX/conda-meta/history)"
   creation_time=$(echo $creation_time | sed -e 's/^==>\ //g' -e 's/\ <==//g')
+  echo "Environment was created on $creation_time"
   requirements_modification_time="$(date -r $install_file '+%Y-%m-%d %H:%M:%S')"
   # Check if existing environment is older than a week or if environment was built 
   # before last modification to requirements file. If so, mark for recreation.
