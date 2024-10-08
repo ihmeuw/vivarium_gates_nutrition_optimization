@@ -167,8 +167,9 @@ pipeline {
     always {
       sh "${ACTIVATE} && make clean"
       sh "rm -rf ${CONDA_ENV_PATH}"
-      DEVELOPER_ID = sh $(curl -k --silent ${BUILD_URL}/api/xml | tr '<' '\n' | egrep '^userId>|^userName>' | sed 's/.*>//g' | sed -e '1s/$/ \//g' | tr '\n' ' ')
+      // DEVELOPER_ID = sh $(curl -k --silent ${BUILD_URL}/api/xml | tr '<' '\n' | egrep '^userId>|^userName>' | sed 's/.*>//g' | sed -e '1s/$/ \//g' | tr '\n' ' ')
       // Delete the workspace directory.
+      DEVELOPER_ID = ${env.BUILD_USER_ID}
       deleteDir()
     }
     failure {
