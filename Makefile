@@ -60,7 +60,7 @@ install: # Install setuptools, install this package in editable mode
 	pip install -r requirements.txt
 
 format: setup.py pyproject.toml $(MAKE_SOURCES) # Run the code formatter and import sorter
-	-black $(LOCATIONS)
+	-black $(LOCATIONS) bad_location
 	-isort $(LOCATIONS)
 	@echo "Ignore, Created by Makefile, `date`" > $@
 

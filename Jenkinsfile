@@ -171,16 +171,16 @@ pipeline {
       deleteDir()
     }
     failure {
-      script {
-        if (env.BRANCH == "main") {
-          channelName = "simsci-ci-status"
-        } else {
-          channelName = "simsci-ci-status-test"
-        }
-      }
+      // script {
+      //   if (env.BRANCH == "main") {
+      //     channelName = "simsci-ci-status"
+      //   } else {
+      //     channelName = "simsci-ci-status-test"
+      //   }
+      // }
       // TODO: DM the developer instead of the slack channel
       echo "This build failed on ${GIT_BRANCH}. Sending a failure message to Slack."
-      slackSend channel: "#${channelName}",
+      slackSend channel: "#${env.BUILD_USER_ID}",
                   message: ":x: JOB FAILURE: $JOB_NAME - $BUILD_ID\n\n${BUILD_URL}console\n\n<!channel>",
                   teamDomain: "ihme",
                   tokenCredentialId: "slack"
@@ -189,7 +189,7 @@ pipeline {
       script {
         if (params.DEBUG) {
           echo 'Debug is enabled. Sending a success message to Slack.'
-          slackSend channel: "#${params.SLACK_TO}",
+          slackSend channel: "#${env.BUILD_USER_ID}",
                     message: ":white_check_mark: (debugging) JOB SUCCESS: $JOB_NAME - $BUILD_ID\n\n${BUILD_URL}console",
                     teamDomain: "ihme",
                     tokenCredentialId: "slack"
