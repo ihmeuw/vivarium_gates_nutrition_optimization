@@ -124,7 +124,7 @@ pipeline {
 
         // Display environment variables from Jenkins.
         echo """Environment:
-        USER:           '${USER}'
+        BUILDER:        '${env.BUILD_USER_ID}'
         ACTIVATE:       '${ACTIVATE}'
         BUILD_NUMBER:   '${BUILD_NUMBER}'
         BRANCH:         '${BRANCH}'
