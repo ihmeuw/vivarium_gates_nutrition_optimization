@@ -13,6 +13,7 @@ pipeline {
   options {
     // Keep 100 old builds.
     buildDiscarder logRotator(numToKeepStr: "100")
+    user_ID=currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause')[0]['userId']
 
     // Wait 60 seconds before starting the build.
     // If another commit enters the build queue in this time, the first build will be discarded.
@@ -167,10 +168,7 @@ pipeline {
     always {
       sh "${ACTIVATE} && make clean"
       sh "rm -rf ${CONDA_ENV_PATH}"
-      user_ID=currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause')[0]['userId']
-      // BUILD_CAUSE_JSON=$(curl --silent ${BUILD_URL}/api/json | tr "{}" "\n" | grep "Started by")
-      // BUILD_USER_ID=$(echo $BUILD_CAUSE_JSON | tr "," "\n" | grep "userId" | awk -F\" '{print $4}')
-      // BUILD_USER_NAME=$(echo $BUILD_CAUSE_JSON | tr "," "\n" | grep "userName" | awk -F\" '{print $4}')
+      
       // Delete the workspace directory.
       deleteDir()
     }
