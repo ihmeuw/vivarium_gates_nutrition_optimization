@@ -99,6 +99,7 @@ pipeline {
     // Jenkins commands run in separate processes, so need to activate the environment every
     // time we run pip, poetry, etc.
     ACTIVATE = "source ${CONDA_BIN_PATH}/activate ${CONDA_ENV_PATH} &> /dev/null"
+    userID = "${env.BUILD_USER_ID}"
   }
 
   stages {
@@ -122,7 +123,8 @@ pipeline {
         DEPLOY_OVERRIDE: ${params.DEPLOY_OVERRIDE}"""
 
         // Display environment variables from Jenkins.
-        echo """Environment:  
+        echo """Environment:
+        USER_ID:        '${USER_ID}'
         ACTIVATE:       '${ACTIVATE}'
         BUILD_NUMBER:   '${BUILD_NUMBER}'
         BRANCH:         '${BRANCH}'
