@@ -13,7 +13,6 @@ pipeline {
   options {
     // Keep 100 old builds.
     buildDiscarder logRotator(numToKeepStr: "100")
-    user_ID=currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause')[0]['userId']
 
     // Wait 60 seconds before starting the build.
     // If another commit enters the build queue in this time, the first build will be discarded.
@@ -168,7 +167,10 @@ pipeline {
     always {
       sh "${ACTIVATE} && make clean"
       sh "rm -rf ${CONDA_ENV_PATH}"
-      
+      script{
+        DEVELOPER_ID = $(curl -k --silent ${BUILD_URL}/api/xml | tr '<' '\n' | egrep '^userId>|^userName>' | sed 's/.*>//g' | sed -e '1s/$/ \//g' | tr '\n' ' ')
+        echo "${DEVELOPER_ID}"
+      }
       // Delete the workspace directory.
       deleteDir()
     }
@@ -183,7 +185,7 @@ pipeline {
       // TODO: DM the developer instead of the slack channel
       echo "This build failed on ${GIT_BRANCH}. Sending a failure message to Slack."
       slackSend channel: "#${channelName}",
-                  message: ":x: JOB FAILURE: ${userID} triggered $JOB_NAME - $BUILD_ID\n\n${BUILD_URL}console\n\n<!channel>",
+                  message: ":x: JOB FAILURE: ${DEVELOPER_ID} triggered $JOB_NAME - $BUILD_ID\n\n${BUILD_URL}console\n\n<!channel>",
                   teamDomain: "ihme",
                   tokenCredentialId: "slack"
     }
