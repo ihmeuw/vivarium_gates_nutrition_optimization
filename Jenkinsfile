@@ -14,7 +14,8 @@ def sendBuildStatusOverSlack() {
     } else {
         channelName = "simsci-ci-status-test"
     }
-    def builder = currentBuild.rawBuild.getCause(Cause.UserIdCause).getUserId()
+
+    def builder = env.BUILD_NUMBER.getCause(Cause.UserIdCause).getUserId()
     // def builder = '???'
     // if (env.BUILD_USER_ID) {
     //     builder = env.BUILD_USER_ID
