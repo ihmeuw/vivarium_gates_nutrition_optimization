@@ -1,4 +1,5 @@
 def sendBuildStatusOverSlack() {
+    // Sends a slack message based on various build parameters.
     def colorCode
     switch (currentBuild.result) {
         case 'SUCCESS':
