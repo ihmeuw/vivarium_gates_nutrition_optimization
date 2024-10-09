@@ -167,9 +167,10 @@ pipeline {
     always {
       sh "${ACTIVATE} && make clean"
       sh "rm -rf ${CONDA_ENV_PATH}"
-      // wrap([$class: 'BuildUser']) {
-      //     sh " echo '${env.BUILD_USER_ID}' "
-      //   }
+      wrap([$class: 'BuildUser']) {
+        echo "BUILD_USER=${BUILD_USER}"
+        echo "env.BUILD_USER_EMAIL=${env.BUILD_USER_EMAIL}"
+      }
       // Delete the workspace directory.
       deleteDir()
     }
@@ -184,7 +185,7 @@ pipeline {
       // TODO: DM the developer instead of the slack channel
       echo "This build failed on ${GIT_BRANCH}. Sending a failure message to Slack."
       slackSend channel: "#${channelName}",
-                  message: ":x: JOB FAILURE: ${BUILD_USER_ID} triggered $JOB_NAME - $BUILD_ID\n\n${BUILD_URL}console\n\n<!channel>",
+                  message: ":x: JOB FAILURE: ${BUILD_USER} triggered $JOB_NAME - $BUILD_ID\n\n${BUILD_URL}console\n\n<!channel>",
                   teamDomain: "ihme",
                   tokenCredentialId: "slack"
     }
