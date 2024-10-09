@@ -167,14 +167,10 @@ pipeline {
     always {
       sh "${ACTIVATE} && make clean"
       sh "rm -rf ${CONDA_ENV_PATH}"
-      // Using the Build User Vars Plugin to get the user ID
-      buildUserVars {
-          userID = env.BUILD_USER_ID
-          // Sending a failure message to the user via Slack
-          // Make sure you have configured Jenkins with Slack credentials
-          // and have a method/utility/script ready for sending Slack messages
-          // sendMessageToSlack(slackUserID, "Your build failed: ${env.BUILD_URL}")
-      }
+      user_ID=currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause')[0]['userId']
+      // BUILD_CAUSE_JSON=$(curl --silent ${BUILD_URL}/api/json | tr "{}" "\n" | grep "Started by")
+      // BUILD_USER_ID=$(echo $BUILD_CAUSE_JSON | tr "," "\n" | grep "userId" | awk -F\" '{print $4}')
+      // BUILD_USER_NAME=$(echo $BUILD_CAUSE_JSON | tr "," "\n" | grep "userName" | awk -F\" '{print $4}')
       // Delete the workspace directory.
       deleteDir()
     }
@@ -197,7 +193,7 @@ pipeline {
       script {
         if (params.DEBUG) {
           echo 'Debug is enabled. Sending a success message to Slack.'
-          slackSend channel: "#${DEVELOPER_ID}",
+          slackSend channel: "#${channelName}",
                     message: ":white_check_mark: (debugging) JOB SUCCESS: $JOB_NAME - $BUILD_ID\n\n${BUILD_URL}console",
                     teamDomain: "ihme",
                     tokenCredentialId: "slack"
