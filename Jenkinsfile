@@ -216,7 +216,6 @@ pipeline {
     always {
       sh "${ACTIVATE} && make clean"
       sh "rm -rf ${CONDA_ENV_PATH}"
-      
       // Delete the workspace directory.
       deleteDir()
       // Send a message to Slack.
