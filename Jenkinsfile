@@ -218,7 +218,7 @@ pipeline {
         }
         // Run git command to get the author of the last commit
         def developerID = sh(
-            script: "git log -1 --pretty=format:'%an' ${env.BRANCH}",
+            script: "git log -1 --pretty=format:'%an' ${GIT_BRANCH}",
             returnStdout: true
         ).trim()
         def slackMessage = """
