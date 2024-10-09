@@ -229,22 +229,26 @@ pipeline {
           Author: @${developerID}
           Build details: <${env.BUILD_URL}/console|See in web console>
       """.stripIndent()
-        def slack_msg = [
-          baseUrl:           "https://ihme.slack.com/services/hooks/jenkins-ci/",
-          channel:           "${channelName}",
-          tokenCredentialId: "slack",
-          message:           slackMessage
-        ]
+        // def slack_msg = [
+        //   baseUrl:           "https://ihme.slack.com/services/hooks/jenkins-ci/",
+        //   channel:           "${channelName}",
+        //   tokenCredentialId: "slack",
+        //   message:           slackMessage
+        // ]
       }
-        
+      
       // Send a message to Slack.
       // sendBuildStatusOverSlack()
       // Delete the workspace directory.
       deleteDir()
     }
     failure {
+      echo "This build was triggered by ${developerID}."
       echo "This build failed on ${GIT_BRANCH}. Sending a failure message to Slack."
-      slackSend(slack_msg)
+      slackSend channel: "#${channelName}",
+                  message: slackMessage
+                  teamDomain: "ihme",
+                  tokenCredentialId: "slack"
     }
     success {
       script {
