@@ -15,7 +15,9 @@ def sendBuildStatusOverSlack() {
         channelName = "simsci-ci-status-test"
     }
 
-    def builder = env.BUILD_NUMBER.getCause(Cause.UserIdCause).getUserId()
+    def job = Jenkins.getInstance().getItemByFullName(env.JOB_BASE_NAME, Job.class)
+    def build = job.getBuildByNumber(env.BUILD_ID as int)
+    def builder = build.getCause(Cause.UserIdCause).getUserId()
     // def builder = '???'
     // if (env.BUILD_USER_ID) {
     //     builder = env.BUILD_USER_ID
