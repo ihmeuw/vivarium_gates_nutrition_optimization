@@ -1,48 +1,47 @@
-// def sendBuildStatusOverSlack() {
-//     def colorCode
-//     switch (currentBuild.result) {
-//         case 'SUCCESS':
-//             colorCode = 'good'
-//             slackChannel = 'dt-build-successes'
-//             break
-//         case 'UNSTABLE':
-//             colorCode = 'warning'
-//             slackChannel = 'dt-build-failures'
-//             break
-//         case 'FAILURE':
-//             colorCode = 'danger'
-//             slackChannel = 'dt-build-failures'
-//             break;
-//     }
-//     def builder = '???'
-//     if (env.BUILD_USER_ID) {
-//         builder = env.BUILD_USER_ID
-//         builder -= ~/\@.*$/
-//     }
-//     if (env.cron_user) {
-//          builder = 'Parameterized Cron'
-//     }
-//     def build_notes = ''
-//     if (env.build_notes) {
-//         build_notes += "Build notes: ${env.build_notes}"
-//     }
-//     def message = """
-//         Job: *${env.JOB_NAME}*
-//         ${build_notes}
-//         Build number: #${env.BUILD_NUMBER}
-//         Build status: *${currentBuild.result}*
-//         Author: @${builder}
-//         Build details: <${env.BUILD_URL}/console|See in web console>
-//     """.stripIndent()
-//     def slack_msg = [
-//         baseUrl:           "https://ihme.slack.com/services/hooks/jenkins-ci/",
-//         channel:           "${slackChannel}",
-//         tokenCredentialId: "slack_api_key",
-//         message:           message
-//     ]
-//     if (colorCode) { slack_msg.color = colorCode }
-//     return slackSend(slack_msg)
-// }
+def sendBuildStatusOverSlack() {
+    def colorCode
+    switch (currentBuild.result) {
+        case 'SUCCESS':
+            colorCode = 'good'
+            break
+        case 'FAILURE':
+            colorCode = 'danger'
+            break;
+    }
+    if (env.BRANCH == "main") {
+        channelName = "simsci-ci-status"
+    } else {
+        channelName = "simsci-ci-status-test"
+    }
+    def builder = '???'
+    if (env.BUILD_USER_ID) {
+        builder = env.BUILD_USER_ID
+        builder -= ~/\@.*$/
+    }
+    if (env.cron_user) {
+         builder = 'Parameterized Cron'
+    }
+    def build_notes = ''
+    if (env.build_notes) {
+        build_notes += "Build notes: ${env.build_notes}"
+    }
+    def message = """
+        Job: *${env.JOB_NAME}*
+        ${build_notes}
+        Build number: #${env.BUILD_NUMBER}
+        Build status: *${currentBuild.result}*
+        Author: @${builder}
+        Build details: <${env.BUILD_URL}/console|See in web console>
+    """.stripIndent()
+    def slack_msg = [
+        baseUrl:           "https://ihme.slack.com/services/hooks/jenkins-ci/",
+        channel:           "${channelName}",
+        tokenCredentialId: "slack",
+        message:           message
+    ]
+    if (colorCode) { slack_msg.color = colorCode }
+    return slackSend(slack_msg)
+}
 
 
 pipeline_name="vivarium_gates_nutrition_optimization"
@@ -214,30 +213,27 @@ pipeline {
     always {
       sh "${ACTIVATE} && make clean"
       sh "rm -rf ${CONDA_ENV_PATH}"
-      script {
-        if (env.BUILD_USER_ID) {
-          builder = env.BUILD_USER_ID
-          builder -= ~/\@.*$/
-      }
-      }
+      
       // Delete the workspace directory.
       deleteDir()
+      // Send a message to Slack.
+      sendBuildStatusOverSlack()
     }
-    failure {
-      script {
-        if (env.BRANCH == "main") {
-          channelName = "simsci-ci-status"
-        } else {
-          channelName = "simsci-ci-status-test"
-        }
-      }
-      // TODO: DM the developer instead of the slack channel
-      echo "This build failed on ${GIT_BRANCH}. Sending a failure message to Slack."
-      slackSend channel: "#${channelName}",
-                  message: ":x: JOB FAILURE: ${builder} triggered $JOB_NAME - $BUILD_ID\n\n${BUILD_URL}console\n\n<!channel>",
-                  teamDomain: "ihme",
-                  tokenCredentialId: "slack"
-    }
+    // failure {
+    //   script {
+    //     if (env.BRANCH == "main") {
+    //       channelName = "simsci-ci-status"
+    //     } else {
+    //       channelName = "simsci-ci-status-test"
+    //     }
+    //   }
+    //   // TODO: DM the developer instead of the slack channel
+    //   echo "This build failed on ${GIT_BRANCH}. Sending a failure message to Slack."
+    //   slackSend channel: "#${channelName}",
+    //               message: ":x: JOB FAILURE: ${builder} triggered $JOB_NAME - $BUILD_ID\n\n${BUILD_URL}console\n\n<!channel>",
+    //               teamDomain: "ihme",
+    //               tokenCredentialId: "slack"
+    // }
     success {
       script {
         if (params.DEBUG) {
