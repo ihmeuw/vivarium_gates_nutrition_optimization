@@ -169,8 +169,7 @@ pipeline {
       sh "rm -rf ${CONDA_ENV_PATH}"
       // Using the Build User Vars Plugin to get the user ID
       buildUserVars {
-          def userID = env.BUILD_USER_ID
-
+          userID = env.BUILD_USER_ID
           // Sending a failure message to the user via Slack
           // Make sure you have configured Jenkins with Slack credentials
           // and have a method/utility/script ready for sending Slack messages
