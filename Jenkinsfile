@@ -14,15 +14,11 @@ def sendBuildStatusOverSlack() {
     } else {
         channelName = "simsci-ci-status-test"
     }
-
-    def job = Jenkins.getInstance().getItemByFullName(env.JOB_BASE_NAME, Job.class)
-    def build = job.getBuildByNumber(env.BUILD_ID as int)
-    def builder = build.getCause(Cause.UserIdCause).getUserId()
-    // def builder = '???'
-    // if (env.BUILD_USER_ID) {
-    //     builder = env.BUILD_USER_ID
-    //     builder -= ~/\@.*$/
-    // }
+    def builder = '???'
+    if (env.BUILD_USER_ID) {
+        builder = env.BUILD_USER_ID
+        builder -= ~/\@.*$/
+    }
     if (env.cron_user) {
          builder = 'Parameterized Cron'
     }
@@ -127,6 +123,8 @@ pipeline {
 
         // Display environment variables from Jenkins.
         echo """Environment:
+        BUILDER:        '${env.BUILD_USER_ID}'
+        AUTHOR:         '${env.CHANGE_AUTHOR}'
         ACTIVATE:       '${ACTIVATE}'
         BUILD_NUMBER:   '${BUILD_NUMBER}'
         BRANCH:         '${BRANCH}'
