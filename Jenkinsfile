@@ -1,44 +1,44 @@
-def sendBuildStatusOverSlack() {
-    // Sends a slack message based on various build parameters.
-    def colorCode
-    switch (currentBuild.result) {
-        case 'SUCCESS':
-            colorCode = 'good'
-            break
-        case 'FAILURE':
-            colorCode = 'danger'
-            break;
-    }
-    if (env.BRANCH == "main") {
-        channelName = "simsci-ci-status"
-    } else {
-        channelName = "simsci-ci-status-test"
-    }
-    def builder = sh(script: "git log -1 --pretty=format:'%ae' ${GIT_BRANCH}", returnStdout: true).trim()
-    if (env.cron_user) {
-         builder = 'Parameterized Cron'
-    }
-    def build_notes = ''
-    if (env.build_notes) {
-        build_notes += "Build notes: ${env.build_notes}"
-    }
-    def message = """
-        Job: *${env.JOB_NAME}*
-        ${build_notes}
-        Build number: #${env.BUILD_NUMBER}
-        Build status: *${currentBuild.result}*
-        Author: @${builder}
-        Build details: <${env.BUILD_URL}/console|See in web console>
-    """.stripIndent()
-    def slack_msg = [
-        baseUrl:           "https://ihme.slack.com/services/hooks/jenkins-ci/",
-        channel:           "${channelName}",
-        tokenCredentialId: "slack",
-        message:           message
-    ]
-    if (colorCode) { slack_msg.color = colorCode }
-    return slackSend(slack_msg)
-}
+// def sendBuildStatusOverSlack() {
+//     // Sends a slack message based on various build parameters.
+//     def colorCode
+//     switch (currentBuild.result) {
+//         case 'SUCCESS':
+//             colorCode = 'good'
+//             break
+//         case 'FAILURE':
+//             colorCode = 'danger'
+//             break;
+//     }
+//     if (env.BRANCH == "main") {
+//         channelName = "simsci-ci-status"
+//     } else {
+//         channelName = "simsci-ci-status-test"
+//     }
+//     def builder = sh(script: "git log -1 --pretty=format:'%ae' ${GIT_BRANCH}", returnStdout: true).trim()
+//     if (env.cron_user) {
+//          builder = 'Parameterized Cron'
+//     }
+//     def build_notes = ''
+//     if (env.build_notes) {
+//         build_notes += "Build notes: ${env.build_notes}"
+//     }
+    // def message = """
+    //     Job: *${env.JOB_NAME}*
+    //     ${build_notes}
+    //     Build number: #${env.BUILD_NUMBER}
+    //     Build status: *${currentBuild.result}*
+    //     Author: @${builder}
+    //     Build details: <${env.BUILD_URL}/console|See in web console>
+    // """.stripIndent()
+    // def slack_msg = [
+    //     baseUrl:           "https://ihme.slack.com/services/hooks/jenkins-ci/",
+    //     channel:           "${channelName}",
+    //     tokenCredentialId: "slack",
+    //     message:           message
+    // ]
+//     if (colorCode) { slack_msg.color = colorCode }
+//     return slackSend(slack_msg)
+// }
 
 
 pipeline_name="vivarium_gates_nutrition_optimization"
@@ -95,7 +95,6 @@ pipeline {
     // Jenkins commands run in separate processes, so need to activate the environment every
     // time we run pip, poetry, etc.
     ACTIVATE = "source ${CONDA_BIN_PATH}/activate ${CONDA_ENV_PATH} &> /dev/null"
-    USER = "${env.BUILD_USER}"
   }
 
   stages {
@@ -120,7 +119,6 @@ pipeline {
 
         // Display environment variables from Jenkins.
         echo """Environment:
-        BUILDER:        '${env.BUILD_USER_ID}'
         ACTIVATE:       '${ACTIVATE}'
         BUILD_NUMBER:   '${BUILD_NUMBER}'
         BRANCH:         '${BRANCH}'
@@ -212,10 +210,41 @@ pipeline {
     always {
       sh "${ACTIVATE} && make clean"
       sh "rm -rf ${CONDA_ENV_PATH}"
+      script {
+        if (env.BRANCH == "main") {
+          channelName = "simsci-ci-status"
+        } else {
+          channelName = "simsci-ci-status-test"
+        }
+        // Run git command to get the author of the last commit
+        def developerID = sh(
+            script: "git log -1 --pretty=format:'%an' ${branchName}",
+            returnStdout: true
+        ).trim()
+        def slackMessage = """
+          Job: *${env.JOB_NAME}*
+          ${build_notes}
+          Build number: #${env.BUILD_NUMBER}
+          Build status: *${currentBuild.result}*
+          Author: @${developerID}
+          Build details: <${env.BUILD_URL}/console|See in web console>
+      """.stripIndent()
+        def slack_msg = [
+          baseUrl:           "https://ihme.slack.com/services/hooks/jenkins-ci/",
+          channel:           "${channelName}",
+          tokenCredentialId: "slack",
+          message:           slackMessage
+        ]
+      }
+        
       // Send a message to Slack.
-      sendBuildStatusOverSlack()
+      // sendBuildStatusOverSlack()
       // Delete the workspace directory.
       deleteDir()
+    }
+    failure {
+      echo "This build failed on ${GIT_BRANCH}. Sending a failure message to Slack."
+      slackSend(slack_msg)
     }
     success {
       script {
