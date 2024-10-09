@@ -246,7 +246,7 @@ pipeline {
       echo "This build was triggered by ${developerID}."
       echo "This build failed on ${GIT_BRANCH}. Sending a failure message to Slack."
       slackSend channel: "#${channelName}",
-                  message: slackMessage
+                  message: slackMessage,
                   teamDomain: "ihme",
                   tokenCredentialId: "slack"
     }
