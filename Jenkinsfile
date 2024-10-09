@@ -14,7 +14,7 @@ def sendBuildStatusOverSlack() {
     } else {
         channelName = "simsci-ci-status-test"
     }
-    def builder = (script: "git log -1 --pretty=format:'%ae'", returnStdout: true).trim()
+    def builder = sh(script: "git log -1 --pretty=format:'%ae' ${GIT_BRANCH}", returnStdout: true).trim()
     if (env.cron_user) {
          builder = 'Parameterized Cron'
     }
@@ -212,11 +212,10 @@ pipeline {
     always {
       sh "${ACTIVATE} && make clean"
       sh "rm -rf ${CONDA_ENV_PATH}"
-
-      // Delete the workspace directory.
-      deleteDir()
       // Send a message to Slack.
       sendBuildStatusOverSlack()
+      // Delete the workspace directory.
+      deleteDir()
     }
     success {
       script {
