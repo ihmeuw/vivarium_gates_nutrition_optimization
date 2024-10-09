@@ -167,9 +167,14 @@ pipeline {
     always {
       sh "${ACTIVATE} && make clean"
       sh "rm -rf ${CONDA_ENV_PATH}"
-      wrap([$class: 'BuildUser']) {
-        echo "BUILD_USER=${BUILD_USER}"
-        echo "env.BUILD_USER_EMAIL=${env.BUILD_USER_EMAIL}"
+      // Using the Build User Vars Plugin to get the user ID
+      buildUserVars {
+          def userID = env.BUILD_USER_ID
+
+          // Sending a failure message to the user via Slack
+          // Make sure you have configured Jenkins with Slack credentials
+          // and have a method/utility/script ready for sending Slack messages
+          // sendMessageToSlack(slackUserID, "Your build failed: ${env.BUILD_URL}")
       }
       // Delete the workspace directory.
       deleteDir()
@@ -185,7 +190,7 @@ pipeline {
       // TODO: DM the developer instead of the slack channel
       echo "This build failed on ${GIT_BRANCH}. Sending a failure message to Slack."
       slackSend channel: "#${channelName}",
-                  message: ":x: JOB FAILURE: ${BUILD_USER} triggered $JOB_NAME - $BUILD_ID\n\n${BUILD_URL}console\n\n<!channel>",
+                  message: ":x: JOB FAILURE: ${userID} triggered $JOB_NAME - $BUILD_ID\n\n${BUILD_URL}console\n\n<!channel>",
                   teamDomain: "ihme",
                   tokenCredentialId: "slack"
     }
