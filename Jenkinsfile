@@ -13,6 +13,8 @@ pipeline {
   options {
     // Keep 100 old builds.
     buildDiscarder logRotator(numToKeepStr: "100")
+    // Get developer id
+    withBuildUser()
 
     // Wait 60 seconds before starting the build.
     // If another commit enters the build queue in this time, the first build will be discarded.
