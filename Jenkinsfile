@@ -13,8 +13,6 @@ pipeline {
   options {
     // Keep 100 old builds.
     buildDiscarder logRotator(numToKeepStr: "100")
-    // Get developer id
-    withBuildUser()
 
     // Wait 60 seconds before starting the build.
     // If another commit enters the build queue in this time, the first build will be discarded.
@@ -169,6 +167,9 @@ pipeline {
     always {
       sh "${ACTIVATE} && make clean"
       sh "rm -rf ${CONDA_ENV_PATH}"
+      // wrap([$class: 'BuildUser']) {
+      //     sh " echo '${env.BUILD_USER_ID}' "
+      //   }
       // Delete the workspace directory.
       deleteDir()
     }
@@ -183,7 +184,7 @@ pipeline {
       // TODO: DM the developer instead of the slack channel
       echo "This build failed on ${GIT_BRANCH}. Sending a failure message to Slack."
       slackSend channel: "#${channelName}",
-                  message: ":x: JOB FAILURE: ${env.BUILD_USER_ID} triggered $JOB_NAME - $BUILD_ID\n\n${BUILD_URL}console\n\n<!channel>",
+                  message: ":x: JOB FAILURE: ${BUILD_USER_ID} triggered $JOB_NAME - $BUILD_ID\n\n${BUILD_URL}console\n\n<!channel>",
                   teamDomain: "ihme",
                   tokenCredentialId: "slack"
     }
