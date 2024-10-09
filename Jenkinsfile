@@ -14,11 +14,12 @@ def sendBuildStatusOverSlack() {
     } else {
         channelName = "simsci-ci-status-test"
     }
-    def builder = '???'
-    if (env.BUILD_USER_ID) {
-        builder = env.BUILD_USER_ID
-        builder -= ~/\@.*$/
-    }
+    def builder = currentBuild.rawBuild.getCause(Cause.UserIdCause).getUserId()
+    // def builder = '???'
+    // if (env.BUILD_USER_ID) {
+    //     builder = env.BUILD_USER_ID
+    //     builder -= ~/\@.*$/
+    // }
     if (env.cron_user) {
          builder = 'Parameterized Cron'
     }
