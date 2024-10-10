@@ -1,46 +1,3 @@
-// def sendBuildStatusOverSlack() {
-//     // Sends a slack message based on various build parameters.
-//     def colorCode
-//     switch (currentBuild.result) {
-//         case 'SUCCESS':
-//             colorCode = 'good'
-//             break
-//         case 'FAILURE':
-//             colorCode = 'danger'
-//             break;
-//     }
-//     if (env.BRANCH == "main") {
-//         channelName = "simsci-ci-status"
-//     } else {
-//         channelName = "simsci-ci-status-test"
-//     }
-//     def builder = sh(script: "git log -1 --pretty=format:'%ae' ${GIT_BRANCH}", returnStdout: true).trim()
-//     if (env.cron_user) {
-//          builder = 'Parameterized Cron'
-//     }
-//     def build_notes = ''
-//     if (env.build_notes) {
-//         build_notes += "Build notes: ${env.build_notes}"
-//     }
-    // def message = """
-    //     Job: *${env.JOB_NAME}*
-    //     ${build_notes}
-    //     Build number: #${env.BUILD_NUMBER}
-    //     Build status: *${currentBuild.result}*
-    //     Author: @${builder}
-    //     Build details: <${env.BUILD_URL}/console|See in web console>
-    // """.stripIndent()
-    // def slack_msg = [
-    //     baseUrl:           "https://ihme.slack.com/services/hooks/jenkins-ci/",
-    //     channel:           "${channelName}",
-    //     tokenCredentialId: "slack",
-    //     message:           message
-    // ]
-//     if (colorCode) { slack_msg.color = colorCode }
-//     return slackSend(slack_msg)
-// }
-
-
 pipeline_name="vivarium_gates_nutrition_optimization"
 conda_env_name="${pipeline_name}-${BUILD_NUMBER}"
 conda_env_path="/tmp/${conda_env_name}"
@@ -210,6 +167,9 @@ pipeline {
     always {
       sh "${ACTIVATE} && make clean"
       sh "rm -rf ${CONDA_ENV_PATH}"
+      // Delete the workspace directory.
+      deleteDir()
+      
       script {
         if (env.BRANCH == "main") {
           channelName = "simsci-ci-status"
@@ -217,29 +177,18 @@ pipeline {
           channelName = "simsci-ci-status-test"
         }
         // Run git command to get the author of the last commit
-        def developerID = sh(
+        developerID = sh(
             script: "git log -1 --pretty=format:'%an'",
             returnStdout: true
         ).trim()
-        def slackMessage = """
+        slackMessage = """
           Job: *${env.JOB_NAME}*
           Build number: #${env.BUILD_NUMBER}
           Build status: *${currentBuild.result}*
           Author: @${developerID}
           Build details: <${env.BUILD_URL}/console|See in web console>
       """.stripIndent()
-        // def slack_msg = [
-        //   baseUrl:           "https://ihme.slack.com/services/hooks/jenkins-ci/",
-        //   channel:           "${channelName}",
-        //   tokenCredentialId: "slack",
-        //   message:           slackMessage
-        // ]
       }
-      
-      // Send a message to Slack.
-      // sendBuildStatusOverSlack()
-      // Delete the workspace directory.
-      deleteDir()
     }
     failure {
       echo "This build was triggered by ${developerID}."
