@@ -167,9 +167,7 @@ pipeline {
     always {
       sh "${ACTIVATE} && make clean"
       sh "rm -rf ${CONDA_ENV_PATH}"
-      // Delete the workspace directory.
-      deleteDir()
-      
+      // Generate a message to send to Slack.
       script {
         if (env.BRANCH == "main") {
           channelName = "simsci-ci-status"
@@ -178,8 +176,8 @@ pipeline {
         }
         // Run git command to get the author of the last commit
         developerID = sh(
-            script: "git log -1 --pretty=format:'%an'",
-            returnStdout: true
+          script: "git log -1 --pretty=format:'%an'",
+          returnStdout: true
         ).trim()
         slackMessage = """
           Job: *${env.JOB_NAME}*
@@ -189,9 +187,11 @@ pipeline {
           Build details: <${env.BUILD_URL}/console|See in web console>
       """.stripIndent()
       }
+
+      // Delete the workspace directory.
+      deleteDir()
     }
     failure {
-      echo "This build was triggered by ${developerID}."
       echo "This build failed on ${GIT_BRANCH}. Sending a failure message to Slack."
       slackSend channel: "#${channelName}",
                   message: slackMessage,
