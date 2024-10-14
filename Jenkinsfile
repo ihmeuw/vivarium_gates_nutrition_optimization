@@ -2,10 +2,10 @@ def githubUsernameToSlackName(github_author) {
   // Add team members as necessary
   def mapping = [
     "albrja": "albrja",
-    "stevebachmeier": "sbachmei",
+    "Steve Bachmeier": "sbachmei",
     "hussain-jafari": "hjafari",
-    "patricktnast": "pnast",
-    "rmudambi": "rmudambi",
+    "Patrick Nast": "pnast",
+    "Rajan Mudambi": "rmudambi",
   ]
   return mapping.get(github_author, "channel")
 }
