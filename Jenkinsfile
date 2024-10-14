@@ -216,7 +216,7 @@ pipeline {
         if (params.DEBUG) {
           echo 'Debug is enabled. Sending a success message to Slack.'
           slackSend channel: "#${channelName}",
-                    message: ":white_check_mark: (debugging) JOB SUCCESS: $JOB_NAME - $BUILD_ID\n\n${BUILD_URL}console",
+                    message: ":white_check_mark: (debugging) JOB SUCCESS: $slackID triggerd $JOB_NAME - $BUILD_ID\n\n${BUILD_URL}console",
                     teamDomain: "ihme",
                     tokenCredentialId: "slack"
         } else {
