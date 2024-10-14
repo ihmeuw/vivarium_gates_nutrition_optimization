@@ -205,7 +205,7 @@ pipeline {
       deleteDir()
     }
     failure {
-      echo "This build triggered by ${slackID} failed on ${GIT_BRANCH}. Sending a failure message to Slack."
+      echo "This build triggered by ${developerID} failed on ${GIT_BRANCH}. Sending a failure message to Slack."
       slackSend channel: "#${channelName}",
                   message: slackMessage,
                   teamDomain: "ihme",
