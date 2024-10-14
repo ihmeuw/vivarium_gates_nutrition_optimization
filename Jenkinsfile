@@ -1,3 +1,15 @@
+def githubUsernameToSlackName(github_author) {
+  // Add team members as necessary
+  def mapping = [
+    "albrja": "albrja",
+    "stevebachmeier": "sbachmei",
+    "hussain-jafari": "hjafari",
+    "patricktnast": "pnast",
+    "rmudambi": "rmudambi",
+  ]
+  return mapping.get(github_author, "channel")
+}
+
 pipeline_name="vivarium_gates_nutrition_optimization"
 conda_env_name="${pipeline_name}-${BUILD_NUMBER}"
 conda_env_path="/tmp/${conda_env_name}"
@@ -179,11 +191,12 @@ pipeline {
           script: "git log -1 --pretty=format:'%an'",
           returnStdout: true
         ).trim()
+        slackID = githubUsernameToSlackName(developerID)
         slackMessage = """
           Job: *${env.JOB_NAME}*
           Build number: #${env.BUILD_NUMBER}
           Build status: *${currentBuild.result}*
-          Author: @${developerID}
+          Author: @${slackID}
           Build details: <${env.BUILD_URL}/console|See in web console>
       """.stripIndent()
       }
