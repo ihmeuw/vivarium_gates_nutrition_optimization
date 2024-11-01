@@ -5,6 +5,12 @@ from pathlib import Path
 import pandas as pd
 import pytest
 import yaml
+from tests.conftest import is_on_slurm
+
+pytestmark = pytest.mark.skipif(
+    not is_on_slurm(),
+    reason="Must be on slurm to run this test.",
+)
 
 
 @pytest.fixture

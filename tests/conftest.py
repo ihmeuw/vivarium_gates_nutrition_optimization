@@ -1,3 +1,5 @@
+import shutil
+
 import pytest
 
 
@@ -17,3 +19,7 @@ def pytest_collection_modifyitems(config, items):
     for item in items:
         if "slow" in item.keywords:
             item.add_marker(skip_slow)
+
+def is_on_slurm() -> bool:
+    """Returns True if the current environment is a SLURM cluster."""
+    return shutil.which("sbatch") is not None
