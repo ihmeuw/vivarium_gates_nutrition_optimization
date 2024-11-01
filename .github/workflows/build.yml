@@ -1,87 +1,28 @@
 # -----------------------------------------------------------------------------
-#   - invoked on push, pull_request, or manual trigger
-#   - test under 3 versions of python
+#   - invoked on push, pull_request, manual trigger, or schedule
+#   - test under at least 3 versions of python
 # -----------------------------------------------------------------------------
-name: build
-on: [push, pull_request, workflow_dispatch]
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.8", "3.9", "3.10","3.11"]
-    defaults:
-      run:
-        shell: bash -l {0}
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: check for upstream vivarium
-        run: |
-          if git ls-remote --exit-code --heads https://github.com/ihmeuw/vivarium.git ${GITHUB_HEAD_REF} == "0"; then
-            echo "upstream_vivarium_exist=true" >> $GITHUB_ENV
-          else
-            echo "upstream_vivarium_exist=false" >> $GITHUB_ENV
-          fi
-      - name: check for upstream vivarium_public_health
-        run: |
-          if git ls-remote --exit-code --heads https://github.com/ihmeuw/vivarium_public_health.git ${GITHUB_HEAD_REF} == "0"; then
-            echo "upstream_vivarium_public_health_exist=true" >> $GITHUB_ENV
-          else
-            echo "upstream_vivarium_public_health_exist=false" >> $GITHUB_ENV
-          fi
-      - name: check for upstream vivarium_inputs
-        run: |
-          if git ls-remote --exit-code --heads https://github.com/ihmeuw/vivarium_inputs.git ${GITHUB_HEAD_REF} == "0"; then
-            echo "upstream_vivarium_inputs_exist=true" >> $GITHUB_ENV
-          else
-            echo "upstream_vivarium_inputs_exist=false" >> $GITHUB_ENV
-          fi
-      - name: print environment values
-        run: |
-          cat $GITHUB_ENV
-      - name: Update pip
-        run: |
-          python -m pip install --upgrade pip
-      - name: Retrieve upstream vivarium
-        if: env.upstream_vivarium_exist == 'true'
-        run: |
-          echo "Cloning vivarium upstream branch: ${GITHUB_HEAD_REF}"
-          pushd ..
-          git clone --branch=${GITHUB_HEAD_REF} https://github.com/ihmeuw/vivarium.git
-          pushd vivarium
-          pip install .
-          popd && popd
-      - name: Retrieve upstream vivarium_public_health
-        if: env.upstream_vivarium_public_health_exist == 'true'
-        run: |
-          echo "Cloning vivarium_public_health upstream branch: ${GITHUB_HEAD_REF}"
-          pushd ..
-          git clone --branch=${GITHUB_HEAD_REF} https://github.com/ihmeuw/vivarium_public_health.git
-          pushd vivarium_public_health
-          pip install .
-          popd && popd
-      - name: Retrieve upstream vivarium_inputs
-        if: env.upstream_vivarium_inputs_exist == 'true'
-        run: |
-          echo "Cloning upstream vivarium_inputs branch: ${GITHUB_HEAD_REF}"
-          pushd ..
-          git clone --branch=${GITHUB_HEAD_REF} https://github.com/ihmeuw/vivarium_inputs.git
-          pushd vivarium_inputs
-          pip install .
-          popd && popd
-      - name: Install dependencies
-        run: |
-          pip install .[test]
-      - name: Lint
-        run: |
-          pip install black==22.3.0 isort
-          isort . --check -v
-          black . --check -v
-      - name: Test
-        run: |
-          pytest ./tests/unit/
+  name: build
+  on:
+    push:
+    pull_request:
+    workflow_dispatch:
+    schedule:
+      - cron: "0 8 * * *"
+    
+  jobs:
+    build:
+      strategy:
+        matrix:
+          python-version: ["3.9", "3.10", "3.11"]
+      uses: 
+        ihmeuw/vivarium_build_utils/.github/workflows/build.yml@main
+      with:
+        dependencies: "layered_config_tree,vivarium,vivarium_public_health"
+        install_type: "[test]"
+        skip_mypy: true
+        skip_docs: true
+      secrets:
+        NOTIFY_EMAIL: ${{ secrets.NOTIFY_EMAIL }}
+        NOTIFY_PASSWORD: ${{ secrets.NOTIFY_PASSWORD }}
+  
