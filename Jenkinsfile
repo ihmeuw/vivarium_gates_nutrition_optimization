@@ -17,8 +17,6 @@ conda_env_path="/tmp/${conda_env_name}"
 // In the past, we used /ihme/code/* on the NFS (which is slower)
 shared_path="/svc-simsci"
 // comma separated string list of branches to run periodic builds on
-scheduled_branches = "main"
-CRON_SETTINGS = scheduled_branches.split(',').collect{it.trim()}.contains(BRANCH_NAME) ? 'H H(20-23) * * *' : ''
 
 pipeline {
   // This agent runs as svc-simsci on simsci-jenkinsagent-ci-p01.
@@ -68,9 +66,7 @@ pipeline {
     // time we run pip, poetry, etc.
     ACTIVATE = "source ${CONDA_BIN_PATH}/activate ${CONDA_ENV_PATH} &> /dev/null"
   }
-  triggers {
-    cron(CRON_SETTINGS)
-  }
+  
   stages {
     stage("Initialization") {
       steps {
