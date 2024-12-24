@@ -11,16 +11,17 @@ def githubUsernameToSlackName(github_author) {
 }
 
 pipeline_name="vivarium_gates_nutrition_optimization"
-conda_env_name="${pipeline_name}-${BUILD_NUMBER}"
+conda_env_name="${pipeline_name}-${BRANCH_NAME}-${BUILD_NUMBER}"
 conda_env_path="/tmp/${conda_env_name}"
 // defaults for conda and pip are a local directory /svc-simsci for improved speed.
 // In the past, we used /ihme/code/* on the NFS (which is slower)
 shared_path="/svc-simsci"
+// comma separated string list of branches to run periodic builds on
 
 pipeline {
-  // This agent runs as svc-simsci on node simsci-slurm-sbuild-p01.
+  // This agent runs as svc-simsci on simsci-jenkinsagent-ci-p01.
   // It has access to standard IHME filesystems and singularity
-  agent { label "svc-simsci" }
+  agent { label "matrix-tasks" }
 
   options {
     // Keep 100 old builds.
@@ -65,7 +66,7 @@ pipeline {
     // time we run pip, poetry, etc.
     ACTIVATE = "source ${CONDA_BIN_PATH}/activate ${CONDA_ENV_PATH} &> /dev/null"
   }
-
+  
   stages {
     stage("Initialization") {
       steps {
