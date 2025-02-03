@@ -7,7 +7,9 @@ from vivarium.framework.engine import Builder
 from vivarium.framework.results import Observer
 from vivarium.framework.time import get_time_stamp
 from vivarium_public_health.disease import DiseaseState
-from vivarium_public_health.results import COLUMNS
+from vivarium_public_health.results import (
+    COLUMNS,
+)
 from vivarium_public_health.results import DisabilityObserver as DisabilityObserver_
 from vivarium_public_health.results import (
     DiseaseObserver,
