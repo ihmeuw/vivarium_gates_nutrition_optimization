@@ -12,6 +12,7 @@ for an example.
 
    No logging is done here. Logging is done in vivarium inputs itself and forwarded.
 """
+from typing import List, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -19,7 +20,7 @@ import vivarium_inputs.validation.sim as validation
 from scipy import stats
 from vivarium.framework.artifact import EntityKey
 from vivarium.framework.randomness import get_hash
-from vivarium_gbd_access import gbd
+from vivarium_gbd_access.gbd import base_data as gbd
 from vivarium_inputs import core as vi_core
 from vivarium_inputs import globals as vi_globals
 from vivarium_inputs import interface
@@ -133,13 +134,18 @@ def load_standard_data(key: str, location: str) -> pd.DataFrame:
 
 
 # TODO: Remove this if/ when Vivarium Inputs implements the change directly
-def load_raw_incidence_data(key: str, location: str) -> pd.DataFrame:
+def load_raw_incidence_data(
+    key: str, location: str, years: Optional[Union[int, str, List[int]]] = None
+) -> pd.DataFrame:
     """Temporary function to short circuit around validation issues in Vivarium Inputs"""
     key = EntityKey(key)
     entity = get_entity(key)
-    data = vi_core.get_data(entity, key.measure, location)
+    data_type = vi_utils.DataType(key.measure, "draws")
+    data = vi_core.get_data(entity, key.measure, location, years, data_type)
     data = vi_utils.scrub_gbd_conventions(data, location)
-    validation.validate_for_simulation(data, entity, "incidence_rate", location)
+    validation.validate_for_simulation(
+        data, entity, "incidence_rate", location, years, data_type.value_columns
+    )
     data = vi_utils.split_interval(data, interval_column="age", split_column_prefix="age")
     data = vi_utils.split_interval(data, interval_column="year", split_column_prefix="year")
     return vi_utils.sort_hierarchical_data(data).droplevel("location")
@@ -441,7 +447,9 @@ def load_background_morbidity(key: str, location: str) -> pd.DataFrame:
 ###########################
 
 
-def get_hemoglobin_data(key: str, location: str) -> pd.DataFrame:
+def get_hemoglobin_data(
+    key: str, location: str, years: Optional[Union[int, str, List[int]]] = None
+) -> pd.DataFrame:
     me_id = {
         data_keys.HEMOGLOBIN.MEAN: 10487,
         data_keys.HEMOGLOBIN.STANDARD_DEVIATION: 10488,
@@ -449,7 +457,9 @@ def get_hemoglobin_data(key: str, location: str) -> pd.DataFrame:
     correction_factors = data_values.PREGNANCY_CORRECTION_FACTORS[key]
 
     location_id = utility_data.get_location_id(location)
-    hemoglobin_data = gbd.get_modelable_entity_draws(me_id=me_id, location_id=location_id)
+    hemoglobin_data = gbd.get_modelable_entity_draws(
+        me_id=me_id, location_id=location_id, year_id=years, data_type="draws"
+    )
 
     existing_draw_cols = [col for col in hemoglobin_data if col.startswith("draw_")]
     extra_draw_cols = [
