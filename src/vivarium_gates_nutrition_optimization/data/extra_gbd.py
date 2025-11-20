@@ -97,7 +97,6 @@ def get_anemia_yld_rate(location: str):
 
 
 @vi_utils.cache
-
 def get_hemoglobin_rr_data(key: str, location: str):
     data = gbd.get_draws(
         release_id=33,
@@ -113,4 +112,3 @@ def get_hemoglobin_rr_data(key: str, location: str):
     data = data[data["cause_id"] == 367]
     data["year_id"] = 2023
     return data
-
