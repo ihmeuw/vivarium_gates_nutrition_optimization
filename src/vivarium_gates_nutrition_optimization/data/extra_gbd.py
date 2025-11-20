@@ -10,7 +10,7 @@ from vivarium_gates_nutrition_optimization.data import utilities
 
 
 @vi_utils.cache
-def load_lbwsg_exposure(location: str):
+def load_2021_lbwsg_birth_exposure(location: str):
     entity = utilities.get_entity(data_keys.LBWSG.EXPOSURE)
     location_id = utility_data.get_location_id(location)
     data = gbd.get_draws(
@@ -18,7 +18,7 @@ def load_lbwsg_exposure(location: str):
         gbd_id=entity.gbd_id,
         source=gbd_constants.SOURCES.EXPOSURE,
         location_id=location_id,
-        year_id=2021,
+        year_id=2022,
         sex_id=gbd_constants.SEX.MALE + gbd_constants.SEX.FEMALE,
         age_group_id=164,  # Birth prevalence
         release_id=gbd_constants.RELEASE_IDS.GBD_2021,
@@ -35,7 +35,7 @@ def get_all_cause_yld_rate(location: str):
         entity.gbd_id,
         source=gbd_constants.SOURCES.COMO,
         location_id=location_id,
-        release_id=gbd_constants.RELEASE_IDS.GBD_2021,
+        release_id=gbd_constants.RELEASE_IDS.GBD_2023,
         measure_id=vi_globals.MEASURES["YLDs"],
         metric_id=3,  # rate
     )
@@ -51,8 +51,8 @@ def get_maternal_disorder_ylds(location: str, metric_id=None):
         entity.gbd_id,
         source=gbd_constants.SOURCES.COMO,
         location_id=location_id,
-        year_id=2021,
-        release_id=gbd_constants.RELEASE_IDS.GBD_2021,
+        year_id=2023,
+        release_id=gbd_constants.RELEASE_IDS.GBD_2023,
         measure_id=vi_globals.MEASURES["YLDs"],
         metric_id=metric_id,
     )
@@ -73,8 +73,8 @@ def get_anemia_ylds(location: str, metric_id=None):
         anemia_ids,
         source=gbd_constants.SOURCES.COMO,
         location_id=location_id,
-        year_id=2021,
-        release_id=gbd_constants.RELEASE_IDS.GBD_2021,
+        year_id=2023,
+        release_id=gbd_constants.RELEASE_IDS.GBD_2023,
         measure_id=vi_globals.MEASURES["YLDs"],
         metric_id=metric_id,
     )
@@ -89,7 +89,7 @@ def get_anemia_yld_rate(location: str):
         192,
         source=gbd_constants.SOURCES.COMO,
         location_id=location_id,
-        release_id=gbd_constants.RELEASE_IDS.GBD_2021,
+        release_id=gbd_constants.RELEASE_IDS.GBD_2023,
         measure_id=vi_globals.MEASURES["YLDs"],
         metric_id=3,
     )
@@ -97,18 +97,20 @@ def get_anemia_yld_rate(location: str):
 
 
 @vi_utils.cache
-def get_hemoglobin_maternal_disorders_rr():
-    """Relative risk associated with one g/dL decrease in hemoglobin concentration below 12 g/dL"""
+
+def get_hemoglobin_rr_data(key: str, location: str):
     data = gbd.get_draws(
+        release_id=33,
         gbd_id_type="rei_id",
-        gbd_id=95,
-        release_id=gbd_constants.RELEASE_IDS.GBD_2021,
-        year_id=2021,
-        sex_id=2,
-        source="rr",
-        status="best",
+        gbd_id=376,
+        source=gbd_constants.SOURCES.RR,
+        sex_id=gbd_constants.SEX.FEMALE,
+        location_id=1,  # global data
+        year_id=2022,
     )
     # Subset to a single sub-cause as the get_draws call returns values for 10 sub-causes within the
     # maternal disorders parent cause
     data = data[data["cause_id"] == 367]
+    data["year_id"] = 2023
     return data
+
