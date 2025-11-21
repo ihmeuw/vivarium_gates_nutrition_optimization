@@ -515,7 +515,7 @@ def get_hemoglobin_data(
 
     location_id = utility_data.get_location_id(location)
     hemoglobin_data = gbd.get_modelable_entity_draws(
-        me_id=me_id, location_id=location_id, year_id=years, data_type="draws"
+        me_id=me_id, location_id=location_id, year_id=2023, data_type="draws"
     )
 
     existing_draw_cols = [col for col in hemoglobin_data if col.startswith("draw_")]
