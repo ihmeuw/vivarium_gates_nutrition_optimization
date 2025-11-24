@@ -96,7 +96,7 @@ def get_anemia_yld_rate(location: str):
     return data
 
 
-## This is left as 2021 because the changes to hemoglobin RRs are very significant and would require other model updates we don't plan to make. 
+## This is left as 2021 because the changes to hemoglobin RRs are very significant and would require other model updates we don't plan to make.
 @vi_utils.cache
 def get_hemoglobin_maternal_disorders_rr():
     """Relative risk associated with one g/dL decrease in hemoglobin concentration below 12 g/dL"""
