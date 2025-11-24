@@ -96,19 +96,20 @@ def get_anemia_yld_rate(location: str):
     return data
 
 
+## This is left as 2021 because the changes to hemoglobin RRs are very significant and would require other model updates we don't plan to make. 
 @vi_utils.cache
-def get_hemoglobin_rr_data(key: str, location: str):
+def get_hemoglobin_maternal_disorders_rr():
+    """Relative risk associated with one g/dL decrease in hemoglobin concentration below 12 g/dL"""
     data = gbd.get_draws(
-        release_id=33,
         gbd_id_type="rei_id",
-        gbd_id=376,
-        source=gbd_constants.SOURCES.RR,
-        sex_id=gbd_constants.SEX.FEMALE,
-        location_id=1,  # global data
-        year_id=2022,
+        gbd_id=95,
+        release_id=gbd_constants.RELEASE_IDS.GBD_2021,
+        year_id=2021,
+        sex_id=2,
+        source="rr",
+        status="best",
     )
     # Subset to a single sub-cause as the get_draws call returns values for 10 sub-causes within the
     # maternal disorders parent cause
     data = data[data["cause_id"] == 367]
-    data["year_id"] = 2023
     return data

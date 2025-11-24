@@ -416,7 +416,7 @@ def load_hemoglobin_maternal_disorders_rr(
 
     groupby_cols = ["age_group_id", "sex_id", "year_id"]
     draw_cols = vi_globals.DRAW_COLUMNS
-    rr = extra_gbd.get_hemoglobin_rr_data(key, location)
+    rr = extra_gbd.get_hemoglobin_maternal_disorders_rr()
     rr = rr.groupby(groupby_cols)[draw_cols].sum().reset_index()
     rr = reshape_to_vivarium_format(rr, location)
     return rr
