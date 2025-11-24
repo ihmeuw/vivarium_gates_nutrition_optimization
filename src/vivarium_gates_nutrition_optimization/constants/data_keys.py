@@ -31,7 +31,7 @@ POPULATION = __Population()
 
 class __Pregnancy(NamedTuple):
     ASFR: str = "covariate.age_specific_fertility_rate.estimate"
-    SBR: str = "covariate.stillbirth_to_live_birth_ratio.estimate"
+    SBR: str = "covariate.stillbirth_20_weeks_to_live_birth_ratio.estimate"
     RAW_INCIDENCE_RATE_MISCARRIAGE: str = (
         "cause.maternal_abortion_and_miscarriage.raw_incidence_rate"
     )
