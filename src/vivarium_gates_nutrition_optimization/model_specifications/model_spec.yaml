@@ -2,7 +2,7 @@ components:
     vivarium_public_health:
         results:
             - DiseaseObserver("maternal_disorders")
-            - DiseaseObserver("maternal_hemorrhage")
+        #     - DiseaseObserver("maternal_hemorrhage") # run 2
 
     vivarium_gates_nutrition_optimization:
         components:
