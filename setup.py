@@ -49,8 +49,8 @@ if __name__ == "__main__":
         # TODO: UPDATE TO REAL PINS!
         # "vivarium>=4.0.0, <5.0.0",
         # "vivarium_public_health>=5.0.0, <6.0.0",
-        "vivarium @ git+https://github.com/ihmeuw/vivarium.git@epic/mic-4656/population-redesign",
-        "vivarium_public_health @ git+https://github.com/ihmeuw/vivarium_public_health.git@epic/mic-4656/population-redesign",
+        "vivarium @ git+https://github.com/ihmeuw/vivarium.git@sbachmei/mic-6805/never-use-tracked-query-on-initialization",
+        "vivarium_public_health @ git+https://github.com/ihmeuw/vivarium_public_health.git@release-candidate/v5.0.0",
         "click",
         "jinja2",
         "loguru",
