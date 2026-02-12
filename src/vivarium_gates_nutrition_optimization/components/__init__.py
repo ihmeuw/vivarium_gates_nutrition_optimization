@@ -15,4 +15,5 @@ from .observers import (
     PregnancyOutcomeObserver,
     ResultsStratifier,
 )
+from .population import Population
 from .pregnancy import Pregnancy, UntrackNotPregnant

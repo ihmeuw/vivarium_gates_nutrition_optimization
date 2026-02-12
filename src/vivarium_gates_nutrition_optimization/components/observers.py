@@ -27,31 +27,31 @@ class ResultsStratifier(ResultsStratifier_):
         #         builder.results.register_stratification(
         #             "anemia_status_at_birth",
         #             data_values.ANEMIA_STATUS_AT_BIRTH_CATEGORIES,
-        #             requires_columns=["anemia_status_at_birth"],
+        #             requires_attributes=["anemia_status_at_birth"],
         #         )
 
         builder.results.register_stratification(
             "anemia_levels",
             list(data_values.ANEMIA_DISABILITY_WEIGHTS.keys()),
-            requires_values=["anemia_levels"],
+            requires_attributes=["anemia_levels"],
         )
 
         builder.results.register_stratification(
             "maternal_bmi_anemia_category",
             list(models.BMI_ANEMIA_CATEGORIES),
-            requires_columns=["maternal_bmi_anemia_category"],
+            requires_attributes=["maternal_bmi_anemia_category"],
         )
 
         builder.results.register_stratification(
             "intervention",
             list(models.SUPPLEMENTATION_CATEGORIES),
-            requires_columns=["intervention"],
+            requires_attributes=["intervention"],
         )
 
         builder.results.register_stratification(
             "pregnancy_outcome",
             list(models.PREGNANCY_OUTCOMES),
-            requires_columns=["pregnancy_outcome"],
+            requires_attributes=["pregnancy_outcome"],
         )
 
 
@@ -227,7 +227,7 @@ class PregnancyOutcomeObserver(PublicHealthObserver):
             builder=builder,
             name=f"pregnancy_outcome_count",
             pop_filter="",
-            requires_columns=["pregnancy_outcome"],
+            requires_attributes=["pregnancy_outcome"],
             additional_stratifications=builder.configuration.stratification.pregnancy_outcome.include,
             excluded_stratifications=builder.configuration.stratification.pregnancy_outcome.exclude,
             aggregator=self.count_pregnancy_outcomes_at_initialization,

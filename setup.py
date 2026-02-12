@@ -46,13 +46,16 @@ if __name__ == "__main__":
 
     install_requirements = [
         "gbd_mapping>=3.1.1",
-        "vivarium>=3.0.0, <4.0.0",
-        "vivarium_public_health>=3.0.0, <4.0.0",
+        # TODO: UPDATE TO REAL PINS!
+        # "vivarium>=4.0.0, <5.0.0",
+        # "vivarium_public_health>=5.0.0, <6.0.0",
+        "vivarium @ git+https://github.com/ihmeuw/vivarium.git@epic/mic-4656/population-redesign",
+        "vivarium_public_health @ git+https://github.com/ihmeuw/vivarium_public_health.git@epic/mic-4656/population-redesign",
         "click",
         "jinja2",
         "loguru",
         "numpy",
-        "pandas",
+        "pandas<3.0.0",
         "pyyaml",
         "scipy",
         "tables",

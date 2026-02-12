@@ -4,11 +4,9 @@ import pandas as pd
 from vivarium import Component
 from vivarium.framework.engine import Builder
 from vivarium.framework.event import Event
-from vivarium.framework.lookup import LookupTableData
 from vivarium.framework.population import SimulantData
-from vivarium.framework.values import Pipeline, list_combiner, union_post_processor
+from vivarium.framework.values import Pipeline
 from vivarium_public_health.disease import DiseaseModel, DiseaseState, SusceptibleState
-from vivarium_public_health.utilities import get_lookup_columns
 
 from vivarium_gates_nutrition_optimization.components.children import NewChildren
 from vivarium_gates_nutrition_optimization.constants import data_keys, models
@@ -33,28 +31,8 @@ class PregnantState(DiseaseState):
     ##############
 
     @property
-    def columns_created(self):
-        return [
-            self.event_time_column,
-            self.event_count_column,
-            "pregnancy_outcome",
-            "pregnancy_duration",
-            "sex_of_child",
-            "birth_weight",
-            "gestational_age",
-        ]
-
-    @property
     def sub_components(self):
         return super().sub_components + [self.new_children]
-
-    @property
-    def initialization_requirements(self) -> Dict[str, List[str]]:
-        return {
-            "requires_columns": [self.model],
-            "requires_values": ["birth_outcome_probabilities"],
-            "requires_streams": [],
-        }
 
     def setup(self, builder: Builder):
         """Performs this component's simulation setup.
@@ -68,23 +46,29 @@ class PregnantState(DiseaseState):
         self.time_step = builder.time.step_size()
         self.randomness = builder.randomness.get_stream(self.name)
 
-        self.birth_outcome_probabilities = builder.value.register_value_producer(
+        self.birth_outcome_probabilities_lookup = self.build_lookup_table(
+            builder,
             "birth_outcome_probabilities",
-            source=self.lookup_tables["birth_outcome_probabilities"],
-            requires_columns=get_lookup_columns(
-                [self.lookup_tables["birth_outcome_probabilities"]]
-            ),
+            data_source=get_birth_outcome_probabilities(builder),
+            value_columns=["live_birth", "partial_term", "stillbirth"],
         )
 
-    def build_all_lookup_tables(self, builder: Builder) -> None:
-        super().build_all_lookup_tables(builder)
-        # I am not making birth outcome probabilities configurable because the
-        # method is so complicated - albrja
-        birth_outcome_probabilities = get_birth_outcome_probabilities(builder)
-        self.lookup_tables["birth_outcome_probabilities"] = self.build_lookup_table(
-            builder,
-            birth_outcome_probabilities,
-            value_columns=["live_birth", "partial_term", "stillbirth"],
+        builder.value.register_attribute_producer(
+            "birth_outcome_probabilities",
+            source=self.birth_outcome_probabilities_lookup,
+        )
+
+        # NOTE: event times and event counts are already registered by the BaseDiseaseState
+        builder.population.register_initializer(
+            self.on_initialize_simulants,
+            columns=[
+                "pregnancy_outcome",
+                "pregnancy_duration",
+                "sex_of_child",
+                "birth_weight",
+                "gestational_age",
+            ],
+            required_resources=[self.model, self.randomness, "birth_outcome_probabilities"],
         )
 
     def on_initialize_simulants(self, pop_data: SimulantData) -> None:
@@ -101,9 +85,9 @@ class PregnantState(DiseaseState):
 
     def sample_pregnancy_outcomes_and_durations(self, pop_data: SimulantData) -> pd.DataFrame:
         # Order the columns so that partial_term isn't in the middle!
-        outcome_probabilities = self.birth_outcome_probabilities(pop_data.index)[
-            ["partial_term", "stillbirth", "live_birth"]
-        ]
+        outcome_probabilities = self.population_view.get_attribute_frame(
+            pop_data.index, "birth_outcome_probabilities"
+        )
         pregnancy_outcomes = pd.DataFrame(
             {
                 "pregnancy_outcome": self.randomness.choice(
@@ -158,6 +142,7 @@ class PregnantState(DiseaseState):
         )
 
     def get_initial_event_times(self, pop_data: SimulantData) -> pd.DataFrame:
+        """Overwrite the BaseDiseaseState method"""
         return pd.DataFrame(
             {
                 self.event_time_column: self.clock() + self.time_step(),
@@ -182,33 +167,26 @@ def Pregnancy():
     pregnant = PregnantState(
         models.PREGNANT_STATE_NAME,
         allow_self_transition=True,
-        get_data_functions={
-            "prevalence": lambda *_: 1.0,
-            "disability_weight": lambda *_: 0.0,
-            "excess_mortality_rate": lambda *_: 0.0,
-            # Add a dummy dwell time so we can overwrite it later
-            "dwell_time": lambda *_: 0.0,
-        },
+        prevalence=1.0,
+        dwell_time=0.0,
+        disability_weight=0.0,
+        excess_mortality_rate=0.0,
     )
     parturition = DiseaseState(
         models.PARTURITION_STATE_NAME,
         allow_self_transition=True,
-        get_data_functions={
-            "prevalence": lambda *_: 0.0,
-            "disability_weight": lambda *_: 0.0,
-            "excess_mortality_rate": lambda *_: 0.0,
-            "dwell_time": lambda builder, cause: builder.time.step_size()(),
-        },
+        prevalence=0.0,
+        dwell_time=lambda builder: builder.time.step_size()(),
+        disability_weight=0.0,
+        excess_mortality_rate=0.0,
     )
     postpartum = DiseaseState(
         models.POSTPARTUM_STATE_NAME,
         allow_self_transition=True,
-        get_data_functions={
-            "prevalence": lambda *_: 0.0,
-            "disability_weight": lambda *_: 0.0,
-            "excess_mortality_rate": lambda *_: 0.0,
-            "dwell_time": lambda *_: pd.Timedelta(days=DURATIONS.POSTPARTUM_DAYS),
-        },
+        prevalence=0.0,
+        dwell_time=lambda *_: pd.Timedelta(days=DURATIONS.POSTPARTUM_DAYS),
+        disability_weight=0.0,
+        excess_mortality_rate=0.0,
     )
 
     pregnant.add_dwell_time_transition(parturition)
@@ -220,7 +198,7 @@ def Pregnancy():
     return PregnancyModel(
         models.PREGNANCY_MODEL_NAME,
         states=[not_pregnant, pregnant, parturition, postpartum],
-        get_data_functions={"cause_specific_mortality_rate": lambda *_: 0.0},
+        cause_specific_mortality_rate=0.0,
     )
 
 
@@ -263,17 +241,22 @@ def get_birth_outcome_probabilities(builder: Builder) -> pd.DataFrame:
 class UntrackNotPregnant(Component):
     """Component for untracking not pregnant simulants"""
 
-    @property
-    def columns_required(self) -> List[str]:
-        return ["pregnancy", "exit_time", "tracked"]
+    def setup(self, builder: Builder) -> None:
+        self.clock = builder.time.clock()
+        self.step_size = builder.time.step_size()
+        builder.value.register_attribute_modifier("exit_time", self.update_exit_times)
+        builder.population.register_tracked_query(
+            f"pregnancy != '{models.NOT_PREGNANT_STATE_NAME}'"
+        )
 
-    def on_time_step_cleanup(self, event: Event) -> None:
-        population = self.population_view.get(event.index)
-        pop = population[
-            (population["pregnancy"] == models.NOT_PREGNANT_STATE_NAME)
-            & population["tracked"]
-        ].copy()
-        if len(pop) > 0:
-            pop["tracked"] = pd.Series(False, index=pop.index)
-            pop["exit_time"] = event.time
-            self.population_view.update(pop)
+    def update_exit_times(self, index: pd.Index, target: pd.Series) -> None:
+        """Update exit times for simulants who are no longer pregnant."""
+        not_pregnant_idx = self.population_view.get_filtered_index(
+            index,
+            query=f"pregnancy == '{models.NOT_PREGNANT_STATE_NAME}'",
+        )
+        if not not_pregnant_idx.empty:
+            breakpoint()
+        newly_not_pregnant_idx = not_pregnant_idx.intersection(target[target.isna()].index)
+        target.loc[newly_not_pregnant_idx] = self.clock() + self.step_size()
+        return target

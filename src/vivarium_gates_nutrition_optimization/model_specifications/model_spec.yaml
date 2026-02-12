@@ -1,37 +1,36 @@
 components:
     vivarium_public_health:
-        population:
-            - BasePopulation()
         results:
             - DiseaseObserver("maternal_disorders")
-            - DiseaseObserver("maternal_hemorrhage")
+        #     - DiseaseObserver("maternal_hemorrhage") # run 2
 
     vivarium_gates_nutrition_optimization:
         components:
+            - Population()
             - Pregnancy()
             - UntrackNotPregnant()
             - MaternalDisorders()
-            - MaternalHemorrhage()  
+    #         - MaternalHemorrhage() # run 2
             - MaternalMortality()
-            # - BackgroundMorbidity()
-            - Hemoglobin()
-            - Anemia()
-            - MaternalBMIExposure()
-            - MaternalInterventions()
+    #         # - BackgroundMorbidity()
+    #         - Hemoglobin() # run 2
+    #         - Anemia() # run 2
+    #         - MaternalBMIExposure() # run 2
+    #         - MaternalInterventions() # run 3
             - ResultsStratifier()
             - PregnancyObserver()
             - PregnancyOutcomeObserver()
-            - BirthObserver()
+    #         - BirthObserver() # run 4
             - MaternalMortalityObserver()
-            - DisabilityObserver()
-            - AnemiaObserver()
-            - MaternalBMIObserver()
-            - MaternalInterventionObserver()
+    #         - DisabilityObserver() # run 2
+    #         - AnemiaObserver() # run 2
+    #         - MaternalBMIObserver() # run 2
+    #         - MaternalInterventionObserver() # run 3
 
 configuration:
     input_data:
         input_draw_number: 0
-        artifact_path: '/mnt/team/simulation_science/pub/models/vivarium_gates_nutrition_optimization/artifacts/mean/pakistan.hdf'
+        artifact_path: /mnt/team/simulation_science/pub/models/vivarium_gates_nutrition_optimization/artifacts/mean/pakistan.hdf
     interpolation:
         order: 0
         extrapolate: True
