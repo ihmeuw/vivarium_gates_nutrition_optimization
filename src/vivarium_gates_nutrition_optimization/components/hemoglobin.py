@@ -8,7 +8,6 @@ from vivarium.framework.engine import Builder
 from vivarium.framework.event import Event
 from vivarium.framework.population import SimulantData
 from vivarium.framework.randomness import RESIDUAL_CHOICE
-from vivarium_public_health.utilities import get_lookup_columns
 
 from vivarium_gates_nutrition_optimization.constants import (
     data_keys,

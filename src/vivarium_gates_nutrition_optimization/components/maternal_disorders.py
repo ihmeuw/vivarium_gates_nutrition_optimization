@@ -17,12 +17,10 @@ def MaternalDisorders():
     with_condition = DiseaseState(
         cause,
         allow_self_transition=True,
-        get_data_functions={
-            "prevalence": lambda *_: 0.0,
-            "disability_weight": get_maternal_disorders_disability_weight,
-            "excess_mortality_rate": lambda *_: 0.0,
-            "dwell_time": lambda builder, cause: builder.time.step_size()(),
-        },
+        prevalence=0.0,
+        dwell_time=lambda builder: builder.time.step_size()(),
+        disability_weight=lambda builder: get_maternal_disorders_disability_weight(builder),
+        excess_mortality_rate=0.0,
     )
     recovered = RecoveredState(cause, allow_self_transition=True)
     susceptible.add_transition(with_condition)
@@ -31,7 +29,7 @@ def MaternalDisorders():
     return DiseaseModel(
         cause,
         states=[susceptible, with_condition, recovered],
-        get_data_functions={"cause_specific_mortality_rate": lambda *_: 0.0},
+        cause_specific_mortality_rate=0.0,
     )
 
 
@@ -41,12 +39,10 @@ def MaternalHemorrhage():
     with_condition = DiseaseState(
         cause,
         allow_self_transition=True,
-        get_data_functions={
-            "prevalence": lambda *_: 0.0,
-            "disability_weight": lambda *_: 0.0,
-            "excess_mortality_rate": lambda *_: 0.0,
-            "dwell_time": lambda builder, cause: builder.time.step_size()(),
-        },
+        prevalence=0.0,
+        dwell_time=lambda builder, cause: builder.time.step_size()(),
+        disability_weight=0.0,
+        excess_mortality_rate=0.0,
     )
     recovered = RecoveredState(cause, allow_self_transition=True)
     susceptible.add_transition(with_condition)
@@ -55,11 +51,11 @@ def MaternalHemorrhage():
     return DiseaseModel(
         cause,
         states=[susceptible, with_condition, recovered],
-        get_data_functions={"cause_specific_mortality_rate": lambda *_: 0.0},
+        cause_specific_mortality_rate=0.0,
     )
 
 
-def get_maternal_disorders_disability_weight(builder: Builder, cause: str):
+def get_maternal_disorders_disability_weight(builder: Builder):
     ylds = builder.data.load(data_keys.MATERNAL_DISORDERS.YLDS).set_index(
         ARTIFACT_INDEX_COLUMNS
     )
