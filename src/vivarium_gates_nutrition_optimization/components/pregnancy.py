@@ -255,8 +255,6 @@ class UntrackNotPregnant(Component):
             index,
             query=f"pregnancy == '{models.NOT_PREGNANT_STATE_NAME}'",
         )
-        if not not_pregnant_idx.empty:
-            breakpoint()
         newly_not_pregnant_idx = not_pregnant_idx.intersection(target[target.isna()].index)
         target.loc[newly_not_pregnant_idx] = self.clock() + self.step_size()
         return target
