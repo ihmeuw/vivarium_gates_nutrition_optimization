@@ -176,11 +176,11 @@ class MaternalInterventionObserver(PublicHealthObserver):
             builder=builder,
             name="intervention_count",
             pop_filter=(
-                'alive == "alive" and tracked == True and '
+                "is_alive == True and "
                 f'event_time > "{intervention_date}" and '
                 f'event_time <= "{intervention_date + builder.time.step_size()()}"'
             ),
-            requires_columns=["alive", "intervention", "event_time"],
+            requires_attributes=["is_alive", "intervention", "event_time"],
             additional_stratifications=builder.configuration.stratification.maternal_intervention.include,
             excluded_stratifications=builder.configuration.stratification.maternal_intervention.exclude,
         )
@@ -296,7 +296,7 @@ class BirthObserver(Observer):
                 f"and previous_pregnancy == '{models.PREGNANT_STATE_NAME}' "
                 f"and pregnancy == '{models.PARTURITION_STATE_NAME}'"
             ),
-            requires_columns=list(self.COL_MAPPING),
+            requires_attributes=list(self.COL_MAPPING),
             results_formatter=self.format,
         )
 
