@@ -35,12 +35,11 @@ def MaternalDisorders():
 
 def MaternalHemorrhage():
     cause = models.MATERNAL_HEMORRHAGE_STATE_NAME
-    susceptible = ParturitionSelectionState(cause, allow_self_transition=True)
+    susceptible = ParturitionSelectionState(cause)
     with_condition = DiseaseState(
         cause,
-        allow_self_transition=True,
         prevalence=0.0,
-        dwell_time=lambda builder, cause: builder.time.step_size()(),
+        dwell_time=lambda builder: builder.time.step_size()(),
         disability_weight=0.0,
         excess_mortality_rate=0.0,
     )
