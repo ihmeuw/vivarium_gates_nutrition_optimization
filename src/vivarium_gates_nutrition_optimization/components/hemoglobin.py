@@ -93,9 +93,7 @@ class Hemoglobin(Component):
         ).value.values[0]
 
         builder.value.register_attribute_producer(
-            "hemoglobin.exposure_parameters",
-            source=distribution_parameters,
-            required_resources=[distribution_parameters],
+            "hemoglobin.exposure_parameters", source=distribution_parameters
         )
 
         # Fix resource dependency cycle
