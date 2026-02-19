@@ -134,13 +134,6 @@ class PregnantState(DiseaseState):
         )
         return child_status
 
-    def get_dwell_time_pipeline(self, builder: Builder) -> Pipeline:
-        return builder.value.register_value_producer(
-            f"{self.state_id}.dwell_time",
-            source=lambda index: self.population_view.get(index)["pregnancy_duration"],
-            requires_columns=["age", "sex", "pregnancy_outcome"],
-        )
-
     def get_initial_event_times(self, pop_data: SimulantData) -> pd.DataFrame:
         """Overwrite the BaseDiseaseState method"""
         return pd.DataFrame(
