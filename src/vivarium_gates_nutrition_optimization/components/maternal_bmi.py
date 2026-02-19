@@ -36,7 +36,7 @@ class MaternalBMIExposure(Component):
             builder, "prevalence_low_bmi_non_anemic"
         )
         builder.population.register_initializer(
-            self.on_initialize_simulants,
+            self.initialize_bmi,
             ["maternal_bmi_propensity", "maternal_bmi_anemia_category"],
             required_resources=[
                 self.randomness,
@@ -45,7 +45,7 @@ class MaternalBMIExposure(Component):
             ],
         )
 
-    def on_initialize_simulants(self, pop_data: SimulantData):
+    def initialize_bmi(self, pop_data: SimulantData):
         index = pop_data.index
         propensity = self.randomness.get_draw(index)
         p_low_anemic = self.prevalence_low_bmi_anemic(index)

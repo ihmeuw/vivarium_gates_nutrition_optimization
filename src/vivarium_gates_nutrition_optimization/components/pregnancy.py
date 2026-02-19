@@ -60,7 +60,7 @@ class PregnantState(DiseaseState):
 
         # NOTE: event times and event counts are already registered by the BaseDiseaseState
         builder.population.register_initializer(
-            self.on_initialize_simulants,
+            self.initialize_child_population,
             columns=[
                 "pregnancy_outcome",
                 "pregnancy_duration",
@@ -71,7 +71,7 @@ class PregnantState(DiseaseState):
             required_resources=[self.model, self.randomness, "birth_outcome_probabilities"],
         )
 
-    def on_initialize_simulants(self, pop_data: SimulantData) -> None:
+    def initialize_child_population(self, pop_data: SimulantData) -> None:
         for transition in self.transition_set:
             if transition.start_active:
                 transition.set_active(pop_data.index)

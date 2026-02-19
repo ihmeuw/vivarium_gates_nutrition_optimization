@@ -140,7 +140,7 @@ class Hemoglobin(Component):
         )
 
         builder.population.register_initializer(
-            self.on_initialize_simulants,
+            self.initialize_hemoglobin,
             columns=[
                 "hemoglobin_distribution_propensity",
                 "hemoglobin_percentile",
@@ -149,7 +149,7 @@ class Hemoglobin(Component):
             required_resources=[self.randomness],
         )
 
-    def on_initialize_simulants(self, pop_data: SimulantData) -> None:
+    def initialize_hemoglobin(self, pop_data: SimulantData) -> None:
         pop_update = pd.DataFrame(
             {
                 "hemoglobin_distribution_propensity": self.randomness.get_draw(
@@ -303,7 +303,7 @@ class Anemia(Component):
         )
 
         builder.population.register_initializer(
-            self.on_initialize_simulants, "anemia_status_at_birth"
+            self.initialize_anemia_status_at_birth, "anemia_status_at_birth"
         )
 
     def anemia_source(self, index: pd.Index) -> pd.Series:
@@ -336,7 +336,7 @@ class Anemia(Component):
 
         return disability_weight
 
-    def on_initialize_simulants(self, pop_data: SimulantData) -> None:
+    def initialize_anemia_status_at_birth(self, pop_data: SimulantData) -> None:
         pop_update = pd.DataFrame({"anemia_status_at_birth": "invalid"}, index=pop_data.index)
         self.population_view.update(pop_update)
 
