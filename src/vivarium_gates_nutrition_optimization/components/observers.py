@@ -130,7 +130,7 @@ class MaternalBMIObserver(PublicHealthObserver):
             name=f"person_time_maternal_bmi_anemia",
             pop_filter=f"is_alive == True",
             when="time_step__prepare",
-            requires_attributes=["is_alive", "maternal_bmi_anemia_category"],
+            requires_attributes=["maternal_bmi_anemia_category"],
             additional_stratifications=builder.configuration.stratification.maternal_bmi.include,
             excluded_stratifications=builder.configuration.stratification.maternal_bmi.exclude,
             aggregator=partial(aggregate_state_person_time, builder.time.step_size()()),
@@ -180,7 +180,7 @@ class MaternalInterventionObserver(PublicHealthObserver):
                 f'event_time > "{intervention_date}" and '
                 f'event_time <= "{intervention_date + builder.time.step_size()()}"'
             ),
-            requires_attributes=["is_alive", "intervention", "event_time"],
+            requires_attributes=["intervention"],
             additional_stratifications=builder.configuration.stratification.maternal_intervention.include,
             excluded_stratifications=builder.configuration.stratification.maternal_intervention.exclude,
         )
@@ -225,7 +225,6 @@ class PregnancyOutcomeObserver(PublicHealthObserver):
         self.register_adding_observation(
             builder=builder,
             name=f"pregnancy_outcome_count",
-            pop_filter="",
             requires_attributes=["pregnancy_outcome"],
             additional_stratifications=builder.configuration.stratification.pregnancy_outcome.include,
             excluded_stratifications=builder.configuration.stratification.pregnancy_outcome.exclude,
