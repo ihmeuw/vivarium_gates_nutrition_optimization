@@ -16,16 +16,16 @@ components:
             - Hemoglobin() 
             - Anemia()
             - MaternalBMIExposure()
-    #         - MaternalInterventions() # run 3
+            - MaternalInterventions()
             - ResultsStratifier()
             - PregnancyObserver()
             - PregnancyOutcomeObserver()
-    #         - BirthObserver() # run 4
+            - BirthObserver()
             - MaternalMortalityObserver()
             - DisabilityObserver()
             - AnemiaObserver()
             - MaternalBMIObserver()
-    #         - MaternalInterventionObserver() # run 3
+            - MaternalInterventionObserver()
 
 configuration:
     input_data:
@@ -35,7 +35,12 @@ configuration:
         order: 0
         extrapolate: True
     intervention:
-        scenario: "baseline"
+        scenario: baseline
+        # scenario: zero_coverage
+        # scenario: mms
+        # scenario: ifa
+        # scenario: targeted_bep_ifa
+        # scenario: targeted_bep_mms
     randomness:
         map_size: 1_000_000
         key_columns: ['entrance_time', 'age']
