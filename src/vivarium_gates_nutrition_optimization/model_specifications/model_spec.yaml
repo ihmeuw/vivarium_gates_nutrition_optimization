@@ -1,31 +1,31 @@
 components:
     vivarium_public_health:
         results:
-            - DiseaseObserver("maternal_disorders")
-            - DiseaseObserver("maternal_hemorrhage")
+            - DiseaseObserver("maternal_disorders") # Run 1
+            - DiseaseObserver("maternal_hemorrhage") # Run 2
 
     vivarium_gates_nutrition_optimization:
         components:
-            - Population()
-            - Pregnancy()
-            - UntrackNotPregnant()
-            - MaternalDisorders()
-            - MaternalHemorrhage()
-            - MaternalMortality()
-            # - BackgroundMorbidity()
-            - Hemoglobin() 
-            - Anemia()
-            - MaternalBMIExposure()
-            - MaternalInterventions()
-            - ResultsStratifier()
-            - PregnancyObserver()
-            - PregnancyOutcomeObserver()
-            - BirthObserver()
-            - MaternalMortalityObserver()
-            - DisabilityObserver()
-            - AnemiaObserver()
-            - MaternalBMIObserver()
-            - MaternalInterventionObserver()
+            - Population() # Run 1
+            - Pregnancy() # Run 1
+            - UntrackNotPregnant() # Run 1
+            - MaternalDisorders() # Run 1
+            - MaternalHemorrhage() # Run 2
+            - MaternalMortality() # Run 1
+            # - BackgroundMorbidity() # NA
+            - Hemoglobin() # Run 2
+            - Anemia() # Run 2
+            - MaternalBMIExposure() # Run 2
+            - MaternalInterventions() # Run 3
+            - ResultsStratifier() # Run 1
+            - PregnancyObserver() # Run 1
+            - PregnancyOutcomeObserver() # Run 1
+            - BirthObserver() # Run 3
+            - MaternalMortalityObserver() # Run 1
+            - DisabilityObserver() # Run 2
+            - AnemiaObserver() # Run 2
+            - MaternalBMIObserver() # Run 2
+            - MaternalInterventionObserver() # Run 3
 
 configuration:
     input_data:
