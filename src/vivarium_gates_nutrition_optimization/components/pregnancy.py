@@ -58,6 +58,11 @@ class PregnantState(DiseaseState):
             source=self.birth_outcome_probabilities_lookup,
         )
 
+        builder.value.register_attribute_modifier(
+            self.dwell_time_pipeline,
+            self.update_dwell_time,
+        )
+
         # NOTE: event times and event counts are already registered by the BaseDiseaseState
         builder.population.register_initializer(
             self.initialize_child_population,
@@ -134,6 +139,9 @@ class PregnantState(DiseaseState):
         )
         return child_status
 
+    def update_dwell_time(self, index: pd.Index, target: pd.Series) -> pd.Series:
+        return self.population_view.get_attributes(index, "pregnancy_duration")
+
     def get_initial_event_times(self, pop_data: SimulantData) -> pd.DataFrame:
         """Overwrite the BaseDiseaseState method"""
         return pd.DataFrame(
@@ -161,7 +169,6 @@ def Pregnancy():
         models.PREGNANT_STATE_NAME,
         allow_self_transition=True,
         prevalence=1.0,
-        dwell_time=0.0,
         disability_weight=0.0,
         excess_mortality_rate=0.0,
     )
