@@ -7,9 +7,9 @@ random_seeds: [4344, 5616, 6810, 2787, 2284]
 branches:
   - intervention:
       scenario:
-        # - 'zero_coverage'
-        # - 'baseline'
+        - 'zero_coverage'
+        - 'baseline'
         - 'mms'
-        # - 'ifa'
-        # - 'targeted_bep_ifa'
-        # - 'targeted_bep_mms'
+        - 'ifa'
+        - 'targeted_bep_ifa'
+        - 'targeted_bep_mms'
