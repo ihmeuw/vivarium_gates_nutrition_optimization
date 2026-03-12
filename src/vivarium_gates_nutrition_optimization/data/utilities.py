@@ -1,6 +1,6 @@
 from typing import Union
-import pandas as pd
 
+import pandas as pd
 from gbd_mapping import ModelableEntity, causes, covariates, risk_factors
 from vivarium.framework.artifact import EntityKey
 
@@ -14,6 +14,7 @@ def get_entity(key: Union[str, EntityKey]) -> ModelableEntity:
         "risk_factor": risk_factors,
     }
     return type_map[key.type][key.name]
+
 
 def expand_draw_columns(data: pd.DataFrame, num_draws: int, num_repeats: int) -> pd.DataFrame:
     """

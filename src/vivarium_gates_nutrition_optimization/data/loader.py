@@ -530,6 +530,7 @@ def load_hemoglobin_exposure_data(
     expanded_draws_df = pd.concat([expanded_draws_df_1, expanded_draws_df_2], axis=1)
     return expanded_draws_df
 
+
 def get_hemoglobin_csv_data(
     key: str, location: str, years: Optional[Union[int, str, List[int]]] = None
 ) -> pd.DataFrame:
