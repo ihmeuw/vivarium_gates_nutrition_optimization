@@ -101,14 +101,6 @@ RR_SCALAR = (
     10.0  # Conversion factor between hemoglobin units (g/L) and relative risk units (g/dL)
 )
 
-PREGNANCY_CORRECTION_FACTORS = {
-    data_keys.HEMOGLOBIN.MEAN: pd.read_csv(
-        paths.HEMOGLOBIN_PREGNANCY_ADJUSTMENT_FACTORS_CSV, index_col=0
-    ).squeeze(),
-    data_keys.HEMOGLOBIN.STANDARD_DEVIATION: pd.Series(
-        np.repeat(1.032920188, draw_count), [f"draw_{i}" for i in range(draw_count)]
-    ),
-}
 PROBABILITY_MODERATE_MATERNAL_HEMORRHAGE = (0.85, 0.81, 0.89)
 
 RR_MATERNAL_HEMORRHAGE_ATTRIBUTABLE_TO_HEMOGLOBIN = (
