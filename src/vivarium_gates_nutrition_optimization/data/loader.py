@@ -34,7 +34,7 @@ from vivarium_gates_nutrition_optimization.constants import (
     models,
     paths,
 )
-from vivarium_gates_nutrition_optimization.data import extra_gbd, sampling
+from vivarium_gates_nutrition_optimization.data import extra_gbd, sampling, utilities
 from vivarium_gates_nutrition_optimization.data.utilities import get_entity
 from vivarium_gates_nutrition_optimization.utilities import get_random_variable_draws
 
@@ -85,8 +85,8 @@ def get_data(
         data_keys.MATERNAL_HEMORRHAGE.RR_ATTRIBUTABLE_TO_HEMOGLOBIN: load_hemoglobin_maternal_hemorrhage_rr,
         data_keys.MATERNAL_HEMORRHAGE.PAF_ATTRIBUTABLE_TO_HEMOGLOBIN: load_hemoglobin_maternal_hemorrhage_paf,
         data_keys.MATERNAL_HEMORRHAGE.MODERATE_HEMORRHAGE_PROBABILITY: get_moderate_hemorrhage_probability,
-        data_keys.HEMOGLOBIN.MEAN: get_hemoglobin_data,
-        data_keys.HEMOGLOBIN.STANDARD_DEVIATION: get_hemoglobin_data,
+        data_keys.HEMOGLOBIN.MEAN: load_hemoglobin_exposure_data,
+        data_keys.HEMOGLOBIN.STANDARD_DEVIATION: load_hemoglobin_exposure_data,
         data_keys.HEMOGLOBIN.PREGNANT_PROPORTION_WITH_HEMOGLOBIN_BELOW_70: get_hemoglobin_csv_data,
         data_keys.MATERNAL_BMI.PREVALENCE_LOW_BMI_ANEMIC: load_bmi_prevalence,
         data_keys.MATERNAL_BMI.PREVALENCE_LOW_BMI_NON_ANEMIC: load_bmi_prevalence,
@@ -504,28 +504,31 @@ def load_background_morbidity(
 ###########################
 
 
-def get_hemoglobin_data(
+def load_hemoglobin_exposure_data(
     key: str, location: str, years: Optional[Union[int, str, List[int]]] = None
-) -> pd.DataFrame:
-    me_id = {
-        data_keys.HEMOGLOBIN.MEAN: 10487,
-        data_keys.HEMOGLOBIN.STANDARD_DEVIATION: 10488,
-    }[key]
-    correction_factors = data_values.PREGNANCY_CORRECTION_FACTORS[key]
-
-    location_id = utility_data.get_location_id(location)
-    hemoglobin_data = gbd.get_modelable_entity_draws(
-        me_id=me_id, location_id=location_id, year_id=2023, data_type="draws"
-    )
-
-    existing_draw_cols = [col for col in hemoglobin_data if col.startswith("draw_")]
-    extra_draw_cols = [
-        col for col in existing_draw_cols if col not in vi_globals.DRAW_COLUMNS
-    ]
-    hemoglobin_data = hemoglobin_data.drop(columns=extra_draw_cols, errors="ignore")
-
+):
+    hemoglobin_data = extra_gbd.get_hemoglobin_exposure_data(key, location)
     hemoglobin_data = reshape_to_vivarium_format(hemoglobin_data, location)
-    return hemoglobin_data * correction_factors
+    levels_to_drop = [
+        "measure_id",
+        "metric_id",
+        "model_version_id",
+        "modelable_entity_id",
+        "rei_id",
+    ]
+    if key == data_keys.HEMOGLOBIN.MEAN:
+        levels_to_drop.append("parameter")
+    hemoglobin_data.index = hemoglobin_data.index.droplevel(levels_to_drop)
+
+    # Expand draw columns from 0-99 to 0-249 by repeating 2.5 times
+    expanded_draws_df_1 = utilities.expand_draw_columns(
+        hemoglobin_data, num_draws=100, num_repeats=2
+    )
+    expanded_draws_df_2 = hemoglobin_data[[f"draw_{i}" for i in range(50)]].rename(
+        {f"draw_{i}": f"draw_{i+200}" for i in range(50)}, axis=1
+    )
+    expanded_draws_df = pd.concat([expanded_draws_df_1, expanded_draws_df_2], axis=1)
+    return expanded_draws_df
 
 
 def get_hemoglobin_csv_data(
