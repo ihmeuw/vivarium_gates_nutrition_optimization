@@ -64,7 +64,7 @@ class MaternalInterventions(Component):
         )
 
     def initialize_intervention(self, pop_data: SimulantData) -> None:
-        categories = self.population_view.get_attributes(
+        categories = self.population_view.get(
             pop_data.index, "maternal_bmi_anemia_category"
         )
 
@@ -93,13 +93,13 @@ class MaternalInterventions(Component):
             unsampled_ifa = pop_update["intervention"] == "maybe_ifa"
             pop_update.loc[unsampled_ifa, "intervention"] = baseline_ifa.loc[unsampled_ifa]
 
-        self.population_view.update(pop_update)
+        self.population_view.initialize(pop_update)
 
     def update_exposure(self, index, exposure):
         if self.clock() - self.start_date >= timedelta(
             days=data_values.DURATIONS.INTERVENTION_DELAY_DAYS
         ):
-            intervention = self.population_view.get_attributes(index, "intervention")
+            intervention = self.population_view.get(index, "intervention")
             exposure.loc[intervention == models.NO_TREATMENT] -= (
                 self.ifa_coverage * self.ifa_effect_size
             )
@@ -110,7 +110,7 @@ class MaternalInterventions(Component):
         return exposure
 
     def adjust_stillbirth_probability(self, index, birth_outcome_probabilities):
-        pop = self.population_view.get_attributes(index, "intervention")
+        pop = self.population_view.get(index, "intervention")
         rrs = {
             models.MMS_SUPPLEMENTATION: self.mms_stillbirth_rr,
             models.BEP_SUPPLEMENTATION: self.bep_stillbirth_rr,

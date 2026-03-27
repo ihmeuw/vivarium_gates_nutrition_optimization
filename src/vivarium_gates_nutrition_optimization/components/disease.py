@@ -57,7 +57,7 @@ class ParturitionSelectionTransition(ProportionTransition):
     ####################
 
     def _probability(self, index) -> pd.Series:
-        return self.population_view.get_attributes(index, self.pipeline_name)
+        return self.population_view.get(index, self.pipeline_name)
 
 
 # NOTE: This component is only used by Morbidity which is an exploratory component

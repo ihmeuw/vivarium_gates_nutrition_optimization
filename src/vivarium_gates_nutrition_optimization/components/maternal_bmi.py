@@ -50,7 +50,7 @@ class MaternalBMIExposure(Component):
         propensity = self.randomness.get_draw(index)
         p_low_anemic = self.prevalence_low_bmi_anemic(index)
         p_low_non_anemic = self.prevalence_low_bmi_non_anemic(index)
-        hemoglobin = self.population_view.get_attributes(index, "raw_hemoglobin.exposure")
+        hemoglobin = self.population_view.get(index, "raw_hemoglobin.exposure")
         anemic = index[hemoglobin < self.threshold]
         non_anemic = index.difference(anemic)
 
@@ -75,4 +75,4 @@ class MaternalBMIExposure(Component):
             axis=1,
         )
 
-        self.population_view.update(pop_update)
+        self.population_view.initialize(pop_update)

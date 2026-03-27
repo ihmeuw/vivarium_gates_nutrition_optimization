@@ -86,11 +86,11 @@ class PregnantState(DiseaseState):
             pop_data
         )
         pop_update = pd.concat([pop_events, pregnancy_outcomes_and_durations], axis=1)
-        self.population_view.update(pop_update)
+        self.population_view.initialize(pop_update)
 
     def sample_pregnancy_outcomes_and_durations(self, pop_data: SimulantData) -> pd.DataFrame:
         # Order the columns so that partial_term isn't in the middle!
-        outcome_probabilities = self.population_view.get_attribute_frame(
+        outcome_probabilities = self.population_view.get_frame(
             pop_data.index, "birth_outcome_probabilities"
         )
         pregnancy_outcomes = pd.DataFrame(
@@ -140,7 +140,7 @@ class PregnantState(DiseaseState):
         return child_status
 
     def update_dwell_time(self, index: pd.Index, target: pd.Series) -> pd.Series:
-        return self.population_view.get_attributes(index, "pregnancy_duration")
+        return self.population_view.get(index, "pregnancy_duration")
 
     def get_initial_event_times(self, pop_data: SimulantData) -> pd.DataFrame:
         """Overwrite the BaseDiseaseState method"""
