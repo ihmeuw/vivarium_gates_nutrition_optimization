@@ -80,7 +80,11 @@ class MaternalMortality(Mortality):
         )
 
         self.population_view.update(
-            ["is_alive", self.years_of_life_lost_column_name, self.cause_of_death_column_name],
+            [
+                "is_alive",
+                self.years_of_life_lost_column_name,
+                self.cause_of_death_column_name,
+            ],
             lambda _: pd.DataFrame(
                 {
                     "is_alive": False,

@@ -64,9 +64,7 @@ class MaternalInterventions(Component):
         )
 
     def initialize_intervention(self, pop_data: SimulantData) -> None:
-        categories = self.population_view.get(
-            pop_data.index, "maternal_bmi_anemia_category"
-        )
+        categories = self.population_view.get(pop_data.index, "maternal_bmi_anemia_category")
 
         if self.scenario == "ifa":
             pop_update = pd.DataFrame(
