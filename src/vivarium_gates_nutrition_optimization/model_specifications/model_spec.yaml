@@ -54,9 +54,7 @@ configuration:
             year: 2025
             month: 12
             day: 31
-        # SBACHMEI put back to 7 days
-        # step_size: 7 # Days
-        step_size: 28
+        step_size: 7 # Days
     population:
         population_size: 20_000
         initialization_age_min: 10
