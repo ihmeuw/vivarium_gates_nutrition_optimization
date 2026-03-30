@@ -71,7 +71,7 @@ class MaternalMortality(Mortality):
             event.index,
             query="(is_alive == True) & (maternal_disorders == 'maternal_disorders')",
         )
-        mortality_probability = self.population_view.get_attributes(
+        mortality_probability = self.population_view.get(
             pop_idx, self.mortality_probability_name
         )
 
@@ -79,12 +79,18 @@ class MaternalMortality(Mortality):
             pop_idx, mortality_probability, additional_key="death"
         )
 
-        update = pd.DataFrame(
-            {
-                "is_alive": False,
-                self.years_of_life_lost_column_name: self.life_expectancy_table(deaths),
-                self.cause_of_death_column_name: "maternal_disorders",
-            },
-            index=deaths,
+        self.population_view.update(
+            [
+                "is_alive",
+                self.years_of_life_lost_column_name,
+                self.cause_of_death_column_name,
+            ],
+            lambda _: pd.DataFrame(
+                {
+                    "is_alive": False,
+                    self.years_of_life_lost_column_name: self.life_expectancy_table(deaths),
+                    self.cause_of_death_column_name: "maternal_disorders",
+                },
+                index=deaths,
+            ),
         )
-        self.population_view.update(update)

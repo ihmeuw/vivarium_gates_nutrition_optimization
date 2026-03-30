@@ -168,10 +168,10 @@ class Hemoglobin(Component):
             },
             index=pop_data.index,
         )
-        self.population_view.update(pop_update)
+        self.population_view.initialize(pop_update)
 
     def hemoglobin_source(self, idx: pd.Index) -> pd.Series:
-        pop = self.population_view.get_attributes(
+        pop = self.population_view.get(
             idx,
             [
                 "hemoglobin_distribution_propensity",
@@ -234,7 +234,7 @@ class Hemoglobin(Component):
     def adjust_maternal_disorder_proportion(
         self, index: pd.Index, maternal_disorder_probability: pd.DataFrame
     ) -> pd.Series:
-        hemoglobin_level = self.population_view.get_attributes(index, "hemoglobin.exposure")
+        hemoglobin_level = self.population_view.get(index, "hemoglobin.exposure")
         rr = self.maternal_disorders_relative_risk(index)
         ## annoyingly formatted
         paf = self.maternal_disorders_population_attributable_fraction(index)
@@ -249,7 +249,7 @@ class Hemoglobin(Component):
     def adjust_maternal_hemorrhage_proportion(self, index, maternal_hemorrhage_probability):
         paf = self.hemorrhage_population_attributable_fraction(index)
         rr = self.hemorrhage_relative_risk(index)
-        hemoglobin = self.population_view.get_attributes(index, "hemoglobin.exposure")
+        hemoglobin = self.population_view.get(index, "hemoglobin.exposure")
         maternal_hemorrhage_probability *= 1 - paf
         # Dichotomous risk based on severe anemia
         maternal_hemorrhage_probability.loc[
@@ -262,7 +262,7 @@ class Hemoglobin(Component):
     ) -> pd.DataFrame:
         # We need to persist this value for both current and recovered maternal hemorrhage
         # We don't need to undo after postpartum, as simulants become untracked
-        hemoglobin_scale_factor = self.population_view.get_attributes(
+        hemoglobin_scale_factor = self.population_view.get(
             index,
             "hemoglobin_scale_factor",
             query="is_alive == True & maternal_hemorrhage != 'susceptible_to_maternal_hemorrhage'",
@@ -305,7 +305,7 @@ class Anemia(Component):
         )
 
     def anemia_source(self, index: pd.Index) -> pd.Series:
-        hemoglobin_level = self.population_view.get_attributes(index, "hemoglobin.exposure")
+        hemoglobin_level = self.population_view.get(index, "hemoglobin.exposure")
         thresholds = self.anemia_thresholds(index)
 
         choice_index = (hemoglobin_level.values[np.newaxis].T < thresholds).sum(axis=1)
@@ -317,7 +317,7 @@ class Anemia(Component):
         )
 
     def compute_disability_weight(self, index: pd.Index):
-        anemia_levels = self.population_view.get_attributes(index, "anemia_levels")
+        anemia_levels = self.population_view.get(index, "anemia_levels")
         raw_anemia_disability_weight = anemia_levels.map(ANEMIA_DISABILITY_WEIGHTS)
         dw_map = {
             models.NOT_PREGNANT_STATE_NAME: raw_anemia_disability_weight,
@@ -326,7 +326,7 @@ class Anemia(Component):
             models.PARTURITION_STATE_NAME: pd.Series(0, index=index),
             models.POSTPARTUM_STATE_NAME: raw_anemia_disability_weight,
         }
-        pop = self.population_view.get_attributes(index, ["pregnancy", "is_alive"])
+        pop = self.population_view.get(index, ["pregnancy", "is_alive"])
         disability_weight = pd.Series(np.nan, index=index)
         for state, dw in dw_map.items():
             in_state = (pop["is_alive"] == True) & (pop["pregnancy"] == state)
@@ -336,13 +336,15 @@ class Anemia(Component):
 
     def initialize_anemia_status_at_birth(self, pop_data: SimulantData) -> None:
         pop_update = pd.DataFrame({"anemia_status_at_birth": "invalid"}, index=pop_data.index)
-        self.population_view.update(pop_update)
+        self.population_view.initialize(pop_update)
 
     def on_time_step(self, event: Event):
-        anemia_status_at_birth = self.population_view.get_attributes(
+        anemia_at_birth = self.population_view.get(
             event.index,
             "anemia_levels",
             query=("is_alive == True & pregnancy == 'parturition'"),
         )
-        anemia_status_at_birth.name = "anemia_status_at_birth"
-        self.population_view.update(anemia_status_at_birth)
+        self.population_view.update(
+            "anemia_status_at_birth",
+            lambda _: anemia_at_birth.rename("anemia_status_at_birth"),
+        )
