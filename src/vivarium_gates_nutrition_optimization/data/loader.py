@@ -12,6 +12,7 @@ for an example.
 
    No logging is done here. Logging is done in vivarium inputs itself and forwarded.
 """
+from typing import List, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -19,7 +20,7 @@ import vivarium_inputs.validation.sim as validation
 from scipy import stats
 from vivarium.framework.artifact import EntityKey
 from vivarium.framework.randomness import get_hash
-from vivarium_gbd_access import gbd
+from vivarium_gbd_access.gbd import base_data as gbd
 from vivarium_inputs import core as vi_core
 from vivarium_inputs import globals as vi_globals
 from vivarium_inputs import interface
@@ -40,7 +41,9 @@ from vivarium_gates_nutrition_optimization.utilities import get_random_variable_
 ##Note: need to remove all instances where we limit the size of the data manually. This will be done when RT updates in the input files.
 
 
-def get_data(lookup_key: str, location: str) -> pd.DataFrame:
+def get_data(
+    lookup_key: str, location: str, years: Optional[Union[int, str, List[int]]] = None
+) -> pd.DataFrame | float | str:
     """Retrieves data from an appropriate source.
 
     Parameters
@@ -93,19 +96,23 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
         data_keys.MATERNAL_INTERVENTIONS.BEP_STILLBIRTH_RR: load_supplementation_stillbirth_rr,
         # data_keys.POPULATION.BACKGROUND_MORBIDITY: load_background_morbidity,
     }
-    return mapping[lookup_key](lookup_key, location)
+    return mapping[lookup_key](lookup_key, location, years)
 
 
-def load_population_location(key: str, location: str) -> str:
+def load_population_location(
+    key: str, location: str, years: Optional[Union[int, str, List[int]]] = None
+) -> str:
     if key != data_keys.POPULATION.LOCATION:
         raise ValueError(f"Unrecognized key {key}")
 
     return location
 
 
-def load_population_structure(key: str, location: str) -> pd.DataFrame:
-    base_population_structure = interface.get_population_structure(location)
-    pregnancy_end_rate_avg = get_pregnancy_end_incidence(location)
+def load_population_structure(
+    key: str, location: str, years: Optional[Union[int, str, List[int]]] = None
+) -> pd.DataFrame:
+    base_population_structure = interface.get_population_structure(location, years)
+    pregnancy_end_rate_avg = get_pregnancy_end_incidence(location, years)
     pregnant_population_structure = (
         pregnancy_end_rate_avg.multiply(base_population_structure["value"], axis=0)
         .assign(location=location)
@@ -114,38 +121,53 @@ def load_population_structure(key: str, location: str) -> pd.DataFrame:
     return vi_utils.sort_hierarchical_data(pregnant_population_structure)
 
 
-def load_age_bins(key: str, location: str) -> pd.DataFrame:
+def load_age_bins(
+    key: str, location: str, years: Optional[Union[int, str, List[int]]] = None
+) -> pd.DataFrame:
     return interface.get_age_bins()
 
 
-def load_demographic_dimensions(key: str, location: str) -> pd.DataFrame:
-    return interface.get_demographic_dimensions(location)
+def load_demographic_dimensions(
+    key: str, location: str, years: Optional[Union[int, str, List[int]]] = None
+) -> pd.DataFrame:
+    return interface.get_demographic_dimensions(location, years)
 
 
-def load_theoretical_minimum_risk_life_expectancy(key: str, location: str) -> pd.DataFrame:
+def load_theoretical_minimum_risk_life_expectancy(
+    key: str, location: str, years: Optional[Union[int, str, List[int]]] = None
+) -> pd.DataFrame:
     return interface.get_theoretical_minimum_risk_life_expectancy()
 
 
-def load_standard_data(key: str, location: str) -> pd.DataFrame:
+def load_standard_data(
+    key: str, location: str, years: Optional[Union[int, str, List[int]]] = None
+) -> pd.DataFrame:
     key = EntityKey(key)
     entity = get_entity(key)
-    return interface.get_measure(entity, key.measure, location).droplevel("location")
+    return interface.get_measure(entity, key.measure, location, years).droplevel("location")
 
 
 # TODO: Remove this if/ when Vivarium Inputs implements the change directly
-def load_raw_incidence_data(key: str, location: str) -> pd.DataFrame:
+def load_raw_incidence_data(
+    key: str, location: str, years: Optional[Union[int, str, List[int]]] = None
+) -> pd.DataFrame:
     """Temporary function to short circuit around validation issues in Vivarium Inputs"""
     key = EntityKey(key)
     entity = get_entity(key)
-    data = vi_core.get_data(entity, key.measure, location)
+    data_type = vi_utils.DataType(key.measure, "draws")
+    data = vi_core.get_data(entity, key.measure, location, years, data_type)
     data = vi_utils.scrub_gbd_conventions(data, location)
-    validation.validate_for_simulation(data, entity, "incidence_rate", location)
+    validation.validate_for_simulation(
+        data, entity, "incidence_rate", location, years, data_type.value_columns
+    )
     data = vi_utils.split_interval(data, interval_column="age", split_column_prefix="age")
     data = vi_utils.split_interval(data, interval_column="year", split_column_prefix="year")
     return vi_utils.sort_hierarchical_data(data).droplevel("location")
 
 
-def load_metadata(key: str, location: str):
+def load_metadata(
+    key: str, location: str, years: Optional[Union[int, str, List[int]]] = None
+):
     key = EntityKey(key)
     entity = get_entity(key)
     entity_metadata = entity[key.measure]
@@ -154,7 +176,9 @@ def load_metadata(key: str, location: str):
     return entity_metadata
 
 
-def load_categorical_paf(key: str, location: str) -> pd.DataFrame:
+def load_categorical_paf(
+    key: str, location: str, years: Optional[Union[int, str, List[int]]] = None
+) -> pd.DataFrame:
     try:
         risk = {
             # todo add keys as needed
@@ -163,7 +187,7 @@ def load_categorical_paf(key: str, location: str) -> pd.DataFrame:
     except KeyError:
         raise ValueError(f"Unrecognized key {key}")
 
-    distribution_type = get_data(risk.DISTRIBUTION, location)
+    distribution_type = get_data(risk.DISTRIBUTION, location, years)
 
     if distribution_type != "dichotomous" and "polytomous" not in distribution_type:
         raise NotImplementedError(
@@ -171,8 +195,8 @@ def load_categorical_paf(key: str, location: str) -> pd.DataFrame:
             f"polytomous are recognized categorical distributions."
         )
 
-    exp = get_data(risk.EXPOSURE, location)
-    rr = get_data(risk.RELATIVE_RISK, location)
+    exp = get_data(risk.EXPOSURE, location, years)
+    rr = get_data(risk.RELATIVE_RISK, location, years)
 
     # paf = (sum_categories(exp * rr) - 1) / sum_categories(exp * rr)
     sum_exp_x_rr = (
@@ -191,20 +215,26 @@ def load_categorical_paf(key: str, location: str) -> pd.DataFrame:
 ##################
 
 
-def get_pregnancy_end_incidence(location: str) -> pd.DataFrame:
-    asfr = get_data(data_keys.PREGNANCY.ASFR, location)
-    sbr = get_data(data_keys.PREGNANCY.SBR, location)
+def get_pregnancy_end_incidence(
+    location: str, years: Optional[Union[int, str, List[int]]] = None
+) -> pd.DataFrame:
+    asfr = get_data(data_keys.PREGNANCY.ASFR, location, years)
+    sbr = get_data(data_keys.PREGNANCY.SBR, location, years)
     sbr = sbr.reset_index(level="year_end", drop=True).reindex(asfr.index, level="year_start")
-    incidence_c995 = get_data(data_keys.PREGNANCY.RAW_INCIDENCE_RATE_MISCARRIAGE, location)
-    incidence_c374 = get_data(data_keys.PREGNANCY.RAW_INCIDENCE_RATE_ECTOPIC, location)
+    incidence_c995 = get_data(
+        data_keys.PREGNANCY.RAW_INCIDENCE_RATE_MISCARRIAGE, location, years
+    )
+    incidence_c374 = get_data(data_keys.PREGNANCY.RAW_INCIDENCE_RATE_ECTOPIC, location, years)
     pregnancy_end_rate = (
         asfr + asfr.multiply(sbr["value"], axis=0) + incidence_c995 + incidence_c374
     )
     return pregnancy_end_rate.reorder_levels(asfr.index.names)
 
 
-def load_asfr(key: str, location: str) -> pd.DataFrame:
-    asfr = load_standard_data(key, location)
+def load_asfr(
+    key: str, location: str, years: Optional[Union[int, str, List[int]]] = None
+) -> pd.DataFrame:
+    asfr = load_standard_data(key, location, years)
     asfr = asfr.reset_index()
     asfr_pivot = asfr.pivot(
         index=[col for col in metadata.ARTIFACT_INDEX_COLUMNS if col != "location"],
@@ -216,8 +246,10 @@ def load_asfr(key: str, location: str) -> pd.DataFrame:
     return asfr_draws
 
 
-def load_sbr(key: str, location: str) -> pd.DataFrame:
-    sbr = load_standard_data(key, location)
+def load_sbr(
+    key: str, location: str, years: Optional[Union[int, str, List[int]]] = None
+) -> pd.DataFrame:
+    sbr = load_standard_data(key, location, years)
     sbr = sbr.reorder_levels(["parameter", "year_start", "year_end"]).loc["mean_value"]
     return sbr
 
@@ -227,9 +259,12 @@ def load_sbr(key: str, location: str) -> pd.DataFrame:
 ##############
 
 
-def load_lbwsg_exposure(key: str, location: str) -> pd.DataFrame:
+def load_lbwsg_exposure(
+    key: str, location: str, years: Optional[Union[int, str, List[int]]] = None
+) -> pd.DataFrame:
     entity = get_entity(data_keys.LBWSG.EXPOSURE)
-    data = extra_gbd.load_lbwsg_exposure(location)
+    data = extra_gbd.load_2021_lbwsg_birth_exposure(location)
+
     # This category was a mistake in GBD 2019, so drop.
     extra_residual_category = vi_globals.EXTRA_RESIDUAL_CATEGORY[entity.name]
     data = data.loc[data["parameter"] != extra_residual_category]
@@ -252,14 +287,18 @@ def load_lbwsg_exposure(key: str, location: str) -> pd.DataFrame:
 ###########################
 
 
-def load_maternal_csmr(key: str, location: str) -> pd.DataFrame:
+def load_maternal_csmr(
+    key: str, location: str, years: Optional[Union[int, str, List[int]]] = None
+) -> pd.DataFrame:
     key = EntityKey(key)
     entity = get_entity(key)
     entity.restrictions.yll_age_group_id_end = 15
-    return interface.get_measure(entity, key.measure, location).droplevel("location")
+    return interface.get_measure(entity, key.measure, location, years).droplevel("location")
 
 
-def load_maternal_disorders_ylds(key: str, location: str) -> pd.DataFrame:
+def load_maternal_disorders_ylds(
+    key: str, location: str, years: Optional[Union[int, str, List[int]]] = None
+) -> pd.DataFrame:
     groupby_cols = ["age_group_id", "sex_id", "year_id"]
     draw_cols = vi_globals.DRAW_COLUMNS
 
@@ -291,9 +330,13 @@ def load_maternal_disorders_ylds(key: str, location: str) -> pd.DataFrame:
     return ylds.fillna(0)
 
 
-def load_pregnant_maternal_disorders_incidence(key: str, location: str):
-    total_incidence = get_data(data_keys.MATERNAL_DISORDERS.RAW_INCIDENCE_RATE, location)
-    pregnancy_end_rate = get_pregnancy_end_incidence(location)
+def load_pregnant_maternal_disorders_incidence(
+    key: str, location: str, years: Optional[Union[int, str, List[int]]] = None
+) -> pd.DataFrame:
+    total_incidence = get_data(
+        data_keys.MATERNAL_DISORDERS.RAW_INCIDENCE_RATE, location, years
+    )
+    pregnancy_end_rate = get_pregnancy_end_incidence(location, years)
     maternal_disorders_incidence = total_incidence / pregnancy_end_rate
     ## We have to normalize, since this comes to a probability with some values > 1
     maternal_disorders_incidence = maternal_disorders_incidence.applymap(
@@ -302,17 +345,23 @@ def load_pregnant_maternal_disorders_incidence(key: str, location: str):
     return maternal_disorders_incidence.fillna(0)
 
 
-def load_maternal_disorders_mortality_probability(key: str, location: str):
-    total_csmr = get_data(data_keys.MATERNAL_DISORDERS.CSMR, location)
-    total_incidence = get_data(data_keys.MATERNAL_DISORDERS.RAW_INCIDENCE_RATE, location)
+def load_maternal_disorders_mortality_probability(
+    key: str, location: str, years: Optional[Union[int, str, List[int]]] = None
+) -> pd.DataFrame:
+    total_csmr = get_data(data_keys.MATERNAL_DISORDERS.CSMR, location, years)
+    total_incidence = get_data(
+        data_keys.MATERNAL_DISORDERS.RAW_INCIDENCE_RATE, location, years
+    )
     mortality_probability = total_csmr / total_incidence
     return mortality_probability.fillna(0)
 
 
-def load_pregnant_maternal_hemorrhage_incidence(key: str, location: str):
-    mh_incidence = get_data(data_keys.MATERNAL_HEMORRHAGE.RAW_INCIDENCE_RATE, location)
-    mh_csmr = get_data(data_keys.MATERNAL_HEMORRHAGE.CSMR, location)
-    pregnancy_end_rate = get_pregnancy_end_incidence(location)
+def load_pregnant_maternal_hemorrhage_incidence(
+    key: str, location: str, years: Optional[Union[int, str, List[int]]] = None
+) -> pd.DataFrame:
+    mh_incidence = get_data(data_keys.MATERNAL_HEMORRHAGE.RAW_INCIDENCE_RATE, location, years)
+    mh_csmr = get_data(data_keys.MATERNAL_HEMORRHAGE.CSMR, location, years)
+    pregnancy_end_rate = get_pregnancy_end_incidence(location, years)
     maternal_hemorrhage_incidence = (mh_incidence - mh_csmr) / pregnancy_end_rate
     ## I'm not as sure we need to normalize here, but we may as well.
     maternal_hemorrhage_incidence = maternal_hemorrhage_incidence.applymap(
@@ -321,14 +370,16 @@ def load_pregnant_maternal_hemorrhage_incidence(key: str, location: str):
     return maternal_hemorrhage_incidence.fillna(0)
 
 
-def load_hemoglobin_maternal_hemorrhage_rr(key: str, location: str) -> pd.DataFrame:
+def load_hemoglobin_maternal_hemorrhage_rr(
+    key: str, location: str, years: Optional[Union[int, str, List[int]]] = None
+) -> pd.DataFrame:
     if key != data_keys.MATERNAL_HEMORRHAGE.RR_ATTRIBUTABLE_TO_HEMOGLOBIN:
         raise ValueError(f"Unrecognized key {key}")
 
     distribution = data_values.RR_MATERNAL_HEMORRHAGE_ATTRIBUTABLE_TO_HEMOGLOBIN
     dist = sampling.get_lognorm_from_quantiles(*distribution)
     # Get a DataFrame with the desired index
-    demographic_dimensions = get_data(data_keys.POPULATION.DEMOGRAPHY, location)
+    demographic_dimensions = get_data(data_keys.POPULATION.DEMOGRAPHY, location, years)
 
     rng = np.random.default_rng(get_hash(f"{key}_{location}"))
     draw_count = vi_globals.NUM_DRAWS
@@ -342,18 +393,24 @@ def load_hemoglobin_maternal_hemorrhage_rr(key: str, location: str) -> pd.DataFr
     return maternal_hemorrhage_rr
 
 
-def load_hemoglobin_maternal_hemorrhage_paf(key: str, location: str) -> pd.DataFrame:
+def load_hemoglobin_maternal_hemorrhage_paf(
+    key: str, location: str, years: Optional[Union[int, str, List[int]]] = None
+) -> pd.DataFrame:
     if key != data_keys.MATERNAL_HEMORRHAGE.PAF_ATTRIBUTABLE_TO_HEMOGLOBIN:
         raise ValueError(f"Unrecognized key {key}")
 
-    rr = get_data(data_keys.MATERNAL_HEMORRHAGE.RR_ATTRIBUTABLE_TO_HEMOGLOBIN, location)
+    rr = get_data(
+        data_keys.MATERNAL_HEMORRHAGE.RR_ATTRIBUTABLE_TO_HEMOGLOBIN, location, years
+    )
     proportion = get_data(
-        data_keys.HEMOGLOBIN.PREGNANT_PROPORTION_WITH_HEMOGLOBIN_BELOW_70, location
+        data_keys.HEMOGLOBIN.PREGNANT_PROPORTION_WITH_HEMOGLOBIN_BELOW_70, location, years
     )
     return (rr * proportion + (1 - proportion) - 1) / (rr * proportion + (1 - proportion))
 
 
-def load_hemoglobin_maternal_disorders_rr(key: str, location: str) -> pd.DataFrame:
+def load_hemoglobin_maternal_disorders_rr(
+    key: str, location: str, years: Optional[Union[int, str, List[int]]] = None
+) -> pd.DataFrame:
     if key != data_keys.MATERNAL_DISORDERS.RR_ATTRIBUTABLE_TO_HEMOGLOBIN:
         raise ValueError(f"Unrecognized key {key}")
 
@@ -365,9 +422,11 @@ def load_hemoglobin_maternal_disorders_rr(key: str, location: str) -> pd.DataFra
     return rr
 
 
-def load_hemoglobin_maternal_disorders_paf(key: str, location: str) -> pd.DataFrame:
+def load_hemoglobin_maternal_disorders_paf(
+    key: str, location: str, years: Optional[Union[int, str, List[int]]] = None
+) -> pd.DataFrame:
     location_id = utility_data.get_location_id(location)
-    demography = get_data(data_keys.POPULATION.DEMOGRAPHY, location)
+    demography = get_data(data_keys.POPULATION.DEMOGRAPHY, location, years)
 
     data = pd.read_csv(paths.HEMOGLOBIN_MATERNAL_DISORDERS_PAF_CSV)
     data = data.set_index("location_id").loc[location_id]
@@ -381,7 +440,9 @@ def load_hemoglobin_maternal_disorders_paf(key: str, location: str) -> pd.DataFr
     return data
 
 
-def get_moderate_hemorrhage_probability(key: str, location: str) -> pd.DataFrame:
+def get_moderate_hemorrhage_probability(
+    key: str, location: str, years: Optional[Union[int, str, List[int]]] = None
+) -> pd.DataFrame:
     hemorrhage_dist_params = data_values.PROBABILITY_MODERATE_MATERNAL_HEMORRHAGE
     # Clip a bit higher than zero to avoid underflow error
     dist = sampling.get_truncnorm_from_quantiles(*hemorrhage_dist_params, lower_clip=0.1)
@@ -402,7 +463,9 @@ def get_moderate_hemorrhage_probability(key: str, location: str) -> pd.DataFrame
 ###########################
 
 
-def load_background_morbidity(key: str, location: str) -> pd.DataFrame:
+def load_background_morbidity(
+    key: str, location: str, years: Optional[Union[int, str, List[int]]] = None
+) -> pd.DataFrame:
     all_cause_yld_rate = extra_gbd.get_all_cause_yld_rate(location)
     all_cause_yld_rate = all_cause_yld_rate[
         vi_globals.DEMOGRAPHIC_COLUMNS + vi_globals.DRAW_COLUMNS
@@ -441,7 +504,9 @@ def load_background_morbidity(key: str, location: str) -> pd.DataFrame:
 ###########################
 
 
-def get_hemoglobin_data(key: str, location: str) -> pd.DataFrame:
+def get_hemoglobin_data(
+    key: str, location: str, years: Optional[Union[int, str, List[int]]] = None
+) -> pd.DataFrame:
     me_id = {
         data_keys.HEMOGLOBIN.MEAN: 10487,
         data_keys.HEMOGLOBIN.STANDARD_DEVIATION: 10488,
@@ -449,7 +514,9 @@ def get_hemoglobin_data(key: str, location: str) -> pd.DataFrame:
     correction_factors = data_values.PREGNANCY_CORRECTION_FACTORS[key]
 
     location_id = utility_data.get_location_id(location)
-    hemoglobin_data = gbd.get_modelable_entity_draws(me_id=me_id, location_id=location_id)
+    hemoglobin_data = gbd.get_modelable_entity_draws(
+        me_id=me_id, location_id=location_id, year_id=2023, data_type="draws"
+    )
 
     existing_draw_cols = [col for col in hemoglobin_data if col.startswith("draw_")]
     extra_draw_cols = [
@@ -461,9 +528,11 @@ def get_hemoglobin_data(key: str, location: str) -> pd.DataFrame:
     return hemoglobin_data * correction_factors
 
 
-def get_hemoglobin_csv_data(key: str, location: str):
+def get_hemoglobin_csv_data(
+    key: str, location: str, years: Optional[Union[int, str, List[int]]] = None
+) -> pd.DataFrame:
     location_id = utility_data.get_location_id(location)
-    demography = get_data(data_keys.POPULATION.DEMOGRAPHY, location)
+    demography = get_data(data_keys.POPULATION.DEMOGRAPHY, location, years)
 
     data = pd.read_csv(paths.PREGNANT_PROPORTION_WITH_HEMOGLOBIN_BELOW_70_CSV)
     data = data.set_index("location_id").loc[location_id]
@@ -481,9 +550,11 @@ def get_hemoglobin_csv_data(key: str, location: str):
 ################
 
 
-def load_bmi_prevalence(key: str, location: str):
+def load_bmi_prevalence(
+    key: str, location: str, years: Optional[Union[int, str, List[int]]] = None
+) -> pd.DataFrame:
     location_id = utility_data.get_location_id(location)
-    demography = get_data(data_keys.POPULATION.DEMOGRAPHY, location)
+    demography = get_data(data_keys.POPULATION.DEMOGRAPHY, location, years)
 
     path = {
         data_keys.MATERNAL_BMI.PREVALENCE_LOW_BMI_ANEMIC: paths.PREVALENCE_LOW_BMI_ANEMIC_CSV,
@@ -512,7 +583,9 @@ def load_bmi_prevalence(key: str, location: str):
 ##########################
 
 
-def load_ifa_coverage(key: str, location: str) -> pd.DataFrame:
+def load_ifa_coverage(
+    key: str, location: str, years: Optional[Union[int, str, List[int]]] = None
+) -> pd.DataFrame:
     df = pd.read_csv(
         paths.CSV_RAW_DATA_ROOT / "baseline_ifa_coverage" / (location + ".csv"), index_col=0
     )
@@ -520,7 +593,9 @@ def load_ifa_coverage(key: str, location: str) -> pd.DataFrame:
     return df
 
 
-def load_ifa_effect_size(key: str, location: str) -> pd.DataFrame:
+def load_ifa_effect_size(
+    key: str, location: str, years: Optional[Union[int, str, List[int]]] = None
+) -> pd.DataFrame:
     loc, scale = data_values.IFA_EFFECT_SIZE
     dist = stats.norm(loc, scale)
     rng = np.random.default_rng(get_hash(f"ifa_effect_size_{location}"))
@@ -533,7 +608,9 @@ def load_ifa_effect_size(key: str, location: str) -> pd.DataFrame:
     return ifa_effect_size
 
 
-def load_supplementation_stillbirth_rr(key: str, location: str) -> pd.DataFrame:
+def load_supplementation_stillbirth_rr(
+    key: str, location: str, years: Optional[Union[int, str, List[int]]] = None
+) -> pd.DataFrame:
     try:
         distribution = data_values.INTERVENTION_STILLBIRTH_RRS[key]
     except KeyError:
