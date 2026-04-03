@@ -46,13 +46,13 @@ if __name__ == "__main__":
 
     install_requirements = [
         "gbd_mapping>=3.1.1",
-        "vivarium>=3.0.0, <4.0.0",
-        "vivarium_public_health>=3.0.0, <4.0.0",
+        "vivarium>=4.0.0, <4.1.0",
+        "vivarium_public_health>=5.0.0, <5.1.0",
         "click",
         "jinja2",
         "loguru",
         "numpy",
-        "pandas",
+        "pandas<3.0.0",
         "pyyaml",
         "scipy",
         "tables",
