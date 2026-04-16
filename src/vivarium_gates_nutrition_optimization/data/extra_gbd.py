@@ -113,26 +113,3 @@ def get_hemoglobin_maternal_disorders_rr():
     # maternal disorders parent cause
     data = data[data["cause_id"] == 367]
     return data
-
-
-@vi_utils.cache
-def get_hemoglobin_exposure_data(key: str, location: str):
-    """
-    Get hemoglobin exposure data for a given location and source.
-    """
-    source_map = {
-        data_keys.HEMOGLOBIN.MEAN: gbd_constants.SOURCES.EXPOSURE,
-        data_keys.HEMOGLOBIN.STANDARD_DEVIATION: gbd_constants.SOURCES.EXPOSURE_SD,
-    }
-    source = source_map[key]
-    location_id = utility_data.get_location_id(location)
-    data = gbd.get_draws(
-        gbd_id_type="rei_id",
-        gbd_id=376,
-        source=source,
-        location_id=location_id,
-        year_id=2023,
-        sex_id=gbd_constants.SEX.FEMALE,
-        release_id=gbd_constants.RELEASE_IDS.GBD_2023,
-    )
-    return data
