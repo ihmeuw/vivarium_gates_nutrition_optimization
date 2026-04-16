@@ -133,6 +133,6 @@ def get_hemoglobin_exposure_data(key: str, location: str):
         location_id=location_id,
         year_id=2023,
         sex_id=gbd_constants.SEX.FEMALE,
-        release_id=33,
+        release_id=gbd_constants.RELEASE_IDS.GBD_2023,
     )
     return data
