@@ -1,7 +1,15 @@
+from __future__ import annotations
+
+from typing import Any
+
 import pandas as pd
 from vivarium.framework.engine import Builder
 from vivarium.framework.state_machine import State, Transition
-from vivarium_public_health.disease import DiseaseState, SusceptibleState
+from vivarium.framework.values import ValuesManager
+from vivarium_public_health.causal_factor.calibration_constant import (
+    register_risk_affected_attribute_producer,
+)
+from vivarium_public_health.disease import SusceptibleState
 from vivarium_public_health.disease.transition import ProportionTransition
 
 from vivarium_gates_nutrition_optimization.constants import models
@@ -24,6 +32,14 @@ class ParturitionSelectionState(SusceptibleState):
         return transition
 
 
+def cap_at_one(
+    index: pd.Index, value: Any, manager: ValuesManager
+) -> pd.Series[Any] | pd.DataFrame:
+    ret_val = value.copy()
+    ret_val[ret_val > 1] = 1
+    return ret_val
+
+
 class ParturitionSelectionTransition(ProportionTransition):
 
     #####################
@@ -33,10 +49,12 @@ class ParturitionSelectionTransition(ProportionTransition):
     def setup(self, builder: Builder) -> None:
         super().setup(builder)
         self.pipeline_name = f"{self.output_state.state_id}.transition_proportion"
-        builder.value.register_attribute_producer(
+        register_risk_affected_attribute_producer(
+            builder,
             self.pipeline_name,
             source=self.compute_transition_proportion,
             required_resources=["age", "sex", "is_alive"],
+            additional_post_processors=cap_at_one,
         )
 
     ###################
