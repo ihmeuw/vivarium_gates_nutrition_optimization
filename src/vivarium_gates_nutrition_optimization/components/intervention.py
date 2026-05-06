@@ -35,6 +35,9 @@ class MaternalInterventions(Component):
         self.ifa_coverage = builder.data.load(
             data_keys.MATERNAL_INTERVENTIONS.IFA_COVERAGE
         ).value[0]
+        self.anc1_coverage = builder.data.load(
+            data_keys.MATERNAL_INTERVENTIONS.ANC1_COVERAGE
+        ).value[0]
         self.mms_stillbirth_rr = builder.data.load(
             data_keys.MATERNAL_INTERVENTIONS.MMS_STILLBIRTH_RR
         ).value[0]
@@ -90,6 +93,15 @@ class MaternalInterventions(Component):
 
             unsampled_ifa = pop_update["intervention"] == "maybe_ifa"
             pop_update.loc[unsampled_ifa, "intervention"] = baseline_ifa.loc[unsampled_ifa]
+
+            unsampled_mms = pop_update["intervention"] == "maybe_mms"
+            mms_assignment = self.randomness.choice(
+                categories.index[unsampled_mms],
+                choices=[models.MMS_SUPPLEMENTATION, models.NO_TREATMENT],
+                p=[self.anc1_coverage, RESIDUAL_CHOICE],
+                additional_key="anc1_mms",
+            )
+            pop_update.loc[unsampled_mms, "intervention"] = mms_assignment
 
         self.population_view.initialize(pop_update)
 

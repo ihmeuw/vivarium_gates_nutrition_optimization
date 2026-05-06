@@ -25,6 +25,7 @@ from vivarium_inputs import globals as vi_globals
 from vivarium_inputs import interface
 from vivarium_inputs import utilities as vi_utils
 from vivarium_inputs import utility_data
+from db_queries import get_covariate_estimates
 
 from vivarium_gates_nutrition_optimization.constants import (
     data_keys,
@@ -88,6 +89,7 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
         data_keys.MATERNAL_BMI.PREVALENCE_LOW_BMI_ANEMIC: load_bmi_prevalence,
         data_keys.MATERNAL_BMI.PREVALENCE_LOW_BMI_NON_ANEMIC: load_bmi_prevalence,
         data_keys.MATERNAL_INTERVENTIONS.IFA_COVERAGE: load_ifa_coverage,
+        data_keys.MATERNAL_INTERVENTIONS.ANC1_COVERAGE: load_anc1_coverage,
         data_keys.MATERNAL_INTERVENTIONS.IFA_EFFECT_SIZE: load_ifa_effect_size,
         data_keys.MATERNAL_INTERVENTIONS.MMS_STILLBIRTH_RR: load_supplementation_stillbirth_rr,
         data_keys.MATERNAL_INTERVENTIONS.BEP_STILLBIRTH_RR: load_supplementation_stillbirth_rr,
@@ -532,6 +534,15 @@ def load_ifa_effect_size(key: str, location: str) -> pd.DataFrame:
     )
     return ifa_effect_size
 
+
+def load_anc1_coverage(key: str, location: str) -> pd.DataFrame:
+    location_id = utility_data.get_location_id(location)
+    data = get_covariate_estimates(
+        location_id=location_id, release_id=16, year_id=2023, covariate_id=7
+    )
+    # ANC1 coverage is stored as a proportion (0-1)
+    value = data["mean_value"].values[0]
+    return pd.DataFrame({"value": [value]})
 
 def load_supplementation_stillbirth_rr(key: str, location: str) -> pd.DataFrame:
     try:
