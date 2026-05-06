@@ -16,6 +16,7 @@ for an example.
 import numpy as np
 import pandas as pd
 import vivarium_inputs.validation.sim as validation
+from db_queries import get_covariate_estimates
 from scipy import stats
 from vivarium.framework.artifact import EntityKey
 from vivarium.framework.randomness import get_hash
@@ -25,7 +26,6 @@ from vivarium_inputs import globals as vi_globals
 from vivarium_inputs import interface
 from vivarium_inputs import utilities as vi_utils
 from vivarium_inputs import utility_data
-from db_queries import get_covariate_estimates
 
 from vivarium_gates_nutrition_optimization.constants import (
     data_keys,
@@ -543,6 +543,7 @@ def load_anc1_coverage(key: str, location: str) -> pd.DataFrame:
     # ANC1 coverage is stored as a proportion (0-1)
     value = data["mean_value"].values[0]
     return pd.DataFrame({"value": [value]})
+
 
 def load_supplementation_stillbirth_rr(key: str, location: str) -> pd.DataFrame:
     try:
