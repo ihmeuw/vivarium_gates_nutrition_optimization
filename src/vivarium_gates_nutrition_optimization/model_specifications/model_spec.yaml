@@ -1,17 +1,16 @@
 components:
     vivarium_public_health:
-        population:
-            - BasePopulation()
         results:
             - DiseaseObserver("maternal_disorders")
             - DiseaseObserver("maternal_hemorrhage")
 
     vivarium_gates_nutrition_optimization:
         components:
+            - Population()
             - Pregnancy()
             - UntrackNotPregnant()
             - MaternalDisorders()
-            - MaternalHemorrhage()  
+            - MaternalHemorrhage()
             - MaternalMortality()
             # - BackgroundMorbidity()
             - Hemoglobin()
@@ -31,12 +30,17 @@ components:
 configuration:
     input_data:
         input_draw_number: 0
-        artifact_path: '/mnt/team/simulation_science/pub/models/vivarium_gates_nutrition_optimization/artifacts/mean/pakistan.hdf'
+        # artifact_path: /mnt/team/simulation_science/pub/models/vivarium_gates_nutrition_optimization/artifacts/mean/pakistan.hdf
     interpolation:
         order: 0
         extrapolate: True
     intervention:
-        scenario: "baseline"
+        scenario: baseline
+        # scenario: zero_coverage
+        # scenario: mms
+        # scenario: ifa
+        # scenario: targeted_bep_ifa
+        # scenario: targeted_bep_mms
     randomness:
         map_size: 1_000_000
         key_columns: ['entrance_time', 'age']
