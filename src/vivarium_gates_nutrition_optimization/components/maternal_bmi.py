@@ -16,17 +16,6 @@ from vivarium_gates_nutrition_optimization.constants import (
 
 class MaternalBMIExposure(Component):
     @property
-    def columns_created(self) -> List[str]:
-        return ["maternal_bmi_propensity", "maternal_bmi_anemia_category"]
-
-    @property
-    def initialization_requirements(self) -> Dict[str, List[str]]:
-        return {
-            "requires_values": ["raw_hemoglobin.exposure"],
-            "requires_streams": [self.name],
-        }
-
-    @property
     def configuration_defaults(self) -> Dict[str, Dict[str, Any]]:
         return {
             self.name: {
@@ -39,15 +28,29 @@ class MaternalBMIExposure(Component):
 
     def setup(self, builder: Builder):
         self.randomness = builder.randomness.get_stream(self.name)
-        self.hemoglobin = builder.value.get_value("raw_hemoglobin.exposure")
         self.threshold = data_values.MATERNAL_BMI_ANEMIA_THRESHOLD
+        self.prevalence_low_bmi_anemic = self.build_lookup_table(
+            builder, "prevalence_low_bmi_anemic"
+        )
+        self.prevalence_low_bmi_non_anemic = self.build_lookup_table(
+            builder, "prevalence_low_bmi_non_anemic"
+        )
+        builder.population.register_initializer(
+            self.initialize_bmi,
+            ["maternal_bmi_propensity", "maternal_bmi_anemia_category"],
+            required_resources=[
+                self.randomness,
+                self.prevalence_low_bmi_anemic,
+                "raw_hemoglobin.exposure",
+            ],
+        )
 
-    def on_initialize_simulants(self, pop_data: SimulantData):
+    def initialize_bmi(self, pop_data: SimulantData):
         index = pop_data.index
         propensity = self.randomness.get_draw(index)
-        p_low_anemic = self.lookup_tables["prevalence_low_bmi_anemic"](index)
-        p_low_non_anemic = self.lookup_tables["prevalence_low_bmi_non_anemic"](index)
-        hemoglobin = self.hemoglobin(index)
+        p_low_anemic = self.prevalence_low_bmi_anemic(index)
+        p_low_non_anemic = self.prevalence_low_bmi_non_anemic(index)
+        hemoglobin = self.population_view.get(index, "raw_hemoglobin.exposure")
         anemic = index[hemoglobin < self.threshold]
         non_anemic = index.difference(anemic)
 
@@ -72,4 +75,4 @@ class MaternalBMIExposure(Component):
             axis=1,
         )
 
-        self.population_view.update(pop_update)
+        self.population_view.initialize(pop_update)
