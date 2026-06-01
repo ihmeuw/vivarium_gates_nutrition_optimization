@@ -429,6 +429,7 @@ def load_hemoglobin_maternal_disorders_paf(
     demography = get_data(data_keys.POPULATION.DEMOGRAPHY, location, years)
 
     data = pd.read_csv(paths.HEMOGLOBIN_MATERNAL_DISORDERS_PAF_CSV)
+    data = data[["location_id", "age_group_id", "draw", "paf"]]
     data = data.set_index("location_id").loc[location_id]
     age_bins = utility_data.get_age_bins()
     data = data.merge(age_bins, on="age_group_id")
