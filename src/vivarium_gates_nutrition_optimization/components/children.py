@@ -1,3 +1,4 @@
+import re
 from typing import List, Tuple
 
 import numpy as np
@@ -108,25 +109,44 @@ class LBWSGDistribution(Component):
         categories = builder.data.load(data_keys.LBWSG.CATEGORIES)
         category_intervals = pd.DataFrame(
             data=[
-                (category, *self._parse_description(description))
+                (
+                    category,
+                    ga_interval.left,
+                    ga_interval.right,
+                    bw_interval.left,
+                    bw_interval.right,
+                )
                 for category, description in categories.items()
+                for ga_interval, bw_interval in [self._parse_description(description)]
             ],
             columns=[
                 "category",
-                "birth_weight_lower",
-                "birth_weight_upper",
                 "gestational_age_lower",
                 "gestational_age_upper",
+                "birth_weight_lower",
+                "birth_weight_upper",
             ],
         ).set_index("category")
         return category_intervals
 
     @staticmethod
-    def _parse_description(description: str) -> Tuple:
-        birth_weight = [
-            float(val) for val in description.split(", [")[1].split(")")[0].split(", ")
-        ]
-        gestational_age = [
-            float(val) for val in description.split("- [")[1].split(")")[0].split(", ")
-        ]
-        return *birth_weight, *gestational_age
+    def _parse_description(description: str) -> tuple[pd.Interval, pd.Interval]:
+        """Parses a string corresponding to a low birth weight and short gestation
+        category to an Interval.
+
+        An example of a standard description:
+        'Neonatal preterm and LBWSG (estimation years) - [0, 24) wks, [0, 500) g'
+        An example of an edge case for gestational age:
+        'Neonatal preterm and LBWSG (estimation years) - [40, 42+] wks, [2000, 2500) g'
+        An example of an edge case of birth weight:
+        'Neonatal preterm and LBWSG (estimation years) - [36, 37) wks, [4000, 9999] g'
+        """
+        lbwsg_values = [float(val) for val in re.findall(r"(\d+)", description)]
+        if len(list(lbwsg_values)) != 4:
+            raise ValueError(
+                f"Could not parse LBWSG description '{description}'. Expected 4 numeric values."
+            )
+        return (
+            pd.Interval(*lbwsg_values[:2], closed="left"),  # Gestational Age
+            pd.Interval(*lbwsg_values[2:], closed="left"),  # Birth Weight
+        )
