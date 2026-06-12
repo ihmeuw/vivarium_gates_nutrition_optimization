@@ -96,6 +96,26 @@ def get_anemia_yld_rate(location: str):
     return data
 
 
+@vi_utils.cache
+def get_hbg_less_than_70(location: str):
+    location_id = utility_data.get_location_id(location)
+    data = gbd.get_draws(
+        "rei_id",
+        207,
+        source=gbd_constants.SOURCES.COMO,
+        sex_id=2,
+        year_id=2023,
+        age_group_id=[7, 8, 9, 10, 11, 12, 13, 14, 15],
+        location_id=location_id,
+        release_id=33,
+        measure_id=5,
+        metric_id=3,
+    )
+    # Subset to a all-cause
+    data = data[data["cause_id"] == 294]
+    return data
+
+
 ## This is left as 2021 because the changes to hemoglobin RRs are very significant and would require other model updates we don't plan to make.
 @vi_utils.cache
 def get_hemoglobin_maternal_disorders_rr():

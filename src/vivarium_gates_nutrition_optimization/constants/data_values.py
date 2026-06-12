@@ -23,9 +23,10 @@ draw_count = 500
 
 
 INFANT_MALE_PERCENTAGES = {
-    "Ethiopia": 0.514271,
-    "Nigeria": 0.511785,
-    "Pakistan": 0.514583,
+    "Ethiopia": 0.515312,
+    "Nigeria": 0.512450,
+    "Pakistan": 0.519811,
+    "Kenya": 0.510294,
 }
 
 MATERNAL_HEMORRHAGE_HEMOGLOBIN_POSTPARTUM_SHIFT = 6.8  # g/L
