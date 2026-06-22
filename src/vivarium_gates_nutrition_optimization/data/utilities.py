@@ -2,7 +2,7 @@ from typing import Union
 
 import pandas as pd
 from gbd_mapping import ModelableEntity, causes, covariates, risk_factors
-from vivarium.framework.artifact import EntityKey
+from vivarium.engine.framework.artifact import EntityKey
 
 
 def get_entity(key: Union[str, EntityKey]) -> ModelableEntity:

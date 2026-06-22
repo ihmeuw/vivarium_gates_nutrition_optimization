@@ -26,6 +26,12 @@ PACKAGE_NAME = $(notdir $(CURDIR))
 # installs vivarium-public-health from a git branch.
 # TODO(hjafari): revert this block once setup.py pins a released vivarium-public-health.
 export SETUPTOOLS_SCM_PRETEND_VERSION_FOR_VIVARIUM_PUBLIC_HEALTH := 5.1.7
+# vivarium-engine is pinned to the unreleased rmudambi/mic-7116/lookup-table-multiindex
+# branch (setuptools-scm derives ~5.0.4 there), but the pinned vivarium-public-health
+# requires vivarium-engine>=5.1.1, so resolution fails. Pretend the engine is 5.1.6
+# (its version on main) to satisfy the constraint while still building the branch code.
+# TODO(hjafari): revert this line once setup.py pins a released vivarium-engine.
+export SETUPTOOLS_SCM_PRETEND_VERSION_FOR_VIVARIUM_ENGINE := 5.1.6
 # --- END TEMPORARY ---
 
 # Helper function for validating enum arguments

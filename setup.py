@@ -46,9 +46,10 @@ if __name__ == "__main__":
 
     install_requirements = [
         "gbd_mapping>=3.1.1,<6.0.0",
-        "vivarium>=4.0.0, <4.1.0",
-        "vivarium_public_health>=5.0.0, <5.1.0",
-        "layered_config_tree<4.2.0",
+        "vivarium-engine @ git+ssh://git@github.com/ihmeuw/vivarium-suite.git@rmudambi/mic-7116/lookup-table-multiindex#subdirectory=libs/engine",
+        "vivarium-public-health @ git+ssh://git@github.com/ihmeuw/vivarium-suite.git@hjafari/mic-7006/no_child_updates#subdirectory=libs/public-health",
+        "vivarium-config-tree",
+        "vivarium-risk-distributions",
         "click",
         "jinja2",
         "loguru",
@@ -61,7 +62,13 @@ if __name__ == "__main__":
 
     # use "pip install -e .[dev]" to install required components + extra components
     data_requirements = ["vivarium_inputs[data]>=4.1.1"]
-    cluster_requirements = ["vivarium_cluster_tools>=3.0.0, <4.0.0"]
+    # TODO(hjafari): restore once a monorepo-migrated vivarium_cluster_tools is
+    # released. The PyPI vivarium_cluster_tools still depends on the old
+    # `vivarium` distribution (pre-monorepo), which collides in the `vivarium`
+    # namespace with `vivarium-engine` and breaks `simulate`. Dropping it here
+    # keeps local simulate runs working; cluster (psimulate) runs are disabled
+    # until this is restored.
+    cluster_requirements = []  # was: ["vivarium_cluster_tools>=3.0.0, <4.0.0"]
     test_requirements = [
         "pytest",
         "pytest-cov",
