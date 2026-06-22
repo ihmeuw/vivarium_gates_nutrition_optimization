@@ -87,7 +87,7 @@ def get_data(
         data_keys.MATERNAL_HEMORRHAGE.MODERATE_HEMORRHAGE_PROBABILITY: get_moderate_hemorrhage_probability,
         data_keys.HEMOGLOBIN.MEAN: load_hemoglobin_exposure_data,
         data_keys.HEMOGLOBIN.STANDARD_DEVIATION: load_hemoglobin_exposure_data,
-        data_keys.HEMOGLOBIN.PREGNANT_PROPORTION_WITH_HEMOGLOBIN_BELOW_70: get_hemoglobin_csv_data,
+        data_keys.HEMOGLOBIN.PREGNANT_PROPORTION_WITH_HEMOGLOBIN_BELOW_70: get_hemoglobin_less_than_70_data,
         data_keys.MATERNAL_BMI.PREVALENCE_LOW_BMI_ANEMIC: load_bmi_prevalence,
         data_keys.MATERNAL_BMI.PREVALENCE_LOW_BMI_NON_ANEMIC: load_bmi_prevalence,
         data_keys.MATERNAL_INTERVENTIONS.IFA_COVERAGE: load_ifa_coverage,
@@ -532,19 +532,14 @@ def load_hemoglobin_exposure_data(
     return expanded_draws_df
 
 
-def get_hemoglobin_csv_data(
+def get_hemoglobin_less_than_70_data(
     key: str, location: str, years: Optional[Union[int, str, List[int]]] = None
 ) -> pd.DataFrame:
-    location_id = utility_data.get_location_id(location)
-    demography = get_data(data_keys.POPULATION.DEMOGRAPHY, location, years)
 
-    data = pd.read_csv(paths.PREGNANT_PROPORTION_WITH_HEMOGLOBIN_BELOW_70_CSV)
-    data = data.set_index("location_id").loc[location_id]
-    age_bins = utility_data.get_age_bins()
-    data = data.merge(age_bins, on="age_group_id")
-    data = data.pivot(index=["age_start", "age_end"], columns="draw", values="value")
-    data = data.reset_index(level="age_end", drop=True).reindex(
-        demography.index, level="age_start", fill_value=0.0
+    data = extra_gbd.get_hbg_less_than_70(location)
+    data = reshape_to_vivarium_format(data, location)
+    data.index = data.index.droplevel(
+        ["cause_id", "measure_id", "metric_id", "rei_id", "version_id"]
     )
     return data
 
