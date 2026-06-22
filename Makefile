@@ -19,6 +19,15 @@ endif
 # Set the package name as the last part of this file's parent directory path
 PACKAGE_NAME = $(notdir $(CURDIR))
 
+# --- TEMPORARY: revert once setup.py points at a released vivarium-public-health ---
+# The vivarium-public-health git dependency is pinned to an unreleased branch commit,
+# so setuptools-scm can't derive a version at build time and `make build-env` fails.
+# This pretend-version short-circuits that. Delete this block when setup.py no longer
+# installs vivarium-public-health from a git branch.
+# TODO(hjafari): revert this block once setup.py pins a released vivarium-public-health.
+export SETUPTOOLS_SCM_PRETEND_VERSION_FOR_VIVARIUM_PUBLIC_HEALTH := 5.1.7
+# --- END TEMPORARY ---
+
 # Helper function for validating enum arguments
 validate_arg = $(if $(filter-out $(2),$(1)),$(error Error: '$(3)' must be one of: $(2), got '$(1)'))
 
