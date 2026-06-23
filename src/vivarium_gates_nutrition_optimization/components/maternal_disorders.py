@@ -1,4 +1,4 @@
-from vivarium.framework.engine import Builder
+from vivarium.engine.framework.engine import Builder
 from vivarium_public_health.disease import DiseaseModel, DiseaseState, RecoveredState
 from vivarium_public_health.utilities import to_years
 

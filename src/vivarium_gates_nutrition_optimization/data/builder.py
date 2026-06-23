@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pandas as pd
 from loguru import logger
-from vivarium.framework.artifact import Artifact, EntityKey
+from vivarium.engine.framework.artifact import Artifact, EntityKey
 
 from vivarium_gates_nutrition_optimization.constants import data_keys
 from vivarium_gates_nutrition_optimization.data import loader
