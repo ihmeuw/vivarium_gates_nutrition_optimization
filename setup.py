@@ -48,6 +48,10 @@ if __name__ == "__main__":
         "gbd_mapping>=3.1.1,<5.0.0",
         "vivarium>=4.1.0,<5.0.0",
         "vivarium_public_health>=5.1.5,<6.0.0",
+        # Pin to <=3.3.2 until this model repo's deps are migrated to the post-monorepo names
+        # NOTE: v3.3.3 / v3.3.4 are post-archive sunset releases of the standalone vbu repo that
+        #   were never tagged in the monorepo, so the Jenkins shared library loader can't find them
+        "vivarium_build_utils<=3.3.2",
         "click",
         "jinja2",
         "loguru",
