@@ -32,7 +32,8 @@ reusable_pipeline(
       // Add additional branches for cron jobs below.
       // Note: Newly added branches will require a manual trigger of the first build 
       // for subsequent scheduled builds to run.
-      "main"
+      "main",
+      "gbd-2021",
     ],
     test_types: ["unit", "e2e"], 
     skip_doc_build: true,
