@@ -92,13 +92,9 @@ build-env: # Create a new environment with installed packages
 	
 	conda create -n $(name) python=$(py) --yes
 # 	Bootstrap vivarium_build_utils into the new environment.
-# 	Pin to <=3.3.2 until this model repo's deps are migrated to the
-# 	post-monorepo names (vivarium-engine, vivarium-gbd-mapping, etc.).
-# 	v3.3.3 / v3.3.4 are post-archive sunset releases of the standalone
-# 	vbu repo that were never tagged in the monorepo, so the Jenkins
-# 	shared library loader can't find them; v3.3.2 is the last v3.x tag
-# 	that exists in both artifactory and the monorepo. See MIC-7185 +
-# 	follow-up ticket for unblocking the migration of this repo to vbu 4.x.
+# 	Pin to <=3.3.2 until this model repo's deps are migrated to the post-monorepo names
+# 	NOTE: v3.3.3 / v3.3.4 are post-archive sunset releases of the standalone vbu repo that
+#		were never tagged in the monorepo, so the Jenkins shared library loader can't find them
 	conda run -n $(name) pip install "vivarium_build_utils<=3.3.2"
 #	Install packages based on type
 	@if [ "$(type)" = "simulation" ]; then \
