@@ -92,7 +92,8 @@ build-env: # Create a new environment with installed packages
 	
 	conda create -n $(name) python=$(py) --yes
 # 	Bootstrap vivarium_build_utils into the new environment
-	conda run -n $(name) pip install vivarium_build_utils
+#	Pin to <4.0.0 until we update pins of packages that now exist in the monorepo
+	conda run -n $(name) pip install "vivarium_build_utils<4.0.0"
 #	Install packages based on type
 	@if [ "$(type)" = "simulation" ]; then \
 		conda run -n $(name) make install ENV_REQS=dev; \
