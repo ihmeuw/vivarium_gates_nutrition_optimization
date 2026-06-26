@@ -7,10 +7,10 @@ else
 # 	First, check if we can import vivarium_build_utils and assign 'yes' or 'no'.
 # 	We do this by importing the package in python and redirecting stderr to the null device.
 # 	If the import is successful (&&), it will print 'yes', otherwise (||) it will print 'no'.
-	VIVARIUM_BUILD_UTILS_AVAILABLE := $(shell python -c "import vivarium_build_utils" 2>/dev/null && echo "yes" || echo "no")
+	VIVARIUM_BUILD_UTILS_AVAILABLE := $(shell python -c "import vivarium.build_utils" 2>/dev/null && echo "yes" || echo "no")
 # 	If vivarium_build_utils is available, get the makefiles path or else set it to empty
 	ifeq ($(VIVARIUM_BUILD_UTILS_AVAILABLE),yes)
-		MAKE_INCLUDES := $(shell python -c "from vivarium_build_utils.resources import get_makefiles_path; print(get_makefiles_path())")
+		MAKE_INCLUDES := $(shell python -c "from vivarium.build_utils.resources import get_makefiles_path; print(get_makefiles_path())")
 	else
 		MAKE_INCLUDES :=
 	endif
@@ -91,8 +91,8 @@ build-env: # Create a new environment with installed packages
 	@$(eval py ?= $(shell python -c "import json; versions = json.load(open('python_versions.json')); print(max(versions, key=lambda x: tuple(map(int, x.split('.')))))"))
 	
 	conda create -n $(name) python=$(py) --yes
-# 	Bootstrap vivarium_build_utils into the new environment
-	conda run -n $(name) pip install vivarium_build_utils
+# 	Bootstrap vivarium.build_utils into the new environment
+	conda run -n $(name) pip install vivarium.build_utils
 #	Install packages based on type
 	@if [ "$(type)" = "simulation" ]; then \
 		conda run -n $(name) make install ENV_REQS=dev; \
