@@ -1,3 +1,13 @@
+# Minimal [project] block so vivarium_build_utils' base.mk can parse the
+# distribution name from pyproject.toml instead of falling back to
+# ``$(notdir $(CURDIR))`` (which is unsafe under Jenkins's parallel
+# workspaces - directories like ``<repo>@2`` contain ``@``, which uv
+# rejects in ``--config-settings-package`` values). Everything except
+# ``name`` continues to come from setup.py via the dynamic declaration.
+[project]
+name = "vivarium_gates_nutrition_optimization"
+dynamic = ["version"]
+
 [tool.black]
 line_length = 94
 
