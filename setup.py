@@ -97,8 +97,9 @@ if __name__ == "__main__":
             "dev": test_requirements + cluster_requirements + lint_requirements,
         },
         zip_safe=False,
-        entry_points="""
-            [console_scripts]
-            make_artifacts=vivarium_gates_nutrition_optimization.tools.cli:make_artifacts
-        """,
+        entry_points={
+            "console_scripts": [
+                "make_artifacts=vivarium_gates_nutrition_optimization.tools.cli:make_artifacts",
+            ],
+        },
     )

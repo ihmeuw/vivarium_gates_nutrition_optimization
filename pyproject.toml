@@ -2,11 +2,22 @@
 # distribution name from pyproject.toml instead of falling back to
 # ``$(notdir $(CURDIR))`` (which is unsafe under Jenkins's parallel
 # workspaces - directories like ``<repo>@2`` contain ``@``, which uv
-# rejects in ``--config-settings-package`` values). Everything except
-# ``name`` continues to come from setup.py via the dynamic declaration.
+# rejects in ``--config-settings-package`` values). Every other PEP 621
+# field is still set in setup.py; setuptools requires anything outside
+# [project] but set via setup() to be declared dynamic.
 [project]
 name = "vivarium_gates_nutrition_optimization"
-dynamic = ["version"]
+dynamic = [
+    "version",
+    "description",
+    "readme",
+    "license",
+    "authors",
+    "urls",
+    "dependencies",
+    "optional-dependencies",
+    "scripts",
+]
 
 [tool.black]
 line_length = 94
