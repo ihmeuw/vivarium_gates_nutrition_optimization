@@ -49,12 +49,9 @@ if __name__ == "__main__":
         "vivarium>=4.0.0, <4.1.0",
         "vivarium_public_health>=5.0.0, <5.1.0",
         "layered_config_tree<4.2.0",
-        # Pin vbu to <=3.3.2 to match the Makefile's build-env bootstrap.
-        # The newer 4.x line requires post-monorepo dep names (vivarium-engine,
-        # vivarium-gbd-mapping, etc.), and v3.3.3 / v3.3.4 are post-archive
-        # sunset releases that were never tagged in the monorepo, so the
-        # Jenkins shared library loader can't find them. Remove this pin
-        # once this repo's deps are migrated to the post-monorepo names.
+        # Pin to <=3.3.2 until this model repo's deps are migrated to the post-monorepo names
+        # NOTE: v3.3.3 / v3.3.4 are post-archive sunset releases of the standalone vbu repo that
+        #   were never tagged in the monorepo, so the Jenkins shared library loader can't find them
         "vivarium_build_utils<=3.3.2",
         "click",
         "jinja2",
