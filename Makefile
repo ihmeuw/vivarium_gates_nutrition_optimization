@@ -91,8 +91,11 @@ build-env: # Create a new environment with installed packages
 	@$(eval py ?= $(shell python -c "import json; versions = json.load(open('python_versions.json')); print(max(versions, key=lambda x: tuple(map(int, x.split('.')))))"))
 	
 	conda create -n $(name) python=$(py) --yes
-# 	Bootstrap vivarium_build_utils into the new environment
-	conda run -n $(name) pip install vivarium_build_utils
+# 	Bootstrap vivarium_build_utils into the new environment.
+# 	Pin to <=3.3.2 until this model repo's deps are migrated to the post-monorepo names
+# 	NOTE: v3.3.3 / v3.3.4 are post-archive sunset releases of the standalone vbu repo that
+#		were never tagged in the monorepo, so the Jenkins shared library loader can't find them
+	conda run -n $(name) pip install "vivarium_build_utils<=3.3.2"
 #	Install packages based on type
 	@if [ "$(type)" = "simulation" ]; then \
 		conda run -n $(name) make install ENV_REQS=dev; \

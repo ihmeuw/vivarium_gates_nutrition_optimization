@@ -49,6 +49,10 @@ if __name__ == "__main__":
         "vivarium>=4.0.0, <4.1.0",
         "vivarium_public_health>=5.0.0, <5.1.0",
         "layered_config_tree<4.2.0",
+        # Pin to <=3.3.2 until this model repo's deps are migrated to the post-monorepo names
+        # NOTE: v3.3.3 / v3.3.4 are post-archive sunset releases of the standalone vbu repo that
+        #   were never tagged in the monorepo, so the Jenkins shared library loader can't find them
+        "vivarium_build_utils<=3.3.2",
         "click",
         "jinja2",
         "loguru",
@@ -73,7 +77,8 @@ if __name__ == "__main__":
     ]
 
     setup(
-        name=about["__title__"],
+        # name is declared statically in pyproject.toml's [project] block.
+        # Setuptools errors if it's also passed here.
         version=about["__version__"],
         description=about["__summary__"],
         long_description=long_description,
@@ -92,8 +97,9 @@ if __name__ == "__main__":
             "dev": test_requirements + cluster_requirements + lint_requirements,
         },
         zip_safe=False,
-        entry_points="""
-            [console_scripts]
-            make_artifacts=vivarium_gates_nutrition_optimization.tools.cli:make_artifacts
-        """,
+        entry_points={
+            "console_scripts": [
+                "make_artifacts=vivarium_gates_nutrition_optimization.tools.cli:make_artifacts",
+            ],
+        },
     )
