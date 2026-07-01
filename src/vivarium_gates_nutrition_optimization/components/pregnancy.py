@@ -1,12 +1,12 @@
 from typing import Dict, List
 
 import pandas as pd
-from vivarium import Component
-from vivarium.framework.engine import Builder
-from vivarium.framework.event import Event
-from vivarium.framework.population import SimulantData
-from vivarium.framework.values import Pipeline
-from vivarium_public_health.disease import DiseaseModel, DiseaseState, SusceptibleState
+from vivarium.engine import Component
+from vivarium.engine.framework.engine import Builder
+from vivarium.engine.framework.event import Event
+from vivarium.engine.framework.population import SimulantData
+from vivarium.engine.framework.values import Pipeline
+from vivarium.public_health.disease import DiseaseModel, DiseaseState, SusceptibleState
 
 from vivarium_gates_nutrition_optimization.components.children import NewChildren
 from vivarium_gates_nutrition_optimization.constants import data_keys, models

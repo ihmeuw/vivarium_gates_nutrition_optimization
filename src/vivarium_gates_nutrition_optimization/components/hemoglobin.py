@@ -3,12 +3,12 @@ from typing import Any, Dict, List, Optional
 import numpy as np
 import pandas as pd
 import scipy.stats
-from vivarium import Component
-from vivarium.framework.engine import Builder
-from vivarium.framework.event import Event
-from vivarium.framework.population import SimulantData
-from vivarium.framework.randomness import RESIDUAL_CHOICE
-from vivarium_public_health.causal_factor.calibration_constant import (
+from vivarium.engine import Component
+from vivarium.engine.framework.engine import Builder
+from vivarium.engine.framework.event import Event
+from vivarium.engine.framework.population import SimulantData
+from vivarium.engine.framework.randomness import RESIDUAL_CHOICE
+from vivarium.public_health.causal_factor.calibration_constant import (
     get_calibration_constant_pipeline_name,
 )
 

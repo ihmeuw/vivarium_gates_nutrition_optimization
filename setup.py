@@ -46,12 +46,13 @@ if __name__ == "__main__":
 
     install_requirements = [
         "gbd_mapping>=3.1.1,<5.0.0",
-        "vivarium>=4.1.0,<5.0.0",
-        "vivarium_public_health>=5.1.5,<6.0.0",
-        # Pin to <=3.3.2 until this model repo's deps are migrated to the post-monorepo names
-        # NOTE: v3.3.3 / v3.3.4 are post-archive sunset releases of the standalone vbu repo that
-        #   were never tagged in the monorepo, so the Jenkins shared library loader can't find them
-        "vivarium_build_utils<=3.3.2",
+        "vivarium-engine>=5.3.0,<5.4.0",
+        "vivarium-public-health>=6.3.1,<6.4.0",
+        "vivarium-config-tree",
+        "vivarium-risk-distributions",
+        # The monorepo vivarium-engine and vivarium-public-health both require
+        # vivarium-build-utils 4.x, so match that range here.
+        "vivarium_build_utils>=4.0.0,<5.0.0",
         "click",
         "jinja2",
         "loguru",
@@ -63,8 +64,15 @@ if __name__ == "__main__":
     ]
 
     # use "pip install -e .[dev]" to install required components + extra components
-    data_requirements = ["vivarium_inputs[data]>=4.1.1, <7.0.0", "vivarium_gbd_access<5.0.0"]
-    cluster_requirements = ["vivarium_cluster_tools>=2.0.0, <3.0.0"]
+    # Keep the GBD-2021 data stack: vivarium_inputs 5.x-6.x pull GBD 2021 (7.0.0
+    # moves to GBD 2023), and vivarium_gbd_access 4.x pulls GBD 2021 (5.0.0 is 2023).
+    data_requirements = [
+        "vivarium_inputs[data]>=5.0.0, <7.0.0",
+        "vivarium_gbd_access>=4.0.0, <5.0.0",
+    ]
+    # vivarium-cluster-tools 4.x is the monorepo-native line (depends on
+    # vivarium-engine / vivarium-config-tree / vbu 4.x, not the old `vivarium`).
+    cluster_requirements = ["vivarium_cluster_tools>=4.0.0, <5.0.0"]
     test_requirements = [
         "pytest",
         "pytest-cov",

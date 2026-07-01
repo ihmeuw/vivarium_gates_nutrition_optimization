@@ -1,10 +1,10 @@
 from typing import Any, Dict
 
 import pandas as pd
-from vivarium.framework.engine import Builder
-from vivarium.framework.event import Event
-from vivarium.framework.population import SimulantData
-from vivarium_public_health.population import Mortality
+from vivarium.engine.framework.engine import Builder
+from vivarium.engine.framework.event import Event
+from vivarium.engine.framework.population import SimulantData
+from vivarium.public_health.population import Mortality
 
 from vivarium_gates_nutrition_optimization.constants import data_keys
 

@@ -2,7 +2,7 @@ from typing import Tuple
 
 import click
 from loguru import logger
-from vivarium.framework.utilities import handle_exceptions
+from vivarium.engine.framework.utilities import handle_exceptions
 
 from vivarium_gates_nutrition_optimization.constants import metadata, paths
 from vivarium_gates_nutrition_optimization.tools import (
