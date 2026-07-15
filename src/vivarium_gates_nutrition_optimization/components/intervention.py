@@ -4,12 +4,12 @@ from typing import Dict, List, Optional
 import numpy as np
 import pandas as pd
 import scipy.stats
-from vivarium import Component
-from vivarium.framework.engine import Builder
-from vivarium.framework.event import Event
-from vivarium.framework.population import SimulantData
-from vivarium.framework.randomness import RESIDUAL_CHOICE
-from vivarium.framework.time import get_time_stamp
+from vivarium.engine import Component
+from vivarium.engine.framework.engine import Builder
+from vivarium.engine.framework.event import Event
+from vivarium.engine.framework.population import SimulantData
+from vivarium.engine.framework.randomness import RESIDUAL_CHOICE
+from vivarium.engine.framework.time import get_time_stamp
 
 from vivarium_gates_nutrition_optimization.constants import (
     data_keys,

@@ -1,4 +1,4 @@
-# from vivarium_public_health.disease import DiseaseModel, SusceptibleState
+# from vivarium.public_health.disease import DiseaseModel, SusceptibleState
 
 # from vivarium_gates_nutrition_optimization.components.disease import (
 #     ParturitionExclusionState,

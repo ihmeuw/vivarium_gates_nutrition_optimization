@@ -3,19 +3,19 @@ from functools import partial
 from typing import Any, Dict
 
 import pandas as pd
-from vivarium.framework.engine import Builder
-from vivarium.framework.results import Observer
-from vivarium.framework.time import get_time_stamp
-from vivarium_public_health.disease import DiseaseState
-from vivarium_public_health.results import COLUMNS
-from vivarium_public_health.results import DisabilityObserver as DisabilityObserver_
-from vivarium_public_health.results import (
+from vivarium.engine.framework.engine import Builder
+from vivarium.engine.framework.results import Observer
+from vivarium.engine.framework.time import get_time_stamp
+from vivarium.public_health.disease import DiseaseState
+from vivarium.public_health.results import COLUMNS
+from vivarium.public_health.results import DisabilityObserver as DisabilityObserver_
+from vivarium.public_health.results import (
     DiseaseObserver,
     MortalityObserver,
     PublicHealthObserver,
 )
-from vivarium_public_health.results import ResultsStratifier as ResultsStratifier_
-from vivarium_public_health.utilities import to_years
+from vivarium.public_health.results import ResultsStratifier as ResultsStratifier_
+from vivarium.public_health.utilities import to_years
 
 from vivarium_gates_nutrition_optimization.constants import data_values, models
 

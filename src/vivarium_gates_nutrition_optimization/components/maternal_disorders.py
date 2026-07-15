@@ -1,6 +1,6 @@
-from vivarium.framework.engine import Builder
-from vivarium_public_health.disease import DiseaseModel, DiseaseState, RecoveredState
-from vivarium_public_health.utilities import to_years
+from vivarium.engine.framework.engine import Builder
+from vivarium.public_health.disease import DiseaseModel, DiseaseState, RecoveredState
+from vivarium.public_health.utilities import to_years
 
 from vivarium_gates_nutrition_optimization.components.disease import (
     ParturitionSelectionState,

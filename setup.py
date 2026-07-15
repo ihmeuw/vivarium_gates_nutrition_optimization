@@ -45,14 +45,14 @@ if __name__ == "__main__":
         long_description = f.read()
 
     install_requirements = [
-        "gbd_mapping>=3.1.1,<6.0.0",
-        "vivarium>=4.0.0, <4.1.0",
-        "vivarium_public_health>=5.0.0, <5.1.0",
-        "layered_config_tree<4.2.0",
-        # Pin to <=3.3.2 until this model repo's deps are migrated to the post-monorepo names
-        # NOTE: v3.3.3 / v3.3.4 are post-archive sunset releases of the standalone vbu repo that
-        #   were never tagged in the monorepo, so the Jenkins shared library loader can't find them
-        "vivarium_build_utils<=3.3.2",
+        "gbd_mapping>=5.0.0,<6.0.0",
+        "vivarium-engine>=5.3.0,<6.0.0",
+        "vivarium-public-health>=6.3.1,<7.0.0",
+        "vivarium-config-tree",
+        "vivarium-risk-distributions",
+        # The monorepo vivarium-engine and vivarium-public-health both require
+        # vivarium-build-utils 4.x, so match that range here.
+        "vivarium_build_utils>=4.0.0,<5.0.0",
         "click",
         "jinja2",
         "loguru",
@@ -64,8 +64,10 @@ if __name__ == "__main__":
     ]
 
     # use "pip install -e .[dev]" to install required components + extra components
-    data_requirements = ["vivarium_inputs[data]>=4.1.1"]
-    cluster_requirements = ["vivarium_cluster_tools>=3.0.0, <4.0.0"]
+    data_requirements = ["vivarium_inputs>=8.0.0,<9.0.0"]
+    # vivarium-cluster-tools 4.x is the monorepo-native line (depends on
+    # vivarium-engine / vivarium-config-tree / vbu 4.x, not the old `vivarium`).
+    cluster_requirements = ["vivarium_cluster_tools>=4.0.0, <5.0.0"]
     test_requirements = [
         "pytest",
         "pytest-cov",

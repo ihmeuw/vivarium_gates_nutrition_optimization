@@ -3,7 +3,7 @@ from typing import Tuple
 import numpy as np
 import pandas as pd
 from scipy import stats
-from vivarium.framework.randomness import get_hash
+from vivarium.engine.framework.randomness import get_hash
 from vivarium_inputs import globals as vi_globals
 
 

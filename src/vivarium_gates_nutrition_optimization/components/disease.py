@@ -1,8 +1,8 @@
 import pandas as pd
-from vivarium.framework.engine import Builder
-from vivarium.framework.state_machine import State, Transition
-from vivarium_public_health.disease import DiseaseState, SusceptibleState
-from vivarium_public_health.disease.transition import ProportionTransition
+from vivarium.engine.framework.engine import Builder
+from vivarium.engine.framework.state_machine import State, Transition
+from vivarium.public_health.disease import DiseaseState, SusceptibleState
+from vivarium.public_health.disease.transition import ProportionTransition
 
 from vivarium_gates_nutrition_optimization.constants import models
 

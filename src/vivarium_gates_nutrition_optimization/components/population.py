@@ -1,5 +1,5 @@
-from vivarium_public_health.population import BasePopulation
-from vivarium_public_health.population.base_population import Disability
+from vivarium.public_health.population import BasePopulation
+from vivarium.public_health.population.base_population import Disability
 
 from vivarium_gates_nutrition_optimization.components.mortality import MaternalMortality
 from vivarium_gates_nutrition_optimization.components.pregnancy import (

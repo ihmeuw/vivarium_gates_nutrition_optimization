@@ -18,8 +18,8 @@ import numpy as np
 import pandas as pd
 import vivarium_inputs.validation.sim as validation
 from scipy import stats
-from vivarium.framework.artifact import EntityKey
-from vivarium.framework.randomness import get_hash
+from vivarium.artifact import EntityKey
+from vivarium.engine.framework.randomness import get_hash
 from vivarium_gbd_access.gbd import base_data as gbd
 from vivarium_inputs import core as vi_core
 from vivarium_inputs import globals as vi_globals

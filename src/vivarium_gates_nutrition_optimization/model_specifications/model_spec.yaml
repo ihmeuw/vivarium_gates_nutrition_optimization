@@ -1,8 +1,9 @@
 components:
-    vivarium_public_health:
-        results:
-            - DiseaseObserver("maternal_disorders")
-            - DiseaseObserver("maternal_hemorrhage")
+    vivarium:
+        public_health:
+            results:
+                - DiseaseObserver("maternal_disorders")
+                - DiseaseObserver("maternal_hemorrhage")
 
     vivarium_gates_nutrition_optimization:
         components:
@@ -30,7 +31,7 @@ components:
 configuration:
     input_data:
         input_draw_number: 0
-        artifact_path: /mnt/team/simulation_science/pub/models/vivarium_gates_nutrition_optimization/artifacts/model13.0/ethiopia.hdf
+        artifact_path: /mnt/team/simulation_science/pub/models/vivarium_gates_nutrition_optimization/artifacts/jkuat_testing/ethiopia.hdf
     interpolation:
         order: 0
         extrapolate: True

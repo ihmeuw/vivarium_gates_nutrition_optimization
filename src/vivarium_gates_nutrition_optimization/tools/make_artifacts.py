@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Tuple, Union
 
 import click
-import vivarium_cluster_tools as vct
+import vivarium.cluster_tools as vct
 from loguru import logger
 
 from vivarium_gates_nutrition_optimization.constants import data_keys, metadata
@@ -101,7 +101,7 @@ def build_artifacts(
         How noisy the logger should be.
     """
 
-    import vivarium_cluster_tools as vct
+    import vivarium.cluster_tools as vct
 
     output_dir = Path(output_dir)
     vct.mkdir(output_dir, parents=True, exists_ok=True)
