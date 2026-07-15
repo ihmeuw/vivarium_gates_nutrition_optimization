@@ -72,6 +72,7 @@ if __name__ == "__main__":
         "pytest",
         "pytest-cov",
         "pytest-mock",
+        "pytest-xdist",
     ]
     lint_requirements = [
         "black==22.3.0",
