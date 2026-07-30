@@ -1,4 +1,4 @@
-from gbd_mapping import sequelae
+from vivarium.gbd_mapping import sequelae
 from vivarium_gbd_access import constants as gbd_constants
 from vivarium_gbd_access import utilities as vi_utils
 from vivarium_gbd_access.gbd import base_data as gbd

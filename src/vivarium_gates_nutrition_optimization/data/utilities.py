@@ -1,7 +1,7 @@
 from typing import Union
 
 import pandas as pd
-from gbd_mapping import ModelableEntity, causes, covariates, risk_factors
+from vivarium.gbd_mapping import ModelableEntity, causes, covariates, risk_factors
 from vivarium.artifact import EntityKey
 
 
