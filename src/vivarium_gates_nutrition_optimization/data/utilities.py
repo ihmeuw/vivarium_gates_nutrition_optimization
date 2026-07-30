@@ -1,8 +1,8 @@
 from typing import Union
 
 import pandas as pd
-from vivarium.gbd_mapping import ModelableEntity, causes, covariates, risk_factors
 from vivarium.artifact import EntityKey
+from vivarium.gbd_mapping import ModelableEntity, causes, covariates, risk_factors
 
 
 def get_entity(key: Union[str, EntityKey]) -> ModelableEntity:
