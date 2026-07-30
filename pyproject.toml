@@ -1,23 +1,67 @@
-# Minimal [project] block so vivarium_build_utils' base.mk can parse the
-# distribution name from pyproject.toml instead of falling back to
-# ``$(notdir $(CURDIR))`` (which is unsafe under Jenkins's parallel
-# workspaces - directories like ``<repo>@2`` contain ``@``, which uv
-# rejects in ``--config-settings-package`` values). Every other PEP 621
-# field is still set in setup.py; setuptools requires anything outside
-# [project] but set via setup() to be declared dynamic.
+[build-system]
+requires = ["setuptools>=61.0", "setuptools_scm[toml]>=8.0"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "vivarium_gates_nutrition_optimization"
-dynamic = [
-    "version",
-    "description",
-    "readme",
-    "license",
-    "authors",
-    "urls",
-    "dependencies",
-    "optional-dependencies",
-    "scripts",
+description = "Research repository for the vivarium_gates_nutrition_optimization project."
+readme = "README.rst"
+# Kept in sync with python_versions.json, which the Makefile and CI read.
+requires-python = ">=3.11,<3.12"
+license = {text = "BSD-3-Clause"}
+authors = [{name = "The vivarium developers", email = "vivarium.dev@gmail.com"}]
+dynamic = ["version"]
+dependencies = [
+    "vivarium-gbd-mapping>=6.0.0,<7.0.0",
+    "vivarium-engine>=5.3.0,<6.0.0",
+    "vivarium-public-health>=6.3.1,<7.0.0",
+    "vivarium-config-tree",
+    "vivarium-risk-distributions",
+    # The monorepo vivarium-engine and vivarium-public-health both require
+    # vivarium-build-utils 4.x, so match that range here.
+    "vivarium_build_utils>=4.0.0,<5.0.0",
+    "click",
+    "jinja2",
+    "loguru",
+    "numpy",
+    "pandas<3.0.0",
+    "pyyaml",
+    "scipy",
+    "tables",
 ]
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-cov",
+    "pytest-mock",
+    "pytest-xdist",
+]
+# vivarium-cluster-tools 4.x is the monorepo-native line (depends on
+# vivarium-engine / vivarium-config-tree / vbu 4.x, not the old `vivarium`).
+cluster = ["vivarium_cluster_tools>=4.0.0,<5.0.0"]
+lint = [
+    "black==22.3.0",
+    "isort==5.13.2",
+]
+data = [
+    "vivarium_inputs>=8.0.0,<9.0.0",
+    "vivarium_gates_nutrition_optimization[cluster]",
+]
+dev = ["vivarium_gates_nutrition_optimization[test,cluster,lint]"]
+
+[project.urls]
+Homepage = "https://github.com/ihmeuw/vivarium_gates_nutrition_optimization"
+
+[project.scripts]
+make_artifacts = "vivarium_gates_nutrition_optimization.tools.cli:make_artifacts"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools_scm]
+tag_regex = '^(?P<prefix>v)?(?P<version>[^\+]+)(?P<suffix>.*)?$'
+fallback_version = "0.0.0+no-git-tag"
 
 [tool.black]
 line_length = 94
