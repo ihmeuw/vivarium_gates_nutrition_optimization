@@ -129,5 +129,4 @@ dmypy.json
 # VS Code Settings
 .vscode/
 
-# setuptools_scm-generated version file
 src/*/_version.py
