@@ -128,3 +128,5 @@ dmypy.json
 
 # VS Code Settings
 .vscode/
+
+src/*/_version.py
