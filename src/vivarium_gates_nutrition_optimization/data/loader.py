@@ -542,9 +542,7 @@ def get_hemoglobin_less_than_70_data(
         ["cause_id", "measure_id", "metric_id", "rei_id", "version_id"]
     )
     # Expand draw columns from 0-99 to 0-249 by repeating 2.5 times
-    expanded_draws_df_1 = utilities.expand_draw_columns(
-        data, num_draws=100, num_repeats=2
-    )
+    expanded_draws_df_1 = utilities.expand_draw_columns(data, num_draws=100, num_repeats=2)
     expanded_draws_df_2 = data[[f"draw_{i}" for i in range(50)]].rename(
         {f"draw_{i}": f"draw_{i+200}" for i in range(50)}, axis=1
     )
