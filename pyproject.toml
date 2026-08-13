@@ -45,7 +45,7 @@ lint = [
 ]
 data = [
     "vivarium_inputs>=8.0.0,<9.0.0",
-    "vivarium_gates_nutrition_optimization[test,cluster,lint]",
+    "vivarium_gates_nutrition_optimization[cluster,lint]",
 ]
 dev = ["vivarium_gates_nutrition_optimization[test,cluster,lint]"]
 
