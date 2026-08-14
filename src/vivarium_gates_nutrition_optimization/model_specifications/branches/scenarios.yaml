@@ -1,15 +1,15 @@
-input_draw_count: 10
-random_seed_count: 5
+input_draw_count: 20
+random_seed_count: 10
 
-input_draws: [8, 13, 41, 103, 139, 177, 192, 199, 216, 221]
-random_seeds: [4344, 5616, 6810, 2787, 2284]
+input_draws: [8, 13, 41, 103, 139, 177, 192, 199, 216, 221, 227, 250, 323, 346, 385, 392, 399, 402, 417, 457]
+random_seeds: [5548, 5703, 6324, 6800, 7551, 781, 9549, 1061, 1362, 2284]
 
 branches:
   - intervention:
       scenario:
-        - 'zero_coverage'
+        #- 'zero_coverage'
         - 'baseline'
-        - 'mms'
-        - 'ifa'
-        - 'targeted_bep_ifa'
-        - 'targeted_bep_mms'
+        #- 'mms'
+        #- 'ifa'
+        #- 'targeted_bep_ifa'
+        #- 'targeted_bep_mms'
