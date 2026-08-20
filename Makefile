@@ -28,6 +28,7 @@ include $(MAKE_INCLUDES)/base.mk
 include $(MAKE_INCLUDES)/test.mk
 else # empty
 # Use this help message (since the vivarium_build_utils version is not available)
+.PHONY: help
 help:
 	@echo
 	@echo "For Make's standard help, run 'make --help'."
@@ -58,6 +59,7 @@ help:
 	@echo
 endif
 
+.PHONY: build-env
 build-env: # Create a new environment with installed packages
 #	Validate arguments - exit if unsupported arguments are passed
 	@allowed="type name lfs py include_timestamp"; \
