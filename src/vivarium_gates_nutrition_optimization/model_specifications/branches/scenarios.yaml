@@ -8,7 +8,7 @@ branches:
   - intervention:
       scenario:
         #- 'zero_coverage'
-        - 'baseline'
+        - 'baseline'  # NOTE: this is the parent sim and contains just the baseline scenario; the child sim branches/scenarios.yaml file includes an alternative scenario
         #- 'mms'
         #- 'ifa'
         #- 'targeted_bep_ifa'
