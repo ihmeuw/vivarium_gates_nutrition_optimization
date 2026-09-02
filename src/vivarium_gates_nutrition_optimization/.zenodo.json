@@ -1,0 +1,49 @@
+{
+    "license": "BSD-3-Clause",
+    "title": "ihmeuw/nutrition_optimization_targeted_sqlns_pregnancy_model: Archival release",
+    "upload_type": "software",
+    "creators": [
+        {
+            "orcid": "0000-0003-1585-5100",
+            "affiliation": "Institute for Health Metrics and Evaluation",
+            "name": "Alison Bowman"
+        },
+        {
+            "orcid": "0009-0005-7858-0222",
+            "affiliation": "Institute for Health Metrics and Evaluation",
+            "name": "Sylvia Lutze"
+        },
+        {
+            "orcid": "0009-0005-8666-7141",
+            "affiliation": "Institute for Health Metrics and Evaluation",
+            "name": "Zeb Burke-Conte"
+        },
+        {
+            "orcid": "0009-0009-1585-4766",
+            "affiliation": "Institute for Health Metrics and Evaluation",
+            "name": "Alix Pletcher"
+        },
+        {
+            "orcid": "0000-0002-7556-2740",
+            "affiliation": "Institute for Health Metrics and Evaluation",
+            "name": "Hussain Jafari"
+        },
+        {
+            "orcid": "0000-0002-5775-2719",
+            "affiliation": "Institute for Health Metrics and Evaluation",
+            "name": "James Albright"
+        },
+        {
+            "orcid": "0000-0001-8649-7561",
+            "affiliation": "Institute for Health Metrics and Evaluation",
+            "name": "Rajan Mudambi"
+        },
+        {
+            "orcid": "0000-0001-6033-4713",
+            "affiliation": "Institute for Health Metrics and Evaluation",
+            "name": "Abraham Flaxman"
+        },
+    ],
+    "access_right": "open",
+    "description": "Archival release of the vivarium model for the nutrition optimization pregnancy model as used for the targeted SQ-LNS analysis"
+}
