@@ -17,10 +17,12 @@ your operating system:
 Once you have this installed, you should open up your normal shell
 (if you're on linux or OSX) or the ``git bash`` shell if you're on windows.
 Within this shell, navigate to the simulation directory. 
+The simulation directory is where this README file is located and will be titled 
+something like ihmeuw-vivarium_gates_nutrition_optimization-{hash}
 You will then then make an environment and install
 all necessary requirements as follows::
 
-   cd <path/to/model/repo/> 
+   cd /FILE/PATH/TO/SIMULATION/DIRECTORY/
    conda create --name vivarium_gates_nutrition_optimization --file vivarium_gates_nutrition_optimization_child_lock.txt
    conda activate vivarium_gates_nutrition_optimization
    pip install -r vivarium_gates_nutrition_optimization_lock_pip.txt
@@ -85,7 +87,8 @@ Running Simulations
 You can run your simulation from the command line. 
 With your conda environment active, you can run with, e.g.::
 
-   (vivarium_gates_nutrition_optimization) :~$ simulate run -vvv /<REPO_INSTALLATION_DIRECTORY>/vivarium_gates_nutrition_optimization/src/vivarium_gates_nutrition_optimization/model_specifications/model_spec.yaml -o /FILE/PATH/TO/SAVE/RESULTS -i src/vivarium_gates_nutrition_optimization/artifacts/<COUNTRY_TO_RUN_IN>.hdf
+   (vivarium_gates_nutrition_optimization) :~$ cd /FILE/PATH/TO/SIMULATION/DIRECTORY/
+   (vivarium_gates_nutrition_optimization) :~$ simulate run -vvv src/vivarium_gates_nutrition_optimization/model_specifications/model_spec.yaml -o /FILE/PATH/TO/SAVE/RESULTS -i src/vivarium_gates_nutrition_optimization/artifacts/<COUNTRY_TO_RUN_IN>.hdf
 
 The simulation will run in one location at a time, enter the country you wish to 
 run the simulation for in your call. Ethiopia, Nigeria, and Paksitan are supported. 
