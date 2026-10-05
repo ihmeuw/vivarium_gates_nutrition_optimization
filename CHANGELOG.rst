@@ -1,3 +1,8 @@
+**11.1 - 10/05/26**
+
+ - Raise the floors to vivarium-engine>=5.11.0 and vivarium-public-health>=6.6.4
+ - Add a description to every value pipeline producer and modifier registration
+
 **11.0 - 3/26/24**
 
  - Update to 2021 data for Ethiopia, bug-fix changes to pregnancy observation, changes to stratification (anemia by pregnancy state and pregnancy transitions by pregnancy outcomes), temporary removal of the IFA scenario, and removal of background morbidity.

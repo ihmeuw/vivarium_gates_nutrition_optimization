@@ -56,11 +56,19 @@ class PregnantState(DiseaseState):
         builder.value.register_attribute_producer(
             "birth_outcome_probabilities",
             source=self.birth_outcome_probabilities_lookup,
+            description=(
+                "The probability of each pregnancy outcome (live birth, partial term, "
+                "stillbirth) for each simulant"
+            ),
         )
 
         builder.value.register_attribute_modifier(
             self.dwell_time_pipeline,
             self.update_dwell_time,
+            description=(
+                "Replace the dwell time in the pregnant state with each simulant's sampled "
+                "pregnancy duration"
+            ),
         )
 
         # NOTE: event times and event counts are already registered by the BaseDiseaseState
@@ -244,7 +252,11 @@ class UntrackNotPregnant(Component):
     def setup(self, builder: Builder) -> None:
         self.clock = builder.time.clock()
         self.step_size = builder.time.step_size()
-        builder.value.register_attribute_modifier("exit_time", self.update_exit_times)
+        builder.value.register_attribute_modifier(
+            "exit_time",
+            self.update_exit_times,
+            description="Record the exit time of simulants who have just become not pregnant",
+        )
         builder.population.register_tracked_query(
             f"pregnancy != '{models.NOT_PREGNANT_STATE_NAME}'"
         )
