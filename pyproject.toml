@@ -45,7 +45,8 @@ lint = [
 ]
 data = [
     "vivarium_inputs>=8.0.0,<9.0.0",
-    "vivarium_gates_nutrition_optimization[cluster,lint]",
+    "vivarium_gbd_access>=6.0.0,<7.0.0",
+    "vivarium_gates_nutrition_optimization[cluster,lint,test]",
 ]
 dev = ["vivarium_gates_nutrition_optimization[test,cluster,lint]"]
 
@@ -67,3 +68,6 @@ line_length = 94
 
 [tool.isort]
 profile = "black"
+
+[tool.uv]
+override-dependencies = ["pandas<3.0.0", "sqlalchemy>=2.0.0,<3.0.0", "numpy<2.0.0"]
