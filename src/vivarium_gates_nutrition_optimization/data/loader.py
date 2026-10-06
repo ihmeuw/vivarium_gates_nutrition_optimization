@@ -460,13 +460,7 @@ def load_hemoglobin_exposure_data(
 ):
     hemoglobin_data = extra_gbd.get_hemoglobin_exposure_data(key, location)
     hemoglobin_data = reshape_to_vivarium_format(hemoglobin_data, location)
-    levels_to_drop = [
-        "measure_id",
-        "metric_id",
-        "model_version_id",
-        "modelable_entity_id",
-        "rei_id",
-    ]
+    levels_to_drop = ["measure_id", "metric_id", "modelable_entity_id", "rei_id"]
     if key == data_keys.HEMOGLOBIN.MEAN:
         levels_to_drop.append("parameter")
     hemoglobin_data.index = hemoglobin_data.index.droplevel(levels_to_drop)
@@ -489,7 +483,7 @@ def get_hemoglobin_less_than_70_data(
     data = extra_gbd.get_hbg_less_than_70(location)
     data = reshape_to_vivarium_format(data, location)
     data.index = data.index.droplevel(
-        ["cause_id", "measure_id", "metric_id", "rei_id", "version_id"]
+        ["cause_id", "measure_id", "metric_id", "rei_id", "gbd_process_version_id"]
     )
     # Expand draw columns from 0-99 to 0-249 by repeating 2.5 times
     expanded_draws_df_1 = utilities.expand_draw_columns(data, num_draws=100, num_repeats=2)
