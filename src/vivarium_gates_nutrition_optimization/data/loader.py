@@ -94,7 +94,6 @@ def get_data(
         data_keys.MATERNAL_INTERVENTIONS.IFA_EFFECT_SIZE: load_ifa_effect_size,
         data_keys.MATERNAL_INTERVENTIONS.MMS_STILLBIRTH_RR: load_supplementation_stillbirth_rr,
         data_keys.MATERNAL_INTERVENTIONS.BEP_STILLBIRTH_RR: load_supplementation_stillbirth_rr,
-        # data_keys.POPULATION.BACKGROUND_MORBIDITY: load_background_morbidity,
     }
     return mapping[lookup_key](lookup_key, location, years)
 
@@ -457,52 +456,6 @@ def get_moderate_hemorrhage_probability(
     )
 
     return moderate_hemorrhage_probability
-
-
-###########################
-# Background Morbidity    #
-###########################
-
-
-def load_background_morbidity(
-    key: str, location: str, years: Optional[Union[int, str, List[int]]] = None
-) -> pd.DataFrame:
-    all_cause_yld_rate = extra_gbd.get_all_cause_yld_rate(location)
-    all_cause_yld_rate = all_cause_yld_rate[
-        vi_globals.DEMOGRAPHIC_COLUMNS + vi_globals.DRAW_COLUMNS
-    ]
-    all_cause_yld_rate = reshape_to_vivarium_format(all_cause_yld_rate, location)
-
-    all_anemia_yld_rate = extra_gbd.get_anemia_yld_rate(location)
-    all_anemia_yld_rate = all_anemia_yld_rate.loc[all_anemia_yld_rate.cause_id == 294][
-        vi_globals.DEMOGRAPHIC_COLUMNS + vi_globals.DRAW_COLUMNS
-    ]
-    all_anemia_yld_rate = reshape_to_vivarium_format(all_anemia_yld_rate, location)
-
-    all_md_yld_rate = extra_gbd.get_maternal_disorder_ylds(location, metric_id=3)
-    all_md_yld_rate = all_md_yld_rate[
-        vi_globals.DEMOGRAPHIC_COLUMNS + vi_globals.DRAW_COLUMNS
-    ]
-    all_md_yld_rate = reshape_to_vivarium_format(all_md_yld_rate, location)
-
-    anemia_sequelae_yld_rate = extra_gbd.get_anemia_ylds(location, metric_id=3)
-    anemia_sequelae_yld_rate = (
-        anemia_sequelae_yld_rate.groupby(vi_globals.DEMOGRAPHIC_COLUMNS)[
-            vi_globals.DRAW_COLUMNS
-        ]
-        .sum()
-        .reset_index()
-    )
-    anemia_sequelae_yld_rate = reshape_to_vivarium_format(anemia_sequelae_yld_rate, location)
-
-    pop_md_yld_rate = all_md_yld_rate - anemia_sequelae_yld_rate
-    final = all_cause_yld_rate - all_anemia_yld_rate - pop_md_yld_rate
-    return final.fillna(0)
-
-
-###########################
-# Hemoglobin Data         #
-###########################
 
 
 def load_hemoglobin_exposure_data(
