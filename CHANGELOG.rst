@@ -6,8 +6,8 @@
  - Include the test extra in the data extra
  - Remove the commented-out ParturitionExclusionState from components/disease.py
  - Raise the data extra pins to vivarium_inputs>=9.0.0,<10.0.0 and vivarium_gbd_access>=7.0.0,<8.0.0
+ - Source the hemoglobin-below-70 proportion through the ``impairment-cause`` machinery entity and the hemoglobin mean exposure through measures.get_exposure, both still under release 33; the release-33 exposure standard deviation has no best model version and raises until it is sourced
  - Migrate the live get_draws calls in data/extra_gbd.py to gbd_access 7: LBWSG birth exposure through measures.get_birth_exposure, maternal disorders and anemia sequelae YLD rates through base_data.get_machinery_estimates, and the hemoglobin maternal disorders relative risk through measures.get_relative_risk
- - Make get_hbg_less_than_70 and get_hemoglobin_exposure_data raise NotImplementedError until the release-33 data access is settled
  - Replace utility_data.get_location_id with utility_data.resolve_location and the model-local load_standard_data with vivarium_inputs.interface.load_standard_data
 
 **11.0 - 3/26/24**
