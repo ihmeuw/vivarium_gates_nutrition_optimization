@@ -3,6 +3,12 @@
  - Raise the floors to vivarium-engine>=5.11.0 and vivarium-public-health>=6.6.4
  - Add a description to every value pipeline producer and modifier registration
  - Remove background morbidity: the commented-out BackgroundMorbidity component and ParturitionExclusionState, the BACKGROUND_MORBIDITY data key, and the loader and extra_gbd functions that only it used. The feature was switched off in 11.0 and never finished; the design remains in the git history
+ - Include the test extra in the data extra
+ - Remove the commented-out ParturitionExclusionState from components/disease.py
+ - Raise the data extra pins to vivarium_inputs>=9.0.0,<10.0.0 and vivarium_gbd_access>=7.0.0,<8.0.0
+ - Migrate the live get_draws calls in data/extra_gbd.py to gbd_access 7: LBWSG birth exposure through measures.get_birth_exposure, maternal disorders and anemia sequelae YLD rates through base_data.get_machinery_estimates, and the hemoglobin maternal disorders relative risk through measures.get_relative_risk
+ - Make get_hbg_less_than_70 and get_hemoglobin_exposure_data raise NotImplementedError until the release-33 data access is settled
+ - Replace utility_data.get_location_id with utility_data.resolve_location and the model-local load_standard_data with vivarium_inputs.interface.load_standard_data
 
 **11.0 - 3/26/24**
 
