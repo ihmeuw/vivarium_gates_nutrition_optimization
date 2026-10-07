@@ -37,6 +37,10 @@ class ParturitionSelectionTransition(ProportionTransition):
             self.pipeline_name,
             source=self.compute_transition_proportion,
             required_resources=["age", "sex", "is_alive"],
+            description=(
+                "The probability that a simulant in parturition develops this maternal "
+                "outcome, its artifact incident probability; zero for everyone else"
+            ),
         )
 
     ###################

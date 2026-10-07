@@ -1,12 +1,8 @@
 **11.1 - 10/05/26**
 
- - Record the monorepo migration (#152, #154, #155, #156, #157, #159): move the build system from setup.py to pyproject.toml, depend on vivarium-engine/vivarium-public-health/vivarium-gbd-mapping and vivarium-build-utils 4.x instead of the single-package vivarium 4.x, vivarium_public_health 5.x and gbd_mapping, and fix the model for GBD 2023 V&V
- - Replace the Makefile with the shared vivarium model version: the distribution name is read from pyproject.toml, build-env gains path= and force= arguments and refuses to clobber an existing environment, and build-shared-env and print-dist-name targets are added
- - Replace environment.sh: it now derives the environment name from pyproject.toml, builds through make, supports -s for a venv overlay on the Jenkins shared environment, and must be sourced
- - Remove requirements.txt, artifact_requirements.txt, .flake8, and pytype.cfg; environments install from the pyproject extras only
- - Add vivarium_gbd_access>=6.0.0,<7.0.0 to the data extra and include the test extra in it
- - Add a [tool.uv] override-dependencies block pinning pandas<3, numpy<2, and sqlalchemy 2.x
- - Rewrite the README Installation section for the local and shared environment workflows
+ - Upgrade environment.sh, Makefile, and shared environments
+ - Raise the floors to vivarium-engine>=5.11.0 and vivarium-public-health>=6.6.4
+ - Add a description to every value pipeline producer and modifier registration
 
 **11.0 - 3/26/24**
 
