@@ -2,6 +2,7 @@
 
  - Raise the floors to vivarium-engine>=5.11.0 and vivarium-public-health>=6.6.4
  - Add a description to every value pipeline producer and modifier registration
+ - Remove background morbidity: the commented-out BackgroundMorbidity component and ParturitionExclusionState, the BACKGROUND_MORBIDITY data key, and the loader and extra_gbd functions that only it used. The feature was switched off in 11.0 and never finished; the design remains in the git history
 
 **11.0 - 3/26/24**
 
