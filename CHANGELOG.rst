@@ -1,5 +1,6 @@
 **11.1 - 10/05/26**
 
+ - Upgrade environment.sh, Makefile, and shared environments
  - Raise the floors to vivarium-engine>=5.11.0 and vivarium-public-health>=6.6.4
  - Add a description to every value pipeline producer and modifier registration
 
