@@ -22,6 +22,31 @@ PACKAGE_NAME = $(notdir $(CURDIR))
 # Helper function for validating enum arguments
 validate_arg = $(if $(filter-out $(2),$(1)),$(error Error: '$(3)' must be one of: $(2), got '$(1)'))
 
+# Environment selector for conda: a prefix when `path` is given, otherwise a name.
+CONDA_ENV_FLAG = $(if $(path),-p $(path),-n $(name))
+
+# Extras group that `type` selects from base.mk's `install` target.
+ENV_REQS_FOR_TYPE = $(if $(filter artifact,$(type)),data,dev)
+
+# Macro for validating make target arguments
+# Usage: $(call validate_make_args,target_name,allowed_args)
+# Example: $(call validate_make_args,build-env,type name path)
+define validate_make_args
+	@allowed="$(2)"; \
+	for arg in $(filter-out $(1),$(MAKECMDGOALS)) $(MAKEFLAGS); do \
+		case $$arg in \
+			*=*) \
+				arg_name=$${arg%%=*}; \
+				if ! echo " $$allowed " | grep -q " $$arg_name "; then \
+					allowed_list=$$(echo $$allowed | sed 's/ /, /g'); \
+					echo "Error: Invalid argument '$$arg_name'. Allowed arguments are: $$allowed_list" >&2; \
+					exit 1; \
+				fi \
+				;; \
+		esac; \
+	done
+endef
+
 ifneq ($(MAKE_INCLUDES),) # not empty
 # Include makefiles from vivarium_build_utils
 include $(MAKE_INCLUDES)/base.mk
@@ -36,22 +61,34 @@ help:
 	@echo "Most of our Makefile targets are provided by the vivarium_build_utils"
 	@echo "package. To access them, you need to create a development environment first."
 	@echo
-	@echo "make build-env"
+	@echo "================================================================================"
+	@echo "build-env: Create a full conda environment from scratch"
+	@echo "================================================================================"
+	@echo
+	@echo "This target creates a new conda environment and installs all required"
+	@echo "packages for development or artifact generation, depending on the 'type' argument."
 	@echo
 	@echo "USAGE:"
-	@echo "  make build-env [type=<environment type>] [name=<environment name>] [py=<python version>] [include_timestamp=<yes|no>] [lfs=<yes|no>]"
+	@echo "  make build-env [type=<environment type>] [name=<environment name>] [path=<environment path>] [py=<python version>] [include_timestamp=<yes|no>] [lfs=<yes|no>] [force=<yes|no>] [keep_env=<yes|no>]"
 	@echo
 	@echo "ARGUMENTS:"
 	@echo "  type [optional]"
 	@echo "      Type of conda environment. Either 'simulation' (default) or 'artifact'"
 	@echo "  name [optional]"
 	@echo "      Name of the conda environment to create (defaults to <PACKAGE_NAME>_<TYPE>)"
+	@echo "  path [optional]"
+	@echo "      Absolute path where the environment should be created (overrides name for location)"
 	@echo "  include_timestamp [optional]"
 	@echo "      Whether to append a timestamp to the environment name. Either 'yes' or 'no' (default)"
 	@echo "  lfs [optional]"
 	@echo "      Whether to install git-lfs in the environment. Either 'yes' or 'no' (default)"
 	@echo "  py [optional]"
 	@echo "      Python version (defaults to latest supported)"
+	@echo "  force [optional]"
+	@echo "      Whether to remove and recreate an existing environment. Either 'yes' or 'no' (default)"
+	@echo "  keep_env [optional]"
+	@echo "      Whether to keep a failed build's partial environment for inspection."
+	@echo "      Either 'yes' or 'no' (default, i.e. tear it down)."
 	@echo
 	@echo "After creating the environment:"
 	@echo "  1. Activate it: 'conda activate <environment_name>'"
@@ -62,19 +99,7 @@ endif
 .PHONY: build-env
 build-env: # Create a new environment with installed packages
 #	Validate arguments - exit if unsupported arguments are passed
-	@allowed="type name lfs py include_timestamp"; \
-	for arg in $(filter-out build-env,$(MAKECMDGOALS)) $(MAKEFLAGS); do \
-		case $$arg in \
-			*=*) \
-				arg_name=$${arg%%=*}; \
-				if ! echo " $$allowed " | grep -q " $$arg_name "; then \
-					allowed_list=$$(echo $$allowed | sed 's/ /, /g'); \
-					echo "Error: Invalid argument '$$arg_name'. Allowed arguments are: $$allowed_list" >&2; \
-					exit 1; \
-				fi \
-				;; \
-		esac; \
-	done
+	$(call validate_make_args,build-env,type name path lfs py include_timestamp force keep_env)
 	
 #   Handle arguments and set defaults
 #   type
@@ -86,33 +111,75 @@ build-env: # Create a new environment with installed packages
 	@$(eval include_timestamp ?= no)
 	@$(call validate_arg,$(include_timestamp),yes no,include_timestamp)
 	@$(if $(filter yes,$(include_timestamp)),$(eval override name := $(name)_$(shell date +%Y%m%d_%H%M%S)),)
+#	path (optional - if set, use -p for conda create instead of -n)
+	@$(eval path ?=)
 #	lfs
 	@$(eval lfs ?= no)
 	@$(call validate_arg,$(lfs),yes no,lfs)
+#	force
+	@$(eval force ?= no)
+	@$(call validate_arg,$(force),yes no,force)
+#	keep_env
+	@$(eval keep_env ?= no)
+	@$(call validate_arg,$(keep_env),yes no,keep_env)
 #	python version
-	@$(eval py ?= $(shell python -c "import json; versions = json.load(open('python_versions.json')); print(max(versions, key=lambda x: tuple(map(int, x.split('.')))))"))
-	
-	conda create -n $(name) python=$(py) --yes
-# 	Bootstrap vivarium_build_utils into the new environment
-	conda run -n $(name) pip install "vivarium_build_utils>=4.0.0,<5.0.0"
-#	Install packages based on type
-	@if [ "$(type)" = "simulation" ]; then \
-		conda run -n $(name) make install ENV_REQS=dev; \
-		conda install -n $(name) redis -c anaconda -y; \
-	elif [ "$(type)" = "artifact" ]; then \
-		conda run -n $(name) make install ENV_REQS=data; \
+	@$(eval py ?= $(shell cat python_versions.json | tr -d '[]" ' | tr ',' '\n' | sort -t. -k1,1n -k2,2n | tail -1))
+
+#	Check if environment already exists and handle based on force flag
+	@if conda env list | grep -qE "$(if $(path),^$(path),^$(name))\s"; then \
+		if [ "$(force)" = "yes" ]; then \
+			echo "Removing existing environment..."; \
+			conda remove $(CONDA_ENV_FLAG) --all --yes; \
+		else \
+			echo "Error: Environment already exists at $(if $(path),$(path),$(name))" >&2; \
+			echo "Use 'force=yes' to remove and recreate it, or specify a different location with 'name=<name>' or 'path=<path>'" >&2; \
+			exit 1; \
+		fi \
 	fi
-	@if [ "$(lfs)" = "yes" ]; then \
-		conda run -n $(name) conda install -c conda-forge git-lfs --yes; \
-		conda run -n $(name) git lfs install; \
+
+#	The force check above guarantees we only tear down an env this invocation created.
+	@if ! $(MAKE) --no-print-directory _build-env \
+			name=$(name) path=$(path) py=$(py) type=$(type) lfs=$(lfs); then \
+		echo >&2; \
+		if [ "$(keep_env)" = "yes" ]; then \
+			echo "Error: failed to build environment $(if $(path),$(path),$(name)). Keeping it (keep_env=yes)." >&2; \
+		else \
+			echo "Error: failed to build environment $(if $(path),$(path),$(name)). Removing it; pass keep_env=yes to keep it for inspection." >&2; \
+			conda env remove $(CONDA_ENV_FLAG) --yes; \
+		fi; \
+		exit 1; \
 	fi
 
 	@echo
 	@echo "Finished building environment"
-	@echo "  name: $(name)"
+	@$(if $(path),echo "  path: $(path)",echo "  name: $(name)")
 	@echo "  type: $(type)"
 	@echo "  git-lfs installed: $(lfs)"
 	@echo "  python version: $(py)"
+	@echo "  forced rebuild: $(force)"
 	@echo
-	@echo "Don't forget to activate it with: 'conda activate $(name)'"
+	@echo "After creating the environment:"
+	@$(if $(path),echo "  1. Activate it: 'conda activate $(path)'",echo "  1. Activate it: 'conda activate $(name)'")
+	@echo "  2. Run 'make help' again to see all newly available targets"
 	@echo
+
+# Private: the build steps live here so `build-env` can tear down the env if any fails.
+.PHONY: _build-env
+_build-env:
+	conda create $(CONDA_ENV_FLAG) python=$(py) --yes
+# 	--no-capture-output streams output, so a failure isn't hidden behind a long silence.
+	conda run --no-capture-output $(CONDA_ENV_FLAG) pip install "vivarium_build_utils>=4.0.0,<5.0.0"
+	conda run --no-capture-output $(CONDA_ENV_FLAG) make install ENV_REQS=$(ENV_REQS_FOR_TYPE)
+	@if [ "$(type)" = "simulation" ]; then \
+		conda install $(CONDA_ENV_FLAG) redis -c anaconda -y; \
+	fi
+# 	`set -e` is load-bearing: a multi-command line reports only its last command's status.
+	@if [ "$(lfs)" = "yes" ]; then \
+		set -e; \
+		conda run --no-capture-output $(CONDA_ENV_FLAG) conda install -c conda-forge git-lfs --yes; \
+		conda run --no-capture-output $(CONDA_ENV_FLAG) git lfs install; \
+	fi
+# 	A fresh env's only editable install is this checkout, so an empty list means it never installed.
+	@conda run --no-capture-output $(CONDA_ENV_FLAG) pip list --editable --format=freeze | grep -q . \
+		|| { echo "Error: nothing was installed into $(if $(path),$(path),$(name)) from $(CURDIR)." >&2; exit 1; }
+
