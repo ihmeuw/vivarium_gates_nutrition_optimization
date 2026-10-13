@@ -10,38 +10,65 @@ Research repository for the vivarium_gates_nutrition_optimization project.
 Installation
 ------------
 
-You will need ``git``, ``git-lfs`` and ``conda`` to get this repository
-and install all of its requirements.  You should follow the instructions for
-your operating system at the following places:
+You will need ``conda`` to install all of this repository's requirements.
+We recommend installing `Miniforge <https://github.com/conda-forge/miniforge>`_.
 
-- `git <https://git-scm.com/downloads>`_
-- `git-lfs <https://git-lfs.github.com/>`_
-- `conda <https://docs.conda.io/en/latest/miniconda.html>`_
-
-Once you have all three installed, you should open up your normal shell
+Once you have conda installed, you should open up your normal shell
 (if you're on linux or OSX) or the ``git bash`` shell if you're on windows.
-You'll then make an environment, clone this repository, then install
-all necessary requirements as follows::
 
-  :~$ conda create --name=vivarium_gates_nutrition_optimization python=3.11
-  ...conda will download python and base dependencies...
-  :~$ conda activate vivarium_gates_nutrition_optimization
-  (vivarium_gates_nutrition_optimization) :~$ git clone https://github.com/ihmeuw/vivarium_gates_nutrition_optimization.git
+You'll then clone this repository and make the necessary environments.
+The first step is to clone the repo::
+
+  :~$ git clone https://github.com/ihmeuw/vivarium_gates_nutrition_optimization.git
   ...git will copy the repository from github and place it in your current directory...
-  (vivarium_gates_nutrition_optimization) :~$ cd vivarium_gates_nutrition_optimization
-  (vivarium_gates_nutrition_optimization) :~$ pip install -e .
+  :~$ cd vivarium_gates_nutrition_optimization
+
+There are two environment options: a **local conda environment** (for personal machines)
+or a **shared environment on the cluster** with a lightweight venv wrapper.
+
+To create or update an environment, use ``source environment.sh``. This will
+automatically create the environment if it doesn't exist, or update it if it
+is stale.
+
+**Local conda environment** (default)::
+
+  :~$ source environment.sh
+  ...creates/activates the simulation conda environment...
+  :~$ source environment.sh -t artifact
+  ...creates/activates the artifact conda environment...
+
+To deactivate a local conda environment, run ``conda deactivate``.
+
+**Shared environment on the cluster** (recommended for cluster development)::
+
+  :~$ source environment.sh -s
+  ...creates/activates a venv overlay on the shared simulation environment...
+  :~$ source environment.sh -s -t artifact
+  ...creates/activates a venv overlay on the shared artifact environment...
+
+To deactivate a shared cluster environment, run ``deactivate``.
+
+Additional options are available; pass the ``-h`` flag to see them
+(e.g. ``-f`` to force a rebuild, ``-l`` to install git lfs).
+
+Alternatively, users can manually create conda environments as follows::
+
+  :~$ conda create --name=vivarium_gates_nutrition_optimization_simulation python=3.11 git git-lfs
+  ...conda will download python and base dependencies...
+  :~$ conda activate vivarium_gates_nutrition_optimization_simulation
+  (vivarium_gates_nutrition_optimization_simulation) :~$ pip install -e .[dev]
+  ...pip will install vivarium and other requirements...
+  (vivarium_gates_nutrition_optimization_simulation) :~$ conda deactivate
+  :~$ conda create --name=vivarium_gates_nutrition_optimization_artifact python=3.11 git git-lfs
+  ...conda will download python and base dependencies...
+  :~$ conda activate vivarium_gates_nutrition_optimization_artifact
+  (vivarium_gates_nutrition_optimization_artifact) :~$ pip install -e .[data]
   ...pip will install vivarium and other requirements...
 
+Supported Python versions: 3.11
 
 Note the ``-e`` flag that follows pip install. This will install the python
 package in-place, which is important for making the model specifications later.
-
-Cloning the repository should take a fair bit of time as git must fetch
-the data artifact associated with the demo (several GB of data) from the
-large file system storage (``git-lfs``). **If your clone works quickly,
-you are likely only retrieving the checksum file that github holds onto,
-and your simulations will fail.** If you are only retrieving checksum
-files you can explicitly pull the data by executing ``git-lfs pull``.
 
 Vivarium uses the Hierarchical Data Format (HDF) as the backing storage
 for the data artifacts that supply data to the simulation. You may not have
