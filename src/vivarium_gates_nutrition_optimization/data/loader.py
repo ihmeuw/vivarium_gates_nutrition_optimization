@@ -113,7 +113,9 @@ def load_population_structure(
     base_population_structure = interface.get_population_structure(location, years)
     pregnancy_end_rate_avg = get_pregnancy_end_incidence(location, years)
     pregnant_population_structure = (
-        pregnancy_end_rate_avg.multiply(base_population_structure["value"], axis=0)
+        pregnancy_end_rate_avg.multiply(
+            base_population_structure["value"].droplevel("location"), axis=0
+        )
         .assign(location=location)
         .set_index("location", append=True)
     )
