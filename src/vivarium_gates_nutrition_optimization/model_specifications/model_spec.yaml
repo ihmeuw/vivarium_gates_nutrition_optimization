@@ -13,7 +13,6 @@ components:
             - MaternalDisorders()
             - MaternalHemorrhage()
             - MaternalMortality()
-            # - BackgroundMorbidity()
             - Hemoglobin()
             - Anemia()
             - MaternalBMIExposure()

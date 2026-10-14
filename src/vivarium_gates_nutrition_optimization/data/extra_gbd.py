@@ -27,22 +27,6 @@ def load_2021_lbwsg_birth_exposure(location: str):
 
 
 @vi_utils.cache
-def get_all_cause_yld_rate(location: str):
-    entity = utilities.get_entity("cause.all_causes.ylds")
-    location_id = utility_data.get_location_id(location)
-    data = gbd.get_draws(
-        "cause_id",
-        entity.gbd_id,
-        source=gbd_constants.SOURCES.COMO,
-        location_id=location_id,
-        release_id=gbd_constants.RELEASE_IDS.GBD_2023,
-        measure_id=vi_globals.MEASURES["YLDs"],
-        metric_id=3,  # rate
-    )
-    return data
-
-
-@vi_utils.cache
 def get_maternal_disorder_ylds(location: str, metric_id=None):
     entity = utilities.get_entity(data_keys.MATERNAL_DISORDERS.YLDS)
     location_id = utility_data.get_location_id(location)
@@ -77,21 +61,6 @@ def get_anemia_ylds(location: str, metric_id=None):
         release_id=gbd_constants.RELEASE_IDS.GBD_2023,
         measure_id=vi_globals.MEASURES["YLDs"],
         metric_id=metric_id,
-    )
-    return data
-
-
-@vi_utils.cache
-def get_anemia_yld_rate(location: str):
-    location_id = utility_data.get_location_id(location)
-    data = gbd.get_draws(
-        "rei_id",
-        192,
-        source=gbd_constants.SOURCES.COMO,
-        location_id=location_id,
-        release_id=gbd_constants.RELEASE_IDS.GBD_2023,
-        measure_id=vi_globals.MEASURES["YLDs"],
-        metric_id=3,
     )
     return data
 
