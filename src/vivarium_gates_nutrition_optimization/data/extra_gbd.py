@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pandas as pd
 from vivarium.gbd_mapping import sequelae
 from vivarium_gbd_access import constants as gbd_constants
@@ -23,6 +25,28 @@ HEMOGLOBIN_REI_ID = 376
 HEMOGLOBIN_BELOW_70_REI_ID = 207
 ALL_CAUSES_ID = 294
 PREGNANCY_AGE_GROUP_IDS = list(range(7, 16))  # 10-14 through 50-54 years
+HEMOGLOBIN_YEAR_ID = 2023
+
+# Central comp will not publish the release-33 hemoglobin SD model (ME 28870, model
+# version 926443) for ihme_cc_get_estimates, so it is read from the draws they copied
+# to the shared folder instead. See the README there and MIC-7505.
+HEMOGLOBIN_RELEASE_33_DIR = Path("/mnt/team/simulation_science/pub/data/hemoglobin_release33")
+HEMOGLOBIN_SD_FILES = [
+    "hemoglobin_exposure_sd_ethiopia.parquet",
+    "hemoglobin_exposure_sd_nigeria.parquet",
+    "hemoglobin_exposure_sd_pakistan.parquet",
+    "me_28870_mvid_926443_select_locations.parquet",
+]
+HEMOGLOBIN_SD_ID_COLUMNS = [
+    "location_id",
+    "year_id",
+    "age_group_id",
+    "sex_id",
+    "measure_id",
+    "metric_id",
+    "modelable_entity_id",
+    "rei_id",
+]
 
 
 @vi_utils.cache
@@ -121,18 +145,47 @@ def get_hemoglobin_maternal_disorders_rr() -> pd.DataFrame:
 
 
 def get_hemoglobin_exposure_data(key: str, location: str) -> pd.DataFrame:
-    """Get hemoglobin exposure mean or standard deviation draws for a location."""
-    if key == data_keys.HEMOGLOBIN.STANDARD_DEVIATION:
-        raise NotImplementedError(
-            "GBD holds no best model version for the release-33 hemoglobin standard "
-            "deviation (modelable entity 28870); see MIC-7505 for how this key is sourced."
-        )
+    """Get hemoglobin exposure mean or standard deviation draws for a location.
+
+    The mean is a live release-33 pull. The standard deviation is read from the
+    stored release-33 capture, because GBD does not serve that model version
+    through the shared functions.
+    """
     location_id = utility_data.resolve_location(location)
+    if key == data_keys.HEMOGLOBIN.STANDARD_DEVIATION:
+        return _read_release_33_hemoglobin_sd(location_id)
     return get_exposure(
         HEMOGLOBIN_REI_ID,
         location_id,
-        2023,
+        HEMOGLOBIN_YEAR_ID,
         "draws",
         sex_id=gbd_constants.SEX.FEMALE,
         release_id=HEMOGLOBIN_RELEASE_ID,
     )
+
+
+def _read_release_33_hemoglobin_sd(location_id: int) -> pd.DataFrame:
+    """Read the stored release-33 hemoglobin SD draws for one location."""
+    frames = []
+    for name in HEMOGLOBIN_SD_FILES:
+        path = HEMOGLOBIN_RELEASE_33_DIR / name
+        if not path.exists():
+            raise FileNotFoundError(
+                f"{path} is missing. See the README in {HEMOGLOBIN_RELEASE_33_DIR} "
+                "and MIC-7505."
+            )
+        frames.append(pd.read_parquet(path))
+    data = pd.concat(frames, ignore_index=True)
+    data = data[
+        (data["location_id"] == location_id)
+        & data["sex_id"].isin(gbd_constants.SEX.FEMALE)
+        & (data["year_id"] == HEMOGLOBIN_YEAR_ID)
+    ]
+    if data.empty:
+        raise FileNotFoundError(
+            f"No release-33 hemoglobin SD draws stored for location {location_id} in "
+            f"{HEMOGLOBIN_RELEASE_33_DIR}; ask central comp to add it (MIC-7505)."
+        )
+    draw_columns = [column for column in data.columns if column.startswith("draw_")]
+    data = data.assign(rei_id=HEMOGLOBIN_REI_ID)
+    return data[HEMOGLOBIN_SD_ID_COLUMNS + draw_columns].reset_index(drop=True)
