@@ -113,7 +113,9 @@ def load_population_structure(
     base_population_structure = interface.get_population_structure(location, years)
     pregnancy_end_rate_avg = get_pregnancy_end_incidence(location, years)
     pregnant_population_structure = (
-        pregnancy_end_rate_avg.multiply(base_population_structure["value"], axis=0)
+        pregnancy_end_rate_avg.multiply(
+            base_population_structure["value"].droplevel("location"), axis=0
+        )
         .assign(location=location)
         .set_index("location", append=True)
     )
@@ -136,14 +138,6 @@ def load_theoretical_minimum_risk_life_expectancy(
     key: str, location: str, years: Optional[Union[int, str, List[int]]] = None
 ) -> pd.DataFrame:
     return interface.get_theoretical_minimum_risk_life_expectancy()
-
-
-def load_standard_data(
-    key: str, location: str, years: Optional[Union[int, str, List[int]]] = None
-) -> pd.DataFrame:
-    key = EntityKey(key)
-    entity = get_entity(key)
-    return interface.get_measure(entity, key.measure, location, years).droplevel("location")
 
 
 # TODO: Remove this if/ when Vivarium Inputs implements the change directly
@@ -233,7 +227,7 @@ def get_pregnancy_end_incidence(
 def load_asfr(
     key: str, location: str, years: Optional[Union[int, str, List[int]]] = None
 ) -> pd.DataFrame:
-    asfr = load_standard_data(key, location, years)
+    asfr = interface.load_standard_data(key, location, years)
     asfr = asfr.reset_index()
     asfr_pivot = asfr.pivot(
         index=[col for col in metadata.ARTIFACT_INDEX_COLUMNS if col != "location"],
@@ -248,7 +242,7 @@ def load_asfr(
 def load_sbr(
     key: str, location: str, years: Optional[Union[int, str, List[int]]] = None
 ) -> pd.DataFrame:
-    sbr = load_standard_data(key, location, years)
+    sbr = interface.load_standard_data(key, location, years)
     sbr = sbr.reorder_levels(["parameter", "year_start", "year_end"]).loc["mean_value"]
     return sbr
 
@@ -424,7 +418,7 @@ def load_hemoglobin_maternal_disorders_rr(
 def load_hemoglobin_maternal_disorders_paf(
     key: str, location: str, years: Optional[Union[int, str, List[int]]] = None
 ) -> pd.DataFrame:
-    location_id = utility_data.get_location_id(location)
+    location_id = utility_data.resolve_location(location)
     demography = get_data(data_keys.POPULATION.DEMOGRAPHY, location, years)
 
     data = pd.read_csv(paths.HEMOGLOBIN_MATERNAL_DISORDERS_PAF_CSV)
@@ -458,18 +452,17 @@ def get_moderate_hemorrhage_probability(
     return moderate_hemorrhage_probability
 
 
+###########################
+# Hemoglobin Data         #
+###########################
+
+
 def load_hemoglobin_exposure_data(
     key: str, location: str, years: Optional[Union[int, str, List[int]]] = None
 ):
     hemoglobin_data = extra_gbd.get_hemoglobin_exposure_data(key, location)
     hemoglobin_data = reshape_to_vivarium_format(hemoglobin_data, location)
-    levels_to_drop = [
-        "measure_id",
-        "metric_id",
-        "model_version_id",
-        "modelable_entity_id",
-        "rei_id",
-    ]
+    levels_to_drop = ["measure_id", "metric_id", "modelable_entity_id", "rei_id"]
     if key == data_keys.HEMOGLOBIN.MEAN:
         levels_to_drop.append("parameter")
     hemoglobin_data.index = hemoglobin_data.index.droplevel(levels_to_drop)
@@ -492,7 +485,7 @@ def get_hemoglobin_less_than_70_data(
     data = extra_gbd.get_hbg_less_than_70(location)
     data = reshape_to_vivarium_format(data, location)
     data.index = data.index.droplevel(
-        ["cause_id", "measure_id", "metric_id", "rei_id", "version_id"]
+        ["cause_id", "measure_id", "metric_id", "rei_id", "gbd_process_version_id"]
     )
     # Expand draw columns from 0-99 to 0-249 by repeating 2.5 times
     expanded_draws_df_1 = utilities.expand_draw_columns(data, num_draws=100, num_repeats=2)
@@ -511,7 +504,7 @@ def get_hemoglobin_less_than_70_data(
 def load_bmi_prevalence(
     key: str, location: str, years: Optional[Union[int, str, List[int]]] = None
 ) -> pd.DataFrame:
-    location_id = utility_data.get_location_id(location)
+    location_id = utility_data.resolve_location(location)
     demography = get_data(data_keys.POPULATION.DEMOGRAPHY, location, years)
 
     path = {
