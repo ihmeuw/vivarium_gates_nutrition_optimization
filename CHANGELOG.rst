@@ -1,16 +1,9 @@
 **11.1 - 10/05/26**
 
- - Upgrade environment.sh, Makefile, and shared environments
- - Raise the floors to vivarium-engine>=5.11.0 and vivarium-public-health>=6.6.4
- - Add a description to every value pipeline producer and modifier registration
- - Remove background morbidity: the commented-out BackgroundMorbidity component and ParturitionExclusionState, the BACKGROUND_MORBIDITY data key, and the loader and extra_gbd functions that only it used. The feature was switched off in 11.0 and never finished; the design remains in the git history
- - Include the test extra in the data extra
- - Remove the commented-out ParturitionExclusionState from components/disease.py
- - Raise the data extra pins to vivarium_inputs>=9.0.0,<10.0.0 and vivarium_gbd_access>=7.0.0,<8.0.0
- - Source the hemoglobin-below-70 proportion through the ``impairment-cause`` machinery entity and the hemoglobin mean exposure through measures.get_exposure, both still under release 33; read the release-33 exposure standard deviation (ME 28870, model version 926443) from the draws central comp stored under ``/mnt/team/simulation_science/pub/data/hemoglobin_release33``, since that model version is not served by the shared functions
- - Migrate the live get_draws calls in data/extra_gbd.py to gbd_access 7: LBWSG birth exposure through measures.get_birth_exposure, maternal disorders and anemia sequelae YLD rates through base_data.get_machinery_estimates, and the hemoglobin maternal disorders relative risk through measures.get_relative_risk
- - Replace utility_data.get_location_id with utility_data.resolve_location and the model-local load_standard_data with vivarium_inputs.interface.load_standard_data
- - Drop the location level from the population structure before scaling it by the pregnancy-end rate: pandas 2 keeps the union of index levels on aligned arithmetic, so the loader's own location append produced a duplicate level
+ - Migrate artifact building off ``get_draws`` to vivarium_gbd_access 7 and vivarium_inputs 9: LBWSG birth exposure, hemoglobin exposure and relative risk, and the maternal disorders and anemia YLD rates now come through the shared functions, and the release-33 hemoglobin exposure standard deviation is read from the central comp draws under ``/mnt/team/simulation_science/pub/data/hemoglobin_release33``
+ - Adopt the shared environment tooling; raise the floors to vivarium-engine 5.11.0 and vivarium-public-health 6.6.4
+ - Remove the unfinished background morbidity feature and describe every pipeline producer and modifier
+ - Fix a duplicated ``location`` index level in the population structure under pandas 2
 
 
 **11.0 - 3/26/24**
