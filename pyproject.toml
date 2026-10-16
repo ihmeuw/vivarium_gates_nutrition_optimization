@@ -12,8 +12,8 @@ authors = [{name = "The vivarium developers", email = "vivarium.dev@gmail.com"}]
 dynamic = ["version"]
 dependencies = [
     "vivarium-gbd-mapping>=6.0.0,<7.0.0",
-    "vivarium-engine>=5.3.0,<6.0.0",
-    "vivarium-public-health>=6.3.1,<7.0.0",
+    "vivarium-engine>=5.11.0,<6.0.0",
+    "vivarium-public-health>=6.6.4,<7.0.0",
     "vivarium-config-tree",
     "vivarium-risk-distributions",
     # The monorepo vivarium-engine and vivarium-public-health both require
@@ -44,8 +44,9 @@ lint = [
     "isort==5.13.2",
 ]
 data = [
-    "vivarium_inputs>=8.0.0,<9.0.0",
-    "vivarium_gates_nutrition_optimization[cluster,lint]",
+    "vivarium_inputs>=9.0.0,<10.0.0",
+    "vivarium_gbd_access>=7.0.0,<8.0.0",
+    "vivarium_gates_nutrition_optimization[cluster,lint,test]",
 ]
 dev = ["vivarium_gates_nutrition_optimization[test,cluster,lint]"]
 
@@ -67,3 +68,6 @@ line_length = 94
 
 [tool.isort]
 profile = "black"
+
+[tool.uv]
+override-dependencies = ["pandas<3.0.0", "sqlalchemy>=2.0.0,<3.0.0", "numpy<2.0.0"]

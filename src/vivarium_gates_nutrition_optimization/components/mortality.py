@@ -59,7 +59,12 @@ class MaternalMortality(Mortality):
             probability_data,
         )
         builder.value.register_attribute_producer(
-            self.mortality_probability_name, source=probability_pipeline_source
+            self.mortality_probability_name,
+            source=probability_pipeline_source,
+            description=(
+                "The probability that each simulant with a maternal disorder dies of it "
+                "during the time step"
+            ),
         )
 
     ########################

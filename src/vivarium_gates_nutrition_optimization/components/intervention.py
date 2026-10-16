@@ -49,12 +49,19 @@ class MaternalInterventions(Component):
             "hemoglobin.exposure",
             self.update_exposure,
             required_resources=["intervention"],
+            description=(
+                "Add the IFA hemoglobin effect for supplemented simulants and remove the "
+                "baseline IFA effect for the untreated"
+            ),
         )
 
         builder.value.register_attribute_modifier(
             "birth_outcome_probabilities",
             self.adjust_stillbirth_probability,
             required_resources=["intervention"],
+            description=(
+                "Shift stillbirth probability to live birth for MMS and BEP recipients"
+            ),
         )
 
         builder.population.register_initializer(
