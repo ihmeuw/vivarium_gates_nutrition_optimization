@@ -1,4 +1,4 @@
-**11.1 - 10/05/26**
+**11.1 - 10/16/26**
 
  - Migrate artifact building off ``get_draws`` to vivarium_gbd_access 7 and vivarium_inputs 9: LBWSG birth exposure, hemoglobin exposure and relative risk, and the maternal disorders and anemia YLD rates now come through the shared functions, and the release-33 hemoglobin exposure standard deviation is read from the central comp draws under ``/mnt/team/simulation_science/pub/data/hemoglobin_release33``
  - Adopt the shared environment tooling; raise the floors to vivarium-engine 5.11.0 and vivarium-public-health 6.6.4
