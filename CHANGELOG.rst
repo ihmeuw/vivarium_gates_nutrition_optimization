@@ -1,4 +1,4 @@
-**11.2 - 10/19/26**
+**11.2 - 10/20/26**
 
  - Use the pytest-vivarium plugin for the shared test options and markers
 
