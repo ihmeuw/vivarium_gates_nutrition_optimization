@@ -5,12 +5,8 @@ from pathlib import Path
 import pandas as pd
 import pytest
 import yaml
-from conftest import is_on_slurm
 
-pytestmark = pytest.mark.skipif(
-    not is_on_slurm(),
-    reason="Must be on slurm to run this test.",
-)
+pytestmark = pytest.mark.cluster
 
 
 @pytest.fixture

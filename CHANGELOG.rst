@@ -1,3 +1,8 @@
+**11.2 - 10/19/26**
+
+ - Use the pytest-vivarium plugin for the shared test options and markers
+
+
 **11.1 - 10/16/26**
 
  - Migrate artifact building off ``get_draws`` to vivarium_gbd_access 7 and vivarium_inputs 9: LBWSG birth exposure, hemoglobin exposure and relative risk, and the maternal disorders and anemia YLD rates now come through the shared functions, and the release-33 hemoglobin exposure standard deviation is read from the central comp draws under ``/mnt/team/simulation_science/pub/data/hemoglobin_release33``
