@@ -31,10 +31,8 @@ dependencies = [
 
 [project.optional-dependencies]
 test = [
-    "pytest",
-    "pytest-cov",
-    "pytest-mock",
-    "pytest-xdist",
+    "vivarium-dependencies[pytest]",
+    "pytest-vivarium",
 ]
 # vivarium-cluster-tools 4.x is the monorepo-native line (depends on
 # vivarium-engine / vivarium-config-tree / vbu 4.x, not the old `vivarium`).
