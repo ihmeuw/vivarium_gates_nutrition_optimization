@@ -206,9 +206,6 @@ _build-env:
 # 	--no-capture-output streams output, so a failure isn't hidden behind a long silence.
 	conda run --no-capture-output $(CONDA_ENV_FLAG) pip install "vivarium_build_utils>=4.0.0,<5.0.0"
 	conda run --no-capture-output $(CONDA_ENV_FLAG) make install ENV_REQS=$(ENV_REQS_FOR_TYPE)
-	@if [ "$(type)" = "simulation" ]; then \
-		conda install $(CONDA_ENV_FLAG) redis -c anaconda -y; \
-	fi
 # 	`set -e` is load-bearing: a multi-command line reports only its last command's status.
 	@if [ "$(lfs)" = "yes" ]; then \
 		set -e; \
