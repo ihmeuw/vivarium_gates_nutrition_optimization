@@ -1,3 +1,7 @@
+**11.3 - 10/28/26**
+
+ - Require vivarium-engine 6 and vivarium_cluster_tools 4.8.0 for the cluster extra
+
 **11.2 - 10/20/26**
 
  - Use the pytest-vivarium plugin for the shared test options and markers
