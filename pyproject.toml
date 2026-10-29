@@ -12,7 +12,7 @@ authors = [{name = "The vivarium developers", email = "vivarium.dev@gmail.com"}]
 dynamic = ["version"]
 dependencies = [
     "vivarium-gbd-mapping>=6.0.0,<7.0.0",
-    "vivarium-engine>=5.11.0,<6.0.0",
+    "vivarium-engine>=6.0.0,<7.0.0",
     "vivarium-public-health>=6.6.4,<7.0.0",
     "vivarium-config-tree",
     "vivarium-risk-distributions",
@@ -36,7 +36,7 @@ test = [
 ]
 # vivarium-cluster-tools 4.x is the monorepo-native line (depends on
 # vivarium-engine / vivarium-config-tree / vbu 4.x, not the old `vivarium`).
-cluster = ["vivarium_cluster_tools[cluster]>=4.0.0,<5.0.0"]
+cluster = ["vivarium_cluster_tools[cluster]>=4.8.0,<5.0.0"]
 lint = [
     "black==22.3.0",
     "isort==5.13.2",
