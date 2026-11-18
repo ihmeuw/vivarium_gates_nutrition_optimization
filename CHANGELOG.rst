@@ -1,3 +1,7 @@
+**11.5 - 11/23/26**
+
+ - Match the model template's ``Makefile`` and ``pyproject.toml``
+
 **11.4 - 11/20/26**
 
  - Build all locations in parallel through jobmon in ``make_artifacts -l all``
