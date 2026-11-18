@@ -11,22 +11,13 @@ license = {text = "BSD-3-Clause"}
 authors = [{name = "The vivarium developers", email = "vivarium.dev@gmail.com"}]
 dynamic = ["version"]
 dependencies = [
+    "vivarium-dependencies[pandas,numpy,scipy,click,tables,loguru]",
+    "vivarium-build-utils>=4.0.0,<5.0.0",
     "vivarium-gbd-mapping>=6.0.0,<7.0.0",
     "vivarium-engine>=6.0.0,<7.0.0",
     "vivarium-public-health>=6.6.4,<7.0.0",
-    "vivarium-config-tree",
-    "vivarium-risk-distributions",
-    # The monorepo vivarium-engine and vivarium-public-health both require
-    # vivarium-build-utils 4.x, so match that range here.
-    "vivarium_build_utils>=4.0.0,<5.0.0",
-    "click",
     "jinja2",
-    "loguru",
-    "numpy",
-    "pandas<3.0.0",
     "pyyaml",
-    "scipy",
-    "tables",
 ]
 
 [project.optional-dependencies]
@@ -34,19 +25,18 @@ test = [
     "vivarium-dependencies[pytest]",
     "pytest-vivarium",
 ]
-# vivarium-cluster-tools 4.x is the monorepo-native line (depends on
-# vivarium-engine / vivarium-config-tree / vbu 4.x, not the old `vivarium`).
-cluster = ["vivarium_cluster_tools[cluster]>=4.8.0,<5.0.0"]
-lint = [
-    "black==22.3.0",
-    "isort==5.13.2",
-]
+cluster = ["vivarium-cluster-tools[cluster]>=4.8.0,<5.0.0"]
 data = [
-    "vivarium_inputs>=9.0.0,<10.0.0",
-    "vivarium_gbd_access>=7.0.0,<8.0.0",
-    "vivarium_gates_nutrition_optimization[cluster,lint,test]",
+    "vivarium-inputs>=9.0.0,<10.0.0",
+    "vivarium-gbd-access>=7.0.0,<8.0.0",
+    "vivarium_gates_nutrition_optimization[cluster]",
 ]
-dev = ["vivarium_gates_nutrition_optimization[test,cluster,lint]"]
+interactive = [
+    "vivarium-dependencies[interactive]",
+    "vivarium-interactive>=1.0.0,<2.0.0",
+]
+lint = ["vivarium-dependencies[lint]"]
+dev = ["vivarium_gates_nutrition_optimization[test,cluster,interactive,lint]"]
 
 [project.urls]
 Homepage = "https://github.com/ihmeuw/vivarium_gates_nutrition_optimization"
@@ -57,15 +47,22 @@ make_artifacts = "vivarium_gates_nutrition_optimization.tools.cli:make_artifacts
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+"vivarium_gates_nutrition_optimization" = ["**/*.yaml", "**/*.ipynb", "**/*.csv"]
+
 [tool.setuptools_scm]
 tag_regex = '^(?P<prefix>v)?(?P<version>[^\+]+)(?P<suffix>.*)?$'
 fallback_version = "0.0.0+no-git-tag"
 
 [tool.black]
-line_length = 94
+line-length = 94
 
 [tool.isort]
 profile = "black"
+line_length = 94
+multi_line_output = 3
 
 [tool.uv]
-override-dependencies = ["pandas<3.0.0", "sqlalchemy>=2.0.0,<3.0.0", "numpy<2.0.0"]
+# pyarrow 26 needs numpy 2 but does not declare it, so cap it while numpy<2 is here.
+# TODO: remove the pyarrow cap with numpy<2 once GBD siloing (MIC-7613) is merged.
+override-dependencies = ["pandas<3.0.0", "sqlalchemy>=2.0.0,<3.0.0", "numpy<2.0.0", "pyarrow<26.0.0"]
