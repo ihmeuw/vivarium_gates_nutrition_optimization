@@ -1,3 +1,8 @@
+**11.4 - 11/20/26**
+
+ - Build all locations in parallel through jobmon in ``make_artifacts -l all``
+ - Add ``--resume`` to rerun only the locations that did not finish
+
 **11.3 - 10/28/26**
 
  - Require vivarium-engine 6 and vivarium_cluster_tools 4.8.0 for the cluster extra
