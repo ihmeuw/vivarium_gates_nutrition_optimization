@@ -10,10 +10,9 @@ PROJECT_NAME = "vivarium_gates_nutrition_optimization"
 CLUSTER_PROJECT = "proj_simscience_prod"
 
 CLUSTER_QUEUE = "all.q"
-MAKE_ARTIFACT_MEM = "10G"
-MAKE_ARTIFACT_CPU = "1"
+MAKE_ARTIFACT_MEM = 10  # GB
+MAKE_ARTIFACT_CPU = 1
 MAKE_ARTIFACT_RUNTIME = "3:00:00"
-MAKE_ARTIFACT_SLEEP = 10
 
 LOCATIONS = ["Ethiopia", "Nigeria", "Pakistan", "Kenya"]
 
