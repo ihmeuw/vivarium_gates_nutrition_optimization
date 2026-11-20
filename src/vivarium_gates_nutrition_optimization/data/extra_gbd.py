@@ -3,14 +3,15 @@ from pathlib import Path
 import pandas as pd
 from vivarium.gbd_mapping import sequelae
 from vivarium_gbd_access import constants as gbd_constants
-from vivarium_gbd_access import utilities as vi_utils
-from vivarium_gbd_access.gbd import base_data as gbd
+from vivarium_gbd_access import shared_functions
+from vivarium_gbd_access.caching import cache
 from vivarium_gbd_access.gbd.demographics import get_age_group_id
 from vivarium_gbd_access.gbd.measures import (
     get_birth_exposure,
     get_exposure,
     get_relative_risk,
 )
+from vivarium_gbd_access.utilities import drop_bookkeeping_columns
 from vivarium_inputs import globals as vi_globals
 from vivarium_inputs import utility_data
 
@@ -49,7 +50,16 @@ HEMOGLOBIN_SD_ID_COLUMNS = [
 ]
 
 
-@vi_utils.cache
+def get_machinery_estimates(**kwargs) -> pd.DataFrame:
+    """Call the shared function and drop the columns that it adds for bookkeeping.
+
+    vivarium_gbd_access 8 no longer drops ``population`` and ``population_group_id``.
+    """
+    data = shared_functions.get_machinery_estimates(**kwargs)
+    return drop_bookkeeping_columns(data, "get_machinery_estimates")
+
+
+@cache
 def load_2021_lbwsg_birth_exposure(location: str) -> pd.DataFrame:
     """Pull the GBD 2021 LBWSG birth exposure draws for a location."""
     entity = utilities.get_entity(data_keys.LBWSG.EXPOSURE)
@@ -64,12 +74,12 @@ def load_2021_lbwsg_birth_exposure(location: str) -> pd.DataFrame:
     return data
 
 
-@vi_utils.cache
+@cache
 def get_maternal_disorder_ylds(location: str) -> pd.DataFrame:
     """Pull GBD 2023 maternal disorders YLD rate draws for a location."""
     entity = utilities.get_entity(data_keys.MATERNAL_DISORDERS.YLDS)
     location_id = utility_data.resolve_location(location)
-    data = gbd.get_machinery_estimates(
+    data = get_machinery_estimates(
         entity="cause",
         entity_id=int(entity.gbd_id),
         release_id=gbd_constants.RELEASE_IDS.GBD_2023,
@@ -84,7 +94,7 @@ def get_maternal_disorder_ylds(location: str) -> pd.DataFrame:
     return data
 
 
-@vi_utils.cache
+@cache
 def get_anemia_ylds(location: str) -> pd.DataFrame:
     """Pull GBD 2023 YLD rate draws for the maternal hemorrhage anemia sequelae."""
     anemia_sequelae = [
@@ -93,7 +103,7 @@ def get_anemia_ylds(location: str) -> pd.DataFrame:
         sequelae.severe_anemia_due_to_maternal_hemorrhage,
     ]
     location_id = utility_data.resolve_location(location)
-    data = gbd.get_machinery_estimates(
+    data = get_machinery_estimates(
         entity="sequela",
         entity_id=[int(sequela.gbd_id) for sequela in anemia_sequelae],
         release_id=gbd_constants.RELEASE_IDS.GBD_2023,
@@ -108,11 +118,11 @@ def get_anemia_ylds(location: str) -> pd.DataFrame:
     return data
 
 
-@vi_utils.cache
+@cache
 def get_hbg_less_than_70(location: str) -> pd.DataFrame:
     """Pull the proportion of pregnant women with hemoglobin below 70 g/L."""
     location_id = utility_data.resolve_location(location)
-    data = gbd.get_machinery_estimates(
+    data = get_machinery_estimates(
         entity="impairment-cause",
         entity_id=[(HEMOGLOBIN_BELOW_70_REI_ID, ALL_CAUSES_ID)],
         release_id=HEMOGLOBIN_RELEASE_ID,
@@ -128,7 +138,7 @@ def get_hbg_less_than_70(location: str) -> pd.DataFrame:
 
 
 ## This is left as 2021 because the changes to hemoglobin RRs are very significant and would require other model updates we don't plan to make.
-@vi_utils.cache
+@cache
 def get_hemoglobin_maternal_disorders_rr() -> pd.DataFrame:
     """Relative risk associated with one g/dL decrease in hemoglobin concentration below 12 g/dL"""
     data = get_relative_risk(

@@ -30,10 +30,14 @@ interactive = [
     "vivarium-interactive>=1.0.0,<2.0.0",
 ]
 lint = ["vivarium-dependencies[lint]"]
-cluster = ["vivarium-cluster-tools[cluster]>=4.8.0,<5.0.0"]
+cluster = [
+    "vivarium-cluster-tools[cluster]>=5.0.0,<6.0.0",
+    "vivarium-psimulate[cluster]>=1.0.0,<2.0.0",
+]
 data = [
-    "vivarium-inputs>=9.0.0,<10.0.0",
-    "vivarium-gbd-access>=7.0.0,<8.0.0",
+    # vivarium-inputs 9.3 and vivarium-gbd-access 8.1 require pandas 3.
+    "vivarium-inputs>=9.2.0,<9.3.0",
+    "vivarium-gbd-access>=8.0.0,<8.1.0",
 ]
 # Every extra that installs from public PyPI alone. cluster and data need the IHME
 # artifactory, so `make build-env artifactory_access=no` installs this instead of dev.
@@ -65,6 +69,4 @@ line_length = 94
 multi_line_output = 3
 
 [tool.uv]
-# pyarrow 26 needs numpy 2 but does not declare it, so cap it while numpy<2 is here.
-# TODO: remove the pyarrow cap with numpy<2 once GBD siloing (MIC-7613) is merged.
-override-dependencies = ["pandas<3.0.0", "sqlalchemy>=2.0.0,<3.0.0", "numpy<2.0.0", "pyarrow<26.0.0"]
+override-dependencies = ["pandas<3.0.0", "sqlalchemy>=2.0.0,<3.0.0"]
