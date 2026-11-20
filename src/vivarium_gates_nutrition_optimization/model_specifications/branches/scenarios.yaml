@@ -13,3 +13,9 @@ branches:
         - 'ifa'
         - 'targeted_bep_ifa'
         - 'targeted_bep_mms'
+    # input_data:
+    #   artifact_path:
+    #     - /mnt/team/simulation_science/pub/models/vivarium_gates_nutrition_optimization/artifacts/model13.3/ethiopia.hdf
+    #     - /mnt/team/simulation_science/pub/models/vivarium_gates_nutrition_optimization/artifacts/model13.3/kenya.hdf
+    #     - /mnt/team/simulation_science/pub/models/vivarium_gates_nutrition_optimization/artifacts/model13.3/nigeria.hdf
+    #     - /mnt/team/simulation_science/pub/models/vivarium_gates_nutrition_optimization/artifacts/model13.3/pakistan.hdf
