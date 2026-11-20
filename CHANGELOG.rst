@@ -4,6 +4,7 @@
  - Build one environment for simulations and artifacts
  - Move to vivarium_gbd_access 8.0, vivarium_inputs 9.2, numpy 2,
    vivarium_cluster_tools 5, and vivarium-psimulate 1
+ - Move to pandas 3, vivarium_gbd_access 8.1, and vivarium_inputs 9.3
 
 **11.4 - 11/20/26**
 

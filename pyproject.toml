@@ -35,9 +35,8 @@ cluster = [
     "vivarium-psimulate[cluster]>=1.0.0,<2.0.0",
 ]
 data = [
-    # vivarium-inputs 9.3 and vivarium-gbd-access 8.1 require pandas 3.
-    "vivarium-inputs>=9.2.0,<9.3.0",
-    "vivarium-gbd-access>=8.0.0,<8.1.0",
+    "vivarium-inputs>=9.3.0",
+    "vivarium-gbd-access>=8.1.0",
 ]
 # Every extra that installs from public PyPI alone. cluster and data need the IHME
 # artifactory, so `make build-env artifactory_access=no` installs this instead of dev.
@@ -67,6 +66,3 @@ line-length = 94
 profile = "black"
 line_length = 94
 multi_line_output = 3
-
-[tool.uv]
-override-dependencies = ["pandas<3.0.0", "sqlalchemy>=2.0.0,<3.0.0"]
