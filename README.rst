@@ -16,7 +16,7 @@ We recommend installing `Miniforge <https://github.com/conda-forge/miniforge>`_.
 Once you have conda installed, you should open up your normal shell
 (if you're on linux or OSX) or the ``git bash`` shell if you're on windows.
 
-You'll then clone this repository and make the necessary environments.
+You'll then clone this repository and make the environment.
 The first step is to clone the repo::
 
   :~$ git clone https://github.com/ihmeuw/vivarium_gates_nutrition_optimization.git
@@ -33,42 +33,29 @@ is stale.
 **Local conda environment** (default)::
 
   :~$ source environment.sh
-  ...creates/activates the simulation conda environment...
-  :~$ source environment.sh -t artifact
-  ...creates/activates the artifact conda environment...
+  ...creates and activates the conda environment...
 
 To deactivate a local conda environment, run ``conda deactivate``.
+
+By default, ``source environment.sh`` installs packages that are hosted on the IHME
+artifactory, so it only installs if on the VPN. To create a public-only environment
+use ``source environment.sh -p``. With this environment, you will be able to run
+simulations but not generate artifacts.
+
+Note that full and public environments have the same name, so you will need to force
+a rebuild by passing ``-f`` to switch between them.
 
 **Shared environment on the cluster** (recommended for cluster development)::
 
   :~$ source environment.sh -s
-  ...creates/activates a venv overlay on the shared simulation environment...
-  :~$ source environment.sh -s -t artifact
-  ...creates/activates a venv overlay on the shared artifact environment...
+  ...creates/activates a venv overlay on the shared environment...
 
 To deactivate a shared cluster environment, run ``deactivate``.
 
 Additional options are available; pass the ``-h`` flag to see them
 (e.g. ``-f`` to force a rebuild, ``-l`` to install git lfs).
 
-Alternatively, users can manually create conda environments as follows::
-
-  :~$ conda create --name=vivarium_gates_nutrition_optimization_simulation python=3.11 git git-lfs
-  ...conda will download python and base dependencies...
-  :~$ conda activate vivarium_gates_nutrition_optimization_simulation
-  (vivarium_gates_nutrition_optimization_simulation) :~$ pip install -e .[dev]
-  ...pip will install vivarium and other requirements...
-  (vivarium_gates_nutrition_optimization_simulation) :~$ conda deactivate
-  :~$ conda create --name=vivarium_gates_nutrition_optimization_artifact python=3.11 git git-lfs
-  ...conda will download python and base dependencies...
-  :~$ conda activate vivarium_gates_nutrition_optimization_artifact
-  (vivarium_gates_nutrition_optimization_artifact) :~$ pip install -e .[data]
-  ...pip will install vivarium and other requirements...
-
 Supported Python versions: 3.11
-
-Note the ``-e`` flag that follows pip install. This will install the python
-package in-place, which is important for making the model specifications later.
 
 Vivarium uses the Hierarchical Data Format (HDF) as the backing storage
 for the data artifacts that supply data to the simulation. You may not have

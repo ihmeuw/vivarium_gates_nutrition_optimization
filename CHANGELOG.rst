@@ -1,6 +1,7 @@
 **11.5 - 11/23/26**
 
  - Match the model template's ``Makefile`` and ``pyproject.toml``
+ - Build one environment for simulations and artifacts
 
 **11.4 - 11/20/26**
 
