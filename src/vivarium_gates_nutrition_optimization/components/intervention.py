@@ -11,11 +11,7 @@ from vivarium.engine.framework.population import SimulantData
 from vivarium.engine.framework.randomness import RESIDUAL_CHOICE
 from vivarium.engine.framework.time import get_time_stamp
 
-from vivarium_gates_nutrition_optimization.constants import (
-    data_keys,
-    data_values,
-    models,
-)
+from vivarium_gates_nutrition_optimization.constants import data_keys, data_values, models
 
 
 class MaternalInterventions(Component):

@@ -2,13 +2,9 @@ from vivarium.engine.framework.engine import Builder
 from vivarium.public_health.disease import DiseaseModel, DiseaseState, RecoveredState
 from vivarium.public_health.utilities import to_years
 
-from vivarium_gates_nutrition_optimization.components.disease import (
-    ParturitionSelectionState,
-)
+from vivarium_gates_nutrition_optimization.components.disease import ParturitionSelectionState
 from vivarium_gates_nutrition_optimization.constants import data_keys, models
-from vivarium_gates_nutrition_optimization.constants.metadata import (
-    ARTIFACT_INDEX_COLUMNS,
-)
+from vivarium_gates_nutrition_optimization.constants.metadata import ARTIFACT_INDEX_COLUMNS
 
 
 def MaternalDisorders():
