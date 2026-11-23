@@ -9,11 +9,7 @@ from vivarium.engine.framework.event import Event
 from vivarium.engine.framework.population import SimulantData
 from vivarium.engine.framework.randomness import RESIDUAL_CHOICE
 
-from vivarium_gates_nutrition_optimization.constants import (
-    data_keys,
-    data_values,
-    models,
-)
+from vivarium_gates_nutrition_optimization.constants import data_keys, data_values, models
 from vivarium_gates_nutrition_optimization.constants.data_values import (
     ANEMIA_DISABILITY_WEIGHTS,
     ANEMIA_THRESHOLD_DATA,

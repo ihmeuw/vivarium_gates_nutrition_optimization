@@ -6,11 +6,7 @@ import pandas as pd
 from vivarium.engine import Component
 from vivarium.engine.framework.engine import Builder
 
-from vivarium_gates_nutrition_optimization.constants import (
-    data_keys,
-    data_values,
-    models,
-)
+from vivarium_gates_nutrition_optimization.constants import data_keys, data_values, models
 
 
 class NewChildren(Component):

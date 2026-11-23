@@ -11,9 +11,7 @@ from vivarium.public_health.disease import DiseaseModel, DiseaseState, Susceptib
 from vivarium_gates_nutrition_optimization.components.children import NewChildren
 from vivarium_gates_nutrition_optimization.constants import data_keys, models
 from vivarium_gates_nutrition_optimization.constants.data_values import DURATIONS
-from vivarium_gates_nutrition_optimization.constants.metadata import (
-    ARTIFACT_INDEX_COLUMNS,
-)
+from vivarium_gates_nutrition_optimization.constants.metadata import ARTIFACT_INDEX_COLUMNS
 
 
 class NotPregnantState(SusceptibleState):

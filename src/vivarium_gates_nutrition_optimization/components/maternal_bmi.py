@@ -7,11 +7,7 @@ from vivarium.engine.framework.engine import Builder
 from vivarium.engine.framework.event import Event
 from vivarium.engine.framework.population import SimulantData
 
-from vivarium_gates_nutrition_optimization.constants import (
-    data_keys,
-    data_values,
-    models,
-)
+from vivarium_gates_nutrition_optimization.constants import data_keys, data_values, models
 
 
 class MaternalBMIExposure(Component):
