@@ -1,3 +1,7 @@
+**11.5.1 - 11/24/26**
+
+ - Run tests on the slurm agent so that the e2e test runs in CI
+
 **11.5 - 11/23/26**
 
  - Match the model template's ``Makefile`` and ``pyproject.toml``
